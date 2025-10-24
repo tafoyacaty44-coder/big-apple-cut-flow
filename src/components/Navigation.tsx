@@ -28,13 +28,16 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#services" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+            <a href="/#services" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Services
             </a>
-            <a href="#about" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
-              About
+            <a href="/barbers" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+              Barbers
             </a>
-            <a href="#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+            <a href="/gallery" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+              Gallery
+            </a>
+            <a href="/#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Contact
             </a>
           </div>
@@ -45,7 +48,10 @@ const Navigation = () => {
               <Phone className="h-4 w-4" />
               <span className="font-semibold">(212) 651-4858</span>
             </a>
-            <GoldButton>
+            <a href="/login" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors text-sm font-semibold">
+              Sign In
+            </a>
+            <GoldButton onClick={() => window.location.href = '/book'}>
               Book Now
             </GoldButton>
           </div>
@@ -64,20 +70,26 @@ const Navigation = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-[hsl(var(--accent))]">
             <div className="flex flex-col space-y-4">
-              <a href="#services" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <a href="/#services" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Services
               </a>
-              <a href="#about" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
-                About
+              <a href="/barbers" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+                Barbers
               </a>
-              <a href="#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <a href="/gallery" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+                Gallery
+              </a>
+              <a href="/#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Contact
               </a>
               <a href="tel:2126514858" className="flex items-center space-x-2 text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors">
                 <Phone className="h-4 w-4" />
                 <span className="font-semibold">(212) 651-4858</span>
               </a>
-              <GoldButton className="w-full">
+              <a href="/login" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors font-semibold">
+                Sign In
+              </a>
+              <GoldButton className="w-full" onClick={() => window.location.href = '/book'}>
                 Book Now
               </GoldButton>
             </div>
