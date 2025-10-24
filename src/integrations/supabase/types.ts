@@ -14,16 +14,319 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string
+          barber_id: string | null
+          cancellation_deadline: string | null
+          confirmation_number: string
+          created_at: string
+          customer_id: string | null
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          notes: string | null
+          payment_amount: number | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          service_id: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          stripe_payment_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time: string
+          barber_id?: string | null
+          cancellation_deadline?: string | null
+          confirmation_number: string
+          created_at?: string
+          customer_id?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          payment_amount?: number | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          service_id: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string
+          barber_id?: string | null
+          cancellation_deadline?: string | null
+          confirmation_number?: string
+          created_at?: string
+          customer_id?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          notes?: string | null
+          payment_amount?: number | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          service_id?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      barber_availability: {
+        Row: {
+          barber_id: string
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_available: boolean
+          start_time: string
+        }
+        Insert: {
+          barber_id: string
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_available?: boolean
+          start_time: string
+        }
+        Update: {
+          barber_id?: string
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_available?: boolean
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barber_availability_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      barbers: {
+        Row: {
+          bio: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          profile_image_url: string | null
+          specialties: string[] | null
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          profile_image_url?: string | null
+          specialties?: string[] | null
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          profile_image_url?: string | null
+          specialties?: string[] | null
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          first_time_customer: boolean
+          full_name: string
+          id: string
+          phone: string | null
+          preferred_barber_id: string | null
+          rewards_points: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          first_time_customer?: boolean
+          full_name: string
+          id: string
+          phone?: string | null
+          preferred_barber_id?: string | null
+          rewards_points?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          first_time_customer?: boolean
+          full_name?: string
+          id?: string
+          phone?: string | null
+          preferred_barber_id?: string | null
+          rewards_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rewards_activity: {
+        Row: {
+          action_type: Database["public"]["Enums"]["reward_action"]
+          created_at: string
+          customer_id: string
+          id: string
+          points_earned: number | null
+          points_redeemed: number | null
+          related_appointment_id: string | null
+        }
+        Insert: {
+          action_type: Database["public"]["Enums"]["reward_action"]
+          created_at?: string
+          customer_id: string
+          id?: string
+          points_earned?: number | null
+          points_redeemed?: number | null
+          related_appointment_id?: string | null
+        }
+        Update: {
+          action_type?: Database["public"]["Enums"]["reward_action"]
+          created_at?: string
+          customer_id?: string
+          id?: string
+          points_earned?: number | null
+          points_redeemed?: number | null
+          related_appointment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rewards_activity_related_appointment_id_fkey"
+            columns: ["related_appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          category: Database["public"]["Enums"]["service_category"]
+          created_at: string
+          description: string | null
+          display_order: number | null
+          duration_minutes: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          regular_price: number
+          vip_price: number
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["service_category"]
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          duration_minutes: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          regular_price: number
+          vip_price: number
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["service_category"]
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          duration_minutes?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          regular_price?: number
+          vip_price?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_confirmation_number: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["user_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      appointment_status:
+        | "pending"
+        | "confirmed"
+        | "completed"
+        | "cancelled"
+        | "no_show"
+      payment_status: "none" | "deposit_paid" | "fully_paid"
+      reward_action:
+        | "review"
+        | "checkin"
+        | "referral"
+        | "social_share"
+        | "redeemed"
+      service_category: "haircut" | "shave" | "combo" | "treatment"
+      user_role: "customer" | "barber" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +453,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      appointment_status: [
+        "pending",
+        "confirmed",
+        "completed",
+        "cancelled",
+        "no_show",
+      ],
+      payment_status: ["none", "deposit_paid", "fully_paid"],
+      reward_action: [
+        "review",
+        "checkin",
+        "referral",
+        "social_share",
+        "redeemed",
+      ],
+      service_category: ["haircut", "shave", "combo", "treatment"],
+      user_role: ["customer", "barber", "admin"],
+    },
   },
 } as const
