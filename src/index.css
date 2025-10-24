@@ -8,75 +8,73 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Barbershop Black & White Theme */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 5%;
+    /* Black & Gold Barbershop Theme */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 5%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
+    --popover-foreground: 0 0% 0%;
 
-    /* Deep black primary */
-    --primary: 0 0% 5%;
-    --primary-foreground: 0 0% 98%;
+    /* Pure black primary */
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Light gray secondary */
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 10%;
+    /* Warm gold secondary */
+    --secondary: 45 100% 51%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 35%;
 
-    /* Classic barber red accent */
-    --accent: 348 83% 47%;
-    --accent-foreground: 0 0% 98%;
+    /* Luxe gold accent - primary brand color */
+    --accent: 43 74% 49%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 20%;
+    --border: 0 0% 85%;
+    --input: 0 0% 92%;
+    --ring: 43 74% 49%;
 
-    --radius: 0.25rem;
+    --radius: 0.375rem;
 
-    /* Custom barbershop tokens */
-    --barber-stripe-red: 348 83% 47%;
-    --barber-stripe-blue: 210 100% 50%;
-    --vintage-sepia: 35 35% 85%;
-    --gold-accent: 43 74% 49%;
+    /* Custom gold variants */
+    --gold-light: 48 100% 88%;
+    --gold-dark: 38 61% 40%;
   }
 
   .dark {
-    --background: 0 0% 8%;
-    --foreground: 0 0% 95%;
+    --background: 0 0% 7%;
+    --foreground: 43 74% 49%;
 
     --card: 0 0% 10%;
-    --card-foreground: 0 0% 95%;
+    --card-foreground: 43 74% 49%;
 
     --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover-foreground: 43 74% 49%;
 
-    --primary: 0 0% 95%;
-    --primary-foreground: 0 0% 10%;
+    --primary: 43 74% 49%;
+    --primary-foreground: 0 0% 0%;
 
     --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary-foreground: 43 74% 49%;
 
-    --muted: 0 0% 18%;
+    --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
 
-    --accent: 348 83% 47%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 43 74% 49%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 0 0% 80%;
+    --input: 0 0% 18%;
+    --ring: 43 74% 49%;
   }
 }
 
@@ -87,34 +85,66 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .tagline {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-weight: 300;
   }
 }
 
 @layer utilities {
-  .barber-stripe {
+  .gold-shine {
     background: linear-gradient(
       135deg,
-      hsl(var(--barber-stripe-red)) 0%,
-      hsl(var(--barber-stripe-red)) 33%,
-      hsl(var(--barber-stripe-blue)) 33%,
-      hsl(var(--barber-stripe-blue)) 66%,
-      hsl(var(--background)) 66%
+      hsl(var(--accent)) 0%,
+      hsl(var(--gold-light)) 50%,
+      hsl(var(--accent)) 100%
     );
-    background-size: 20px 20px;
+    background-size: 200% 200%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
 
   .vintage-shadow {
     box-shadow: 0 10px 40px -15px hsl(0 0% 0% / 0.3);
   }
 
+  .gold-glow {
+    filter: drop-shadow(0 0 20px hsl(var(--accent) / 0.5));
+  }
+
   .text-balance {
     text-wrap: balance;
+  }
+
+  .gold-underline {
+    position: relative;
+  }
+
+  .gold-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, hsl(var(--accent)), transparent);
   }
 }

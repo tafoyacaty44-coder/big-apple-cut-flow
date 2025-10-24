@@ -1,58 +1,43 @@
-import { Button } from "@/components/ui/button";
-import { Scissors } from "lucide-react";
+import { GoldButton } from "@/components/ui/gold-button";
+import Logo from "./Logo";
+import { MapPin } from "lucide-react";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-secondary to-background opacity-50" />
+    <section className="relative min-h-screen flex items-center justify-center bg-primary overflow-hidden">
+      {/* Subtle texture overlay */}
+      <div className="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTI0YzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMCAyNGMtMi4yMSAwLTQgMS43OS00IDRzMS43OSA0IDQgNCA0LTEuNzkgNC00LTEuNzktNC00LTR6bTAtMjRjLTIuMjEgMC00IDEuNzktNCA0czEuNzkgNCA0IDQgNC0xLjc5IDQtNC0xLjc5LTQtNC00eiIvPjwvZz48L2c+PC9zdmc+')]"></div>
       
-      <div className="container mx-auto px-4 py-32 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Icon */}
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-accent/10 mb-8">
-            <Scissors className="h-10 w-10 text-accent" />
-          </div>
-
-          {/* Main Heading */}
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">
-            Classic Cuts,
-            <br />
-            <span className="text-accent">Modern Style</span>
-          </h1>
-
-          {/* Subheading */}
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto text-balance">
-            Experience the finest grooming in the heart of NYC. Where tradition meets excellence.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              size="lg" 
-              className="bg-accent hover:bg-accent/90 text-accent-foreground text-lg px-8 py-6"
-            >
-              Book Appointment
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="text-lg px-8 py-6 border-2"
-            >
-              View Services
-            </Button>
-          </div>
-
-          {/* Address */}
-          <div className="mt-12 pt-12 border-t border-border">
-            <p className="text-muted-foreground mb-2">Visit us at</p>
-            <p className="text-lg font-semibold">422 E 14th St, New York, NY 10009</p>
-          </div>
+      <div className="container relative z-10 text-center px-4 pt-20">
+        {/* Logo with gold glow */}
+        <div className="mb-8 animate-fade-in">
+          <Logo size="xl" className="mx-auto gold-glow" />
+        </div>
+        
+        {/* Tagline */}
+        <p className="tagline text-2xl md:text-4xl text-primary-foreground/90 mb-4 animate-fade-in">
+          Classic Craftsmanship, Modern Precision
+        </p>
+        
+        {/* Location */}
+        <div className="flex items-center justify-center space-x-2 text-[hsl(var(--accent))] mb-12 animate-fade-in">
+          <MapPin className="h-5 w-5" />
+          <span className="text-lg font-medium">East Village, NYC</span>
+        </div>
+        
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
+          <GoldButton size="lg">
+            Book an Appointment
+          </GoldButton>
+          <GoldButton variant="outline" size="lg">
+            View Services
+          </GoldButton>
         </div>
       </div>
 
-      {/* Decorative Barber Pole Stripe */}
-      <div className="absolute bottom-0 left-0 right-0 h-2 barber-stripe opacity-50" />
+      {/* Decorative bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
     </section>
   );
 };
