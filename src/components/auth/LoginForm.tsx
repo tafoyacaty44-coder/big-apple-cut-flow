@@ -4,7 +4,6 @@ import { GoldButton } from '../ui/gold-button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 export const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -12,7 +11,6 @@ export const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +29,6 @@ export const LoginForm = () => {
         title: 'Success',
         description: 'Welcome back!',
       });
-      navigate('/');
     }
 
     setLoading(false);

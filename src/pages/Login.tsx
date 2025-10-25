@@ -5,14 +5,27 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
 
 const Login = () => {
-  const { user } = useAuth();
+  const { user, userRole, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (!loading && user) {
+      if (userRole === 'admin') navigate('/admin');
+      else if (userRole === 'barber') navigate('/barber');
+      else navigate('/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, userRole, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-primary flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-primary-foreground/70">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center px-4 relative overflow-hidden">
