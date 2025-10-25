@@ -42,7 +42,7 @@ const ResetPassword = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
-            <Logo size="xl" />
+            <Logo size="lg" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Reset Password</h1>
           <p className="text-muted-foreground">

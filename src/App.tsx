@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BookingProvider } from "@/contexts/BookingContext";
+import { AdminRoute, BarberRoute, CustomerRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -12,6 +13,9 @@ import ResetPassword from "./pages/ResetPassword";
 import Barbers from "./pages/Barbers";
 import Gallery from "./pages/Gallery";
 import Book from "./pages/Book";
+import AdminDashboard from "./pages/AdminDashboard";
+import BarberDashboard from "./pages/BarberDashboard";
+import CustomerDashboard from "./pages/CustomerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +34,33 @@ const App = () => (
             <Route path="/barbers" element={<Barbers />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/book" element={<Book />} />
+            
+            {/* Protected Routes */}
+            <Route 
+              path="/admin" 
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/barber" 
+              element={
+                <BarberRoute>
+                  <BarberDashboard />
+                </BarberRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard" 
+              element={
+                <CustomerRoute>
+                  <CustomerDashboard />
+                </CustomerRoute>
+              } 
+            />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -3,11 +3,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 
+type UserRole = 'admin' | 'barber' | 'customer' | null;
+
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [userRole, setUserRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const getUserRole = async (userId: string): Promise<UserRole> => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error || !data) return 'customer';
+      return data.role as UserRole;
+    } catch {
+      return 'customer';
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -15,6 +33,16 @@ export const useAuth = () => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Fetch role when user logs in
+        if (session?.user) {
+          setTimeout(() => {
+            getUserRole(session.user.id).then(setUserRole);
+          }, 0);
+        } else {
+          setUserRole(null);
+        }
+        
         setLoading(false);
       }
     );
@@ -23,6 +51,11 @@ export const useAuth = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        getUserRole(session.user.id).then(setUserRole);
+      }
+      
       setLoading(false);
     });
 
@@ -52,6 +85,20 @@ export const useAuth = () => {
       password,
     });
 
+    if (!error && data.user) {
+      const role = await getUserRole(data.user.id);
+      setUserRole(role);
+      
+      // Role-based redirect
+      if (role === 'admin') {
+        navigate('/admin');
+      } else if (role === 'barber') {
+        navigate('/barber');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+
     return { data, error };
   };
 
@@ -74,6 +121,7 @@ export const useAuth = () => {
   return {
     user,
     session,
+    userRole,
     loading,
     signUp,
     signIn,
