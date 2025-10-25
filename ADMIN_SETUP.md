@@ -7,7 +7,14 @@ Go to `/signup` and create an account with:
 - Full Name: Your Name
 
 ## Step 2: Promote to Admin
-After signing up, run this SQL query in your database to promote to admin:
+
+### Option A: Easy Way (No SQL Required)
+1. While logged in, go to `/first-admin`
+2. Click "Make Me Admin"
+3. You'll be redirected to `/staff-login` on success
+
+### Option B: Manual SQL Method
+If Option A doesn't work, run this SQL query in your backend:
 
 ```sql
 SELECT promote_user_to_admin('rmartinezwindycity@gmail.com');

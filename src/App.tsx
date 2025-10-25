@@ -17,6 +17,7 @@ import Book from "./pages/Book";
 import AdminDashboard from "./pages/AdminDashboard";
 import BarberDashboard from "./pages/BarberDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
+import FirstAdmin from "./pages/FirstAdmin";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/barbers" element={<Barbers />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/book" element={<Book />} />
+            <Route path="/first-admin" element={<FirstAdmin />} />
             
             {/* Protected Routes */}
             <Route 
