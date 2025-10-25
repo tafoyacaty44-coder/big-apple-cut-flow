@@ -4,12 +4,14 @@ import Footer from '@/components/Footer';
 import SectionHeading from '@/components/ui/section-heading';
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
-import { Check, Shuffle } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getServices } from '@/lib/api/services';
 import { getBarbersWithAvailability } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
+import DateTimePicker from '@/components/booking/DateTimePicker';
+import { format } from 'date-fns';
 
 import haircutImg from '@/assets/services/haircut.jpg';
 import seniorImg from '@/assets/services/senior-haircut.jpg';
@@ -33,7 +35,7 @@ const serviceImages: Record<string, string> = {
 
 const Book = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const { booking, setSelectedService, setSelectedBarber } = useBooking();
+  const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime } = useBooking();
 
   const { data: services = [], isLoading: isLoadingServices } = useQuery({
     queryKey: ['services'],
@@ -50,7 +52,7 @@ const Book = () => {
     setSelectedService(serviceId);
   };
 
-  const handleBarberSelect = (barberId: string | null, barberName: string | null = null, availability: any[] | null = null) => {
+  const handleBarberSelect = (barberId: string, barberName: string, availability: any[]) => {
     setSelectedBarber(barberId, barberName, availability);
   };
 
@@ -61,8 +63,14 @@ const Book = () => {
   };
 
   const handleNextFromBarber = () => {
-    if (booking.selectedBarberId !== null && currentStep === 2) {
+    if (booking.selectedBarberId && currentStep === 2) {
       setCurrentStep(3);
+    }
+  };
+
+  const handleNextFromDateTime = () => {
+    if (booking.selectedDate && booking.selectedTime && currentStep === 3) {
+      setCurrentStep(4);
     }
   };
 
@@ -198,49 +206,19 @@ const Book = () => {
               {isLoadingBarbers ? (
                 <div className="text-center py-12">Loading barbers...</div>
               ) : (
-                <>
-                  {/* Any Available Barber Option */}
-                  <Card
-                    onClick={() => handleBarberSelect(null, 'Any Available Barber', null)}
-                    className={`cursor-pointer transition-all duration-300 mb-6 ${
-                      booking.selectedBarberId === null
-                        ? 'border-[hsl(var(--accent))] border-2 shadow-[0_0_20px_rgba(212,175,55,0.3)]'
-                        : 'border-border border-2 hover:border-[hsl(var(--accent))]/50'
-                    }`}
-                  >
-                    <div className="p-6 flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center">
-                        <Shuffle className="w-8 h-8 text-[hsl(var(--accent))]" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-xl mb-1">Any Available Barber</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Let us match you with the first available barber
-                        </p>
-                      </div>
-                      {booking.selectedBarberId === null && (
-                        <div className="w-8 h-8 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center">
-                          <Check className="h-5 w-5 text-black" />
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-
-                  {/* Barber Cards */}
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {barbers.map((barber) => (
-                      <BarberCard
-                        key={barber.id}
-                        barber={barber}
-                        selectedServiceName={selectedService?.name || ''}
-                        selectedServicePrice={selectedService?.regular_price || 0}
-                        selectedServiceDuration={selectedService?.duration_minutes || 0}
-                        isSelected={booking.selectedBarberId === barber.id}
-                        onSelect={() => handleBarberSelect(barber.id, barber.full_name, barber.availability)}
-                      />
-                    ))}
-                  </div>
-                </>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {barbers.map((barber) => (
+                    <BarberCard
+                      key={barber.id}
+                      barber={barber}
+                      selectedServiceName={selectedService?.name || ''}
+                      selectedServicePrice={selectedService?.regular_price || 0}
+                      selectedServiceDuration={selectedService?.duration_minutes || 0}
+                      isSelected={booking.selectedBarberId === barber.id}
+                      onSelect={() => handleBarberSelect(barber.id, barber.full_name, barber.availability)}
+                    />
+                  ))}
+                </div>
               )}
 
               <div className="flex gap-4 justify-center">
@@ -249,9 +227,55 @@ const Book = () => {
                 </GoldButton>
                 <GoldButton 
                   onClick={handleNextFromBarber}
-                  disabled={booking.selectedBarberId === undefined}
+                  disabled={!booking.selectedBarberId}
                 >
                   Continue to Date & Time
+                </GoldButton>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Date & Time Selection */}
+          {currentStep === 3 && booking.barberAvailability && (
+            <div className="max-w-6xl mx-auto">
+              {/* Summary Card */}
+              <Card className="mb-8 p-4 bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-bold text-lg">Service: {selectedService?.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      ${selectedService?.regular_price} • {selectedService?.duration_minutes} min
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Barber: {booking.selectedBarberName}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {booking.selectedDate && booking.selectedTime
+                        ? `${format(booking.selectedDate, 'MMMM d, yyyy')} at ${booking.selectedTime}`
+                        : 'Select a date and time below'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <DateTimePicker
+                barberAvailability={booking.barberAvailability}
+                serviceDuration={selectedService?.duration_minutes || 30}
+                selectedDate={booking.selectedDate}
+                selectedTime={booking.selectedTime}
+                onDateSelect={setSelectedDate}
+                onTimeSelect={setSelectedTime}
+              />
+
+              <div className="flex gap-4 justify-center mt-8">
+                <GoldButton variant="outline" onClick={() => setCurrentStep(2)}>
+                  Back to Barbers
+                </GoldButton>
+                <GoldButton 
+                  onClick={handleNextFromDateTime}
+                  disabled={!booking.selectedDate || !booking.selectedTime}
+                >
+                  Continue to Customer Info
                 </GoldButton>
               </div>
             </div>

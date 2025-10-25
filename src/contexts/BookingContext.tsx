@@ -12,7 +12,7 @@ interface BarberAvailability {
 
 interface BookingState {
   selectedServiceId: string | null;
-  selectedBarberId: string | null;
+  selectedBarberId: string | undefined;
   selectedBarberName: string | null;
   barberAvailability: BarberAvailability[] | null;
   selectedDate: Date | null;
@@ -27,7 +27,7 @@ interface BookingState {
 interface BookingContextType {
   booking: BookingState;
   setSelectedService: (serviceId: string) => void;
-  setSelectedBarber: (barberId: string | null, barberName?: string | null, availability?: BarberAvailability[] | null) => void;
+  setSelectedBarber: (barberId: string, barberName: string, availability: BarberAvailability[]) => void;
   setSelectedDate: (date: Date) => void;
   setSelectedTime: (time: string) => void;
   setCustomerInfo: (info: { name: string; email: string; phone: string }) => void;
@@ -39,7 +39,7 @@ const BookingContext = createContext<BookingContextType | undefined>(undefined);
 export const BookingProvider = ({ children }: { children: ReactNode }) => {
   const [booking, setBooking] = useState<BookingState>({
     selectedServiceId: null,
-    selectedBarberId: null,
+    selectedBarberId: undefined,
     selectedBarberName: null,
     barberAvailability: null,
     selectedDate: null,
@@ -51,7 +51,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
     setBooking((prev) => ({ ...prev, selectedServiceId: serviceId }));
   };
 
-  const setSelectedBarber = (barberId: string | null, barberName: string | null = null, availability: BarberAvailability[] | null = null) => {
+  const setSelectedBarber = (barberId: string, barberName: string, availability: BarberAvailability[]) => {
     setBooking((prev) => ({ 
       ...prev, 
       selectedBarberId: barberId,
@@ -75,7 +75,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
   const resetBooking = () => {
     setBooking({
       selectedServiceId: null,
-      selectedBarberId: null,
+      selectedBarberId: undefined,
       selectedBarberName: null,
       barberAvailability: null,
       selectedDate: null,
