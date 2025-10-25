@@ -34,3 +34,6 @@ export const getServiceById = async (id: string): Promise<Service | null> => {
   if (error) throw error;
   return data;
 };
+
+// Alias for getServices (for consistency)
+export const getActiveServices = getServices;

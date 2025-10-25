@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface Barber {
   id: string;
   user_id: string;
+  full_name: string;
   bio: string | null;
   specialties: string[];
   years_experience: number;
@@ -64,3 +65,6 @@ export const getBarberById = async (id: string): Promise<Barber | null> => {
   if (error) throw error;
   return data;
 };
+
+// Alias for getBarbers (for consistency)
+export const getActiveBarbers = getBarbers;
