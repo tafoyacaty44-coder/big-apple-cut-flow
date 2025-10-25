@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import SectionHeading from '@/components/ui/section-heading';
@@ -11,6 +11,7 @@ import { getBarbersWithAvailability } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
 import DateTimePicker from '@/components/booking/DateTimePicker';
+import CustomerInfoForm from '@/components/booking/CustomerInfoForm';
 import { format } from 'date-fns';
 
 import haircutImg from '@/assets/services/haircut.jpg';
@@ -35,7 +36,8 @@ const serviceImages: Record<string, string> = {
 
 const Book = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime } = useBooking();
+  const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo } = useBooking();
+  const customerFormRef = useRef<HTMLFormElement>(null);
 
   const { data: services = [], isLoading: isLoadingServices } = useQuery({
     queryKey: ['services'],
@@ -71,6 +73,23 @@ const Book = () => {
   const handleNextFromDateTime = () => {
     if (booking.selectedDate && booking.selectedTime && currentStep === 3) {
       setCurrentStep(4);
+    }
+  };
+
+  const handleCustomerInfoSubmit = (data: { full_name: string; email: string; phone: string; notes?: string }) => {
+    setCustomerInfo({
+      name: data.full_name,
+      email: data.email,
+      phone: data.phone,
+    });
+    setCurrentStep(5);
+  };
+
+  const handleNextFromCustomerInfo = () => {
+    // Trigger form submission programmatically
+    if (customerFormRef.current) {
+      const submitButton = customerFormRef.current.querySelector('button[type="submit"]') as HTMLButtonElement;
+      submitButton?.click();
     }
   };
 
@@ -276,6 +295,53 @@ const Book = () => {
                   disabled={!booking.selectedDate || !booking.selectedTime}
                 >
                   Continue to Customer Info
+                </GoldButton>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Customer Information */}
+          {currentStep === 4 && (
+            <div className="max-w-6xl mx-auto">
+              {/* Summary Card */}
+              <Card className="mb-8 p-4 bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <h3 className="font-bold">Service</h3>
+                    <p className="text-sm">{selectedService?.name}</p>
+                    <p className="text-xs text-muted-foreground">${selectedService?.regular_price}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold">Barber</h3>
+                    <p className="text-sm">{booking.selectedBarberName}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-bold">Date & Time</h3>
+                    <p className="text-sm">
+                      {booking.selectedDate && format(booking.selectedDate, 'MMM d, yyyy')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{booking.selectedTime}</p>
+                  </div>
+                </div>
+              </Card>
+
+              <div ref={customerFormRef as any}>
+                <CustomerInfoForm
+                  onSubmit={handleCustomerInfoSubmit}
+                  initialData={booking.customerInfo ? {
+                    full_name: booking.customerInfo.name,
+                    email: booking.customerInfo.email,
+                    phone: booking.customerInfo.phone,
+                  } : null}
+                />
+              </div>
+
+              <div className="flex gap-4 justify-center mt-8">
+                <GoldButton variant="outline" onClick={() => setCurrentStep(3)}>
+                  Back to Date & Time
+                </GoldButton>
+                <GoldButton onClick={handleNextFromCustomerInfo}>
+                  Continue to Confirmation
                 </GoldButton>
               </div>
             </div>
