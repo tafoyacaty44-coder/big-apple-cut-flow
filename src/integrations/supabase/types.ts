@@ -101,6 +101,7 @@ export type Database = {
           id: string
           is_available: boolean
           start_time: string
+          status_message: string | null
         }
         Insert: {
           barber_id: string
@@ -110,6 +111,7 @@ export type Database = {
           id?: string
           is_available?: boolean
           start_time: string
+          status_message?: string | null
         }
         Update: {
           barber_id?: string
@@ -119,6 +121,7 @@ export type Database = {
           id?: string
           is_available?: boolean
           start_time?: string
+          status_message?: string | null
         }
         Relationships: [
           {
