@@ -32,16 +32,20 @@ const Hours = () => {
             </CardHeader>
             <CardContent className="space-y-2 text-primary-foreground/90">
               <div className="flex justify-between">
-                <span>Mon - Fri</span>
-                <span className="font-semibold">9am - 8pm</span>
+                <span>Mon - Thu</span>
+                <span className="font-semibold">10am - 7:30pm</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Friday</span>
+                <span className="font-semibold">10am - 6pm</span>
               </div>
               <div className="flex justify-between">
                 <span>Saturday</span>
-                <span className="font-semibold">9am - 7pm</span>
+                <span className="font-semibold">10am - 6pm</span>
               </div>
               <div className="flex justify-between">
                 <span>Sunday</span>
-                <span className="font-semibold">10am - 6pm</span>
+                <span className="font-semibold">10:30am - 6pm</span>
               </div>
             </CardContent>
           </Card>
