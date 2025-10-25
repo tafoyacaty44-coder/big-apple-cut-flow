@@ -137,31 +137,34 @@ export type Database = {
         Row: {
           bio: string | null
           created_at: string
+          full_name: string
           id: string
           is_active: boolean
           profile_image_url: string | null
           specialties: string[] | null
-          user_id: string
+          user_id: string | null
           years_experience: number | null
         }
         Insert: {
           bio?: string | null
           created_at?: string
+          full_name?: string
           id?: string
           is_active?: boolean
           profile_image_url?: string | null
           specialties?: string[] | null
-          user_id: string
+          user_id?: string | null
           years_experience?: number | null
         }
         Update: {
           bio?: string | null
           created_at?: string
+          full_name?: string
           id?: string
           is_active?: boolean
           profile_image_url?: string | null
           specialties?: string[] | null
-          user_id?: string
+          user_id?: string | null
           years_experience?: number | null
         }
         Relationships: []

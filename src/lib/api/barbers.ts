@@ -41,7 +41,6 @@ export const getBarbersWithAvailability = async (): Promise<BarberWithDetails[]>
     .from('barbers')
     .select(`
       *,
-      profiles!inner(full_name),
       barber_availability(*)
     `)
     .eq('is_active', true);
@@ -50,7 +49,7 @@ export const getBarbersWithAvailability = async (): Promise<BarberWithDetails[]>
   
   return (data || []).map((barber: any) => ({
     ...barber,
-    full_name: barber.profiles?.full_name || 'Unknown',
+    full_name: barber.full_name || 'Unknown',
     availability: barber.barber_availability || []
   }));
 };
