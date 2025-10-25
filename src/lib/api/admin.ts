@@ -197,6 +197,97 @@ export const promoteToAdmin = async (email: string) => {
   return data;
 };
 
+// Get all barbers
+export const getAllBarbers = async () => {
+  const { data, error } = await supabase
+    .from('barbers')
+    .select('*')
+    .order('full_name', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+};
+
+// Create barber account via edge function
+export const createBarberAccount = async (barberData: {
+  email: string;
+  password: string;
+  fullName: string;
+  bio?: string;
+  specialties?: string[];
+  yearsExperience?: number;
+  profileImageUrl?: string;
+}) => {
+  const { data, error } = await supabase.functions.invoke('create-barber-account', {
+    body: barberData,
+  });
+
+  if (error) throw error;
+  return data;
+};
+
+// Update barber profile
+export const updateBarberProfile = async (
+  barberId: string,
+  updates: {
+    full_name?: string;
+    bio?: string;
+    specialties?: string[];
+    years_experience?: number;
+    profile_image_url?: string;
+    is_active?: boolean;
+  }
+) => {
+  const { error } = await supabase
+    .from('barbers')
+    .update(updates)
+    .eq('id', barberId);
+
+  if (error) throw error;
+};
+
+// Get barber availability
+export const getBarberAvailability = async (barberId: string) => {
+  const { data, error } = await supabase
+    .from('barber_availability')
+    .select('*')
+    .eq('barber_id', barberId)
+    .order('day_of_week', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+};
+
+// Update barber availability
+export const updateBarberAvailability = async (
+  barberId: string,
+  availability: Array<{
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+    is_available: boolean;
+    status_message?: string;
+  }>
+) => {
+  // Delete existing availability
+  await supabase
+    .from('barber_availability')
+    .delete()
+    .eq('barber_id', barberId);
+
+  // Insert new availability
+  const { error } = await supabase
+    .from('barber_availability')
+    .insert(
+      availability.map(a => ({
+        barber_id: barberId,
+        ...a,
+      }))
+    );
+
+  if (error) throw error;
+};
+
 // Get available time slots for a barber on a specific date
 export const getAvailableTimeSlots = async (
   barberId: string,

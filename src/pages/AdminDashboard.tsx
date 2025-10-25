@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LogOut, Calendar, Users, Scissors } from 'lucide-react';
 import { AppointmentsTable } from '@/components/admin/AppointmentsTable';
 import { UsersTable } from '@/components/admin/UsersTable';
+import { BarbersTable } from '@/components/admin/BarbersTable';
 
 const AdminDashboard = () => {
   const { user, signOut } = useAuth();
@@ -62,9 +63,7 @@ const AdminDashboard = () => {
             </TabsContent>
 
             <TabsContent value="barbers">
-              <div className="text-center py-12 text-muted-foreground">
-                Barber management coming soon...
-              </div>
+              <BarbersTable />
             </TabsContent>
           </Tabs>
         </div>
