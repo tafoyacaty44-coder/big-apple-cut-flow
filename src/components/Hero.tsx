@@ -27,10 +27,12 @@ const Hero = () => {
         
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
-          <GoldButton size="lg">
+          <GoldButton size="lg" onClick={() => window.location.href = '/book'}>
             Book an Appointment
           </GoldButton>
-          <GoldButton variant="outline" size="lg">
+          <GoldButton variant="outline" size="lg" onClick={() => {
+            document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+          }}>
             View Services
           </GoldButton>
         </div>

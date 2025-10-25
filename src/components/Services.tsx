@@ -4,6 +4,8 @@ import SectionHeading from "@/components/ui/section-heading";
 import { Scissors, Sparkles, Star, Briefcase } from "lucide-react";
 import { useQuery } from '@tanstack/react-query';
 import { getServices } from '@/lib/api/services';
+import { useBooking } from '@/contexts/BookingContext';
+import { useNavigate } from 'react-router-dom';
 
 import haircutImg from '@/assets/services/haircut.jpg';
 import seniorImg from '@/assets/services/senior-haircut.jpg';
@@ -33,10 +35,17 @@ const iconMap: Record<string, any> = {
 };
 
 const Services = () => {
+  const navigate = useNavigate();
+  const { setSelectedService } = useBooking();
   const { data: services = [], isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: getServices,
   });
+
+  const handleBookNow = (serviceId: string) => {
+    setSelectedService(serviceId);
+    navigate('/book');
+  };
 
   if (isLoading) {
     return (
@@ -66,7 +75,7 @@ const Services = () => {
               >
                 <div className="aspect-[4/3] overflow-hidden relative">
                   <img 
-                    src={serviceImages[service.name]}
+                    src={serviceImages[service.name] || haircutImg}
                     alt={service.name}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
@@ -76,19 +85,21 @@ const Services = () => {
                 </div>
                 <CardHeader>
                   <CardTitle className="text-xl mb-2">{service.name}</CardTitle>
-                  <CardDescription>
-                    <div className="space-y-1">
-                      <div className="text-2xl font-bold text-foreground">${service.regular_price}</div>
-                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/20">
-                        <span className="text-xs font-semibold text-[hsl(var(--accent))]">VIP</span>
-                        <span className="text-xs text-[hsl(var(--accent))]">${service.vip_price}</span>
-                      </div>
-                    </div>
+                  <CardDescription className="space-y-1">
+                    <span className="text-2xl font-bold text-foreground block">${service.regular_price}</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/20">
+                      <span className="text-xs font-semibold text-[hsl(var(--accent))]">VIP</span>
+                      <span className="text-xs text-[hsl(var(--accent))]">${service.vip_price}</span>
+                    </span>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">{service.description}</p>
-                  <GoldButton variant="outline" className="w-full">
+                  <GoldButton 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => handleBookNow(service.id)}
+                  >
                     Book Now
                   </GoldButton>
                 </CardContent>
