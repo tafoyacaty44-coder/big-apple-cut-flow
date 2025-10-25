@@ -121,6 +121,82 @@ export const getAllCustomers = async () => {
   return data || [];
 };
 
+// Get all users with their roles
+// Note: This function requires creating an edge function to get user emails
+// since auth.users is not accessible from the client
+export const getAllUsers = async () => {
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('id, full_name, phone, created_at');
+
+  if (profilesError) throw profilesError;
+
+  // Get roles for each user
+  const usersWithRoles = await Promise.all(
+    (profiles || []).map(async (profile) => {
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', profile.id)
+        .maybeSingle();
+
+      return {
+        ...profile,
+        email: null, // Email will be populated via edge function if needed
+        role: roleData?.role || 'customer',
+      };
+    })
+  );
+
+  return usersWithRoles;
+};
+
+// Update user role
+export const updateUserRole = async (
+  userId: string,
+  newRole: 'admin' | 'barber' | 'customer'
+) => {
+  // Delete existing role
+  await supabase
+    .from('user_roles')
+    .delete()
+    .eq('user_id', userId);
+
+  // Insert new role
+  const { error } = await supabase
+    .from('user_roles')
+    .insert({
+      user_id: userId,
+      role: newRole,
+    });
+
+  if (error) throw error;
+};
+
+// Create admin account via edge function
+export const createAdminAccount = async (
+  email: string,
+  password: string,
+  fullName: string
+) => {
+  const { data, error } = await supabase.functions.invoke('create-admin-account', {
+    body: { email, password, fullName },
+  });
+
+  if (error) throw error;
+  return data;
+};
+
+// Promote existing user to admin (for first admin setup)
+export const promoteToAdmin = async (email: string) => {
+  const { data, error } = await supabase.rpc('promote_user_to_admin', {
+    target_email: email,
+  });
+
+  if (error) throw error;
+  return data;
+};
+
 // Get available time slots for a barber on a specific date
 export const getAvailableTimeSlots = async (
   barberId: string,
