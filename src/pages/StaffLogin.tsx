@@ -3,8 +3,9 @@ import Logo from '@/components/Logo';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
+import { Shield } from 'lucide-react';
 
-const Login = () => {
+const StaffLogin = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -29,8 +30,20 @@ const Login = () => {
               </div>
             </div>
           </div>
-          <h1 className="text-3xl font-bold mb-2 text-primary-foreground">Welcome Back</h1>
-          <p className="text-primary-foreground/70">Sign in to your account</p>
+          
+          {/* Staff Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[hsl(var(--accent))]/20 border border-[hsl(var(--accent))]/50 rounded-full mb-4">
+            <Shield className="h-4 w-4 text-[hsl(var(--accent))]" />
+            <span className="text-sm font-semibold text-[hsl(var(--accent))] uppercase tracking-wider">
+              Staff Portal
+            </span>
+          </div>
+          
+          <h1 className="text-3xl font-bold mb-2 text-primary-foreground">Staff Access</h1>
+          <p className="text-primary-foreground/70">Admin & Barber Login</p>
+          <p className="text-xs text-primary-foreground/50 mt-2">
+            This portal is for Big Apple Barbershop staff only
+          </p>
         </div>
 
         <div className="bg-card/95 backdrop-blur-sm border-2 border-[hsl(var(--accent))]/30 rounded-lg p-8 shadow-[0_0_30px_rgba(212,175,55,0.15)]">
@@ -43,16 +56,10 @@ const Login = () => {
             >
               Forgot your password?
             </Link>
-            <div className="text-sm text-muted-foreground">
-              Don't have an account?{' '}
-              <Link to="/signup" className="text-[hsl(var(--accent))] hover:underline font-semibold transition-colors">
-                Sign up
-              </Link>
-            </div>
             <div className="text-xs text-muted-foreground mt-4 pt-4 border-t border-border">
-              Staff member?{' '}
-              <Link to="/staff-login" className="text-[hsl(var(--accent))] hover:underline font-semibold transition-colors">
-                Access staff portal
+              Customer?{' '}
+              <Link to="/login" className="text-[hsl(var(--accent))] hover:underline font-semibold transition-colors">
+                Go to customer login
               </Link>
             </div>
           </div>
@@ -68,4 +75,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default StaffLogin;

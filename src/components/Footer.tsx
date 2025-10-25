@@ -112,6 +112,10 @@ const Footer = () => {
             <a href="#" className="hover:text-[hsl(var(--accent))] transition-colors">
               Terms of Service
             </a>
+            <span>|</span>
+            <a href="/staff-login" className="hover:text-[hsl(var(--accent))] transition-colors">
+              Staff Login
+            </a>
           </div>
         </div>
       </div>

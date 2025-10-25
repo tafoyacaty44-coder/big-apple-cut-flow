@@ -8,6 +8,7 @@ import { AdminRoute, BarberRoute, CustomerRoute } from "@/components/auth/Protec
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import StaffLogin from "./pages/StaffLogin";
 import Signup from "./pages/Signup";
 import ResetPassword from "./pages/ResetPassword";
 import Barbers from "./pages/Barbers";
@@ -29,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/staff-login" element={<StaffLogin />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/barbers" element={<Barbers />} />
