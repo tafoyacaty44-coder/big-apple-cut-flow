@@ -1,91 +1,81 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { GoldButton } from '@/components/ui/gold-button';
+import { useQuery } from '@tanstack/react-query';
+import { getBarberProfile } from '@/lib/api/barber';
 import Logo from '@/components/Logo';
-import { Calendar, Clock, User, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { LogOut } from 'lucide-react';
+import { DashboardStats } from '@/components/barber/DashboardStats';
+import { AppointmentsList } from '@/components/barber/AppointmentsList';
+import { WeeklyCalendar } from '@/components/barber/WeeklyCalendar';
+import { MyAvailability } from '@/components/barber/MyAvailability';
 
 const BarberDashboard = () => {
   const { user, signOut } = useAuth();
+  const [barberId, setBarberId] = useState<string | null>(null);
+
+  const { data: barberProfile } = useQuery({
+    queryKey: ['barber-profile', user?.id],
+    queryFn: () => getBarberProfile(user!.id),
+    enabled: !!user,
+  });
+
+  useEffect(() => {
+    if (barberProfile) {
+      setBarberId(barberProfile.id);
+    }
+  }, [barberProfile]);
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b-2 border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Logo size="md" />
-              <div>
-                <h1 className="text-2xl font-bold">Barber Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Your Schedule & Appointments</p>
-              </div>
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Logo />
+            <div>
+              <h1 className="text-xl font-bold">Barber Dashboard</h1>
+              <p className="text-sm text-muted-foreground">
+                {barberProfile?.full_name || 'Loading...'}
+              </p>
             </div>
-            <GoldButton onClick={signOut} variant="outline">
-              Sign Out
-            </GoldButton>
           </div>
+          <Button variant="outline" onClick={signOut}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+          </Button>
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Welcome Back!</h2>
-          <p className="text-muted-foreground">Manage your appointments and availability</p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-card border-2 border-border rounded-lg p-6 vintage-shadow">
-            <Calendar className="w-12 h-12 text-accent mb-4" />
-            <h3 className="text-xl font-bold mb-2">Today</h3>
-            <p className="text-3xl font-bold text-accent mb-2">0</p>
-            <p className="text-muted-foreground text-sm">Appointments</p>
-          </div>
-
-          <div className="bg-card border-2 border-border rounded-lg p-6 vintage-shadow">
-            <Clock className="w-12 h-12 text-accent mb-4" />
-            <h3 className="text-xl font-bold mb-2">This Week</h3>
-            <p className="text-3xl font-bold text-accent mb-2">0</p>
-            <p className="text-muted-foreground text-sm">Appointments</p>
-          </div>
-
-          <div className="bg-card border-2 border-border rounded-lg p-6 vintage-shadow">
-            <User className="w-12 h-12 text-accent mb-4" />
-            <h3 className="text-xl font-bold mb-2">Total Clients</h3>
-            <p className="text-3xl font-bold text-accent mb-2">0</p>
-            <p className="text-muted-foreground text-sm">All Time</p>
-          </div>
-
-          <div className="bg-card border-2 border-border rounded-lg p-6 vintage-shadow">
-            <TrendingUp className="w-12 h-12 text-accent mb-4" />
-            <h3 className="text-xl font-bold mb-2">Rating</h3>
-            <p className="text-3xl font-bold text-accent mb-2">5.0</p>
-            <p className="text-muted-foreground text-sm">Average</p>
-          </div>
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-card border-2 border-border rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">Today's Schedule</h3>
-            <div className="text-center py-8 text-muted-foreground">
-              <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p>No appointments scheduled for today</p>
+        {!barberId ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading your dashboard...</p>
             </div>
           </div>
-
-          <div className="bg-card border-2 border-border rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">Availability Settings</h3>
-            <div className="space-y-4">
-              <GoldButton className="w-full">Update Working Hours</GoldButton>
-              <GoldButton className="w-full" variant="outline">Block Time Off</GoldButton>
-              <GoldButton className="w-full" variant="outline">View Full Calendar</GoldButton>
+        ) : (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Welcome back!</h2>
+              <p className="text-muted-foreground">Here's your schedule overview</p>
             </div>
-          </div>
-        </div>
 
-        <div className="mt-6 text-center">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-accent">
-            ← Back to Main Site
-          </Link>
-        </div>
+            {/* Stats */}
+            <DashboardStats barberId={barberId} />
+
+            {/* Today's Appointments */}
+            <AppointmentsList barberId={barberId} />
+
+            {/* Weekly Calendar */}
+            <WeeklyCalendar barberId={barberId} />
+
+            {/* My Availability */}
+            <MyAvailability barberId={barberId} />
+          </div>
+        )}
       </main>
     </div>
   );
