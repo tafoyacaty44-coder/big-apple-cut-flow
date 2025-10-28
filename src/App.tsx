@@ -28,6 +28,8 @@ import Clients from "./pages/admin/Clients";
 import ClientDetail from "./pages/admin/ClientDetail";
 import RewardsManagement from "./pages/admin/RewardsManagement";
 import ScheduleManagement from "./pages/admin/ScheduleManagement";
+import ServicesManagement from "./pages/admin/ServicesManagement";
+import GalleryManagement from "./pages/admin/GalleryManagement";
 import MySchedule from "./pages/barber/MySchedule";
 import BarberDetail from "./pages/BarberDetail";
 
@@ -128,8 +130,24 @@ const App = () => (
                 </AdminRoute>
               } 
             />
+            <Route
+              path="/admin/services" 
+              element={
+                <AdminRoute>
+                  <ServicesManagement />
+                </AdminRoute>
+              } 
+            />
+            <Route
+              path="/admin/gallery" 
+              element={
+                <AdminRoute>
+                  <GalleryManagement />
+                </AdminRoute>
+              } 
+            />
             <Route 
-              path="/dashboard" 
+              path="/dashboard"
               element={
                 <CustomerRoute>
                   <CustomerDashboard />

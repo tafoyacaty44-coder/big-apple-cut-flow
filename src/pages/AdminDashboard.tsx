@@ -80,6 +80,15 @@ const AdminDashboard = () => {
           </div>
 
           <div className="mb-4 flex flex-wrap gap-4">
+            <Link to="/admin/services">
+              <Button variant="outline">
+                <Scissors className="mr-2 h-4 w-4" />
+                Services
+              </Button>
+            </Link>
+            <Link to="/admin/gallery">
+              <Button variant="outline">Gallery</Button>
+            </Link>
             <Link to="/admin/vip-pricing">
               <Button variant="outline">VIP Pricing</Button>
             </Link>
