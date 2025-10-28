@@ -17,6 +17,10 @@ import Book from "./pages/Book";
 import AdminDashboard from "./pages/AdminDashboard";
 import BarberDashboard from "./pages/BarberDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
+import VipPricing from "./pages/admin/VipPricing";
+import BreakTime from "./pages/admin/BreakTime";
+import Clients from "./pages/admin/Clients";
+import ClientDetail from "./pages/admin/ClientDetail";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +47,38 @@ const App = () => (
               element={
                 <AdminRoute>
                   <AdminDashboard />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/vip-pricing" 
+              element={
+                <AdminRoute>
+                  <VipPricing />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/breaks" 
+              element={
+                <AdminRoute>
+                  <BreakTime />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/clients" 
+              element={
+                <AdminRoute>
+                  <Clients />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/clients/:id" 
+              element={
+                <AdminRoute>
+                  <ClientDetail />
                 </AdminRoute>
               } 
             />
