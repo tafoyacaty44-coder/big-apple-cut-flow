@@ -8,10 +8,13 @@ import { Plus, Send, Users, BarChart3, Calendar } from "lucide-react";
 import { getCampaigns } from "@/lib/api/promotions";
 import { PromotionalCampaignForm } from "@/components/admin/PromotionalCampaignForm";
 import { CampaignsTable } from "@/components/admin/CampaignsTable";
+import { CampaignDetailsDialog } from "@/components/admin/CampaignDetailsDialog";
 
 export default function Promotions() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | undefined>();
+  const [detailsCampaignId, setDetailsCampaignId] = useState<string | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const { data: allCampaigns = [], isLoading } = useQuery({
     queryKey: ['promotional-campaigns'],
@@ -37,6 +40,17 @@ export default function Promotions() {
     setIsFormOpen(true);
   };
 
+  const handleQuickSend = (template: 'all' | 'email' | 'sms') => {
+    setSelectedCampaignId(undefined);
+    setIsFormOpen(true);
+    // The form will handle pre-filling based on template type
+  };
+
+  const handleViewDetails = (id: string) => {
+    setDetailsCampaignId(id);
+    setIsDetailsOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background pt-20">
       <Navigation />
@@ -53,6 +67,60 @@ export default function Promotions() {
             <Plus className="mr-2 h-5 w-5" />
             Create Campaign
           </Button>
+        </div>
+
+        {/* Quick Action Templates */}
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          <Card 
+            className="cursor-pointer hover:border-[hsl(var(--accent))] hover:shadow-lg transition-all"
+            onClick={() => handleQuickSend('all')}
+          >
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-[hsl(var(--accent))]/10">
+                  <Send className="h-6 w-6 text-[hsl(var(--accent))]" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Blast All Customers</CardTitle>
+                  <CardDescription>Email + SMS to everyone</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:border-blue-500 hover:shadow-lg transition-all"
+            onClick={() => handleQuickSend('email')}
+          >
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-blue-500/10">
+                  <Send className="h-6 w-6 text-blue-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Email Everyone</CardTitle>
+                  <CardDescription>Send email to all customers</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:border-green-500 hover:shadow-lg transition-all"
+            onClick={() => handleQuickSend('sms')}
+          >
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-green-500/10">
+                  <Send className="h-6 w-6 text-green-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Text Everyone</CardTitle>
+                  <CardDescription>Send SMS to all customers</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
         </div>
 
         {/* Stats Cards */}
@@ -132,6 +200,7 @@ export default function Promotions() {
                   campaigns={allCampaigns} 
                   isLoading={isLoading}
                   onEdit={handleEdit}
+                  onViewDetails={handleViewDetails}
                 />
               </TabsContent>
 
@@ -140,6 +209,7 @@ export default function Promotions() {
                   campaigns={draftCampaigns} 
                   isLoading={isLoading}
                   onEdit={handleEdit}
+                  onViewDetails={handleViewDetails}
                 />
               </TabsContent>
 
@@ -148,6 +218,7 @@ export default function Promotions() {
                   campaigns={scheduledCampaigns} 
                   isLoading={isLoading}
                   onEdit={handleEdit}
+                  onViewDetails={handleViewDetails}
                 />
               </TabsContent>
 
@@ -156,6 +227,7 @@ export default function Promotions() {
                   campaigns={sentCampaigns} 
                   isLoading={isLoading}
                   onEdit={handleEdit}
+                  onViewDetails={handleViewDetails}
                 />
               </TabsContent>
             </Tabs>
@@ -167,6 +239,12 @@ export default function Promotions() {
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         campaignId={selectedCampaignId}
+      />
+
+      <CampaignDetailsDialog
+        campaignId={detailsCampaignId}
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
       />
     </div>
   );

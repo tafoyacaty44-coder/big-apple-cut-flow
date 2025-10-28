@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { Crown } from 'lucide-react';
+import { Crown, Tag } from 'lucide-react';
+import { validatePromoCode } from '@/lib/api/promo-codes';
 
 const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
 
@@ -37,14 +38,20 @@ interface CustomerInfoFormProps {
   onSubmit: (data: CustomerInfoFormData) => void;
   initialData?: CustomerInfoFormData | null;
   onVipCodeChange?: (code: string, isValid: boolean) => void;
+  onPromoCodeChange?: (code: string, discount: number, campaignId?: string) => void;
   selectedServiceId?: string;
+  promoDiscount?: number;
 }
 
-const CustomerInfoForm = ({ onSubmit, initialData, onVipCodeChange, selectedServiceId }: CustomerInfoFormProps) => {
+const CustomerInfoForm = ({ onSubmit, initialData, onVipCodeChange, onPromoCodeChange, selectedServiceId, promoDiscount = 0 }: CustomerInfoFormProps) => {
   const { user } = useAuth();
   const [vipCode, setVipCode] = useState('');
   const [vipCodeValid, setVipCodeValid] = useState(false);
   const [vipCodeChecking, setVipCodeChecking] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoCodeValid, setPromoCodeValid] = useState(false);
+  const [promoCodeChecking, setPromoCodeChecking] = useState(false);
+  const [promoError, setPromoError] = useState('');
 
   const { data: profile } = useQuery({
     queryKey: ['profile', user?.id],
@@ -133,6 +140,37 @@ const CustomerInfoForm = ({ onSubmit, initialData, onVipCodeChange, selectedServ
       }
     } finally {
       setVipCodeChecking(false);
+    }
+  };
+
+  const handleValidatePromoCode = async () => {
+    if (!promoCode.trim()) return;
+    
+    setPromoCodeChecking(true);
+    setPromoError('');
+    try {
+      const result = await validatePromoCode(promoCode.trim());
+      
+      if (result.valid) {
+        setPromoCodeValid(true);
+        if (onPromoCodeChange) {
+          onPromoCodeChange(promoCode.trim(), result.discount, result.campaign_id);
+        }
+      } else {
+        setPromoCodeValid(false);
+        setPromoError(result.error || 'Invalid promo code');
+        if (onPromoCodeChange) {
+          onPromoCodeChange('', 0);
+        }
+      }
+    } catch (error) {
+      setPromoCodeValid(false);
+      setPromoError('Failed to validate code');
+      if (onPromoCodeChange) {
+        onPromoCodeChange('', 0);
+      }
+    } finally {
+      setPromoCodeChecking(false);
     }
   };
 
@@ -247,6 +285,48 @@ const CustomerInfoForm = ({ onSubmit, initialData, onVipCodeChange, selectedServ
           )}
           {vipCode.trim() && !vipCodeValid && !vipCodeChecking && (
             <p className="text-sm text-destructive mt-2">Invalid VIP code</p>
+          )}
+        </div>
+
+        {/* Promo Code Section */}
+        <div className="mt-4 p-4 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
+          <div className="flex items-center gap-2 mb-3">
+            <Tag className="h-5 w-5 text-primary" />
+            <Label htmlFor="promo-code" className="text-base font-semibold">Promo Code (Optional)</Label>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              id="promo-code"
+              placeholder="Enter promo code"
+              value={promoCode}
+              onChange={(e) => {
+                setPromoCode(e.target.value.toUpperCase());
+                setPromoCodeValid(false);
+                setPromoError('');
+                if (onPromoCodeChange) {
+                  onPromoCodeChange('', 0);
+                }
+              }}
+              className="flex-1"
+            />
+            <Button 
+              type="button"
+              onClick={handleValidatePromoCode}
+              disabled={!promoCode.trim() || promoCodeChecking}
+              variant="outline"
+            >
+              {promoCodeChecking ? 'Checking...' : 'Apply'}
+            </Button>
+          </div>
+          {promoCodeValid && serviceData && (
+            <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-md">
+              <p className="text-sm font-semibold text-green-700 dark:text-green-400">
+                ✓ Promo code applied! Save {promoDiscount}% (${((serviceData.regular_price * promoDiscount) / 100).toFixed(2)} off)
+              </p>
+            </div>
+          )}
+          {promoError && (
+            <p className="text-sm text-destructive mt-2">{promoError}</p>
           )}
         </div>
 

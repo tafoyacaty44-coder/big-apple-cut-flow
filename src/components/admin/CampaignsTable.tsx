@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Copy, Trash2, Pause, X, Mail, MessageSquare } from "lucide-react";
+import { MoreHorizontal, Edit, Copy, Trash2, Pause, X, Mail, MessageSquare, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { PromotionalCampaign, deleteCampaign, duplicateCampaign, pauseCampaign, cancelCampaign } from "@/lib/api/promotions";
 import { format } from "date-fns";
@@ -14,9 +14,10 @@ interface Props {
   campaigns: PromotionalCampaign[];
   isLoading: boolean;
   onEdit: (id: string) => void;
+  onViewDetails?: (id: string) => void;
 }
 
-export function CampaignsTable({ campaigns, isLoading, onEdit }: Props) {
+export function CampaignsTable({ campaigns, isLoading, onEdit, onViewDetails }: Props) {
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
@@ -176,6 +177,12 @@ export function CampaignsTable({ campaigns, isLoading, onEdit }: Props) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    {onViewDetails && campaign.status === 'sent' && (
+                      <DropdownMenuItem onClick={() => onViewDetails(campaign.id)}>
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                        View Analytics
+                      </DropdownMenuItem>
+                    )}
                     {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
                       <DropdownMenuItem onClick={() => onEdit(campaign.id)}>
                         <Edit className="mr-2 h-4 w-4" />

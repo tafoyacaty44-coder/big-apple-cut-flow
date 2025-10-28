@@ -51,6 +51,7 @@ export type Database = {
           appointment_date: string
           appointment_time: string
           barber_id: string | null
+          campaign_id: string | null
           cancellation_deadline: string | null
           client_id: string | null
           confirmation_number: string
@@ -65,6 +66,7 @@ export type Database = {
           payment_locked: boolean | null
           payment_required_reason: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          promo_code_used: string | null
           require_prepayment: boolean | null
           service_id: string
           status: Database["public"]["Enums"]["appointment_status"]
@@ -77,6 +79,7 @@ export type Database = {
           appointment_date: string
           appointment_time: string
           barber_id?: string | null
+          campaign_id?: string | null
           cancellation_deadline?: string | null
           client_id?: string | null
           confirmation_number: string
@@ -91,6 +94,7 @@ export type Database = {
           payment_locked?: boolean | null
           payment_required_reason?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          promo_code_used?: string | null
           require_prepayment?: boolean | null
           service_id: string
           status?: Database["public"]["Enums"]["appointment_status"]
@@ -103,6 +107,7 @@ export type Database = {
           appointment_date?: string
           appointment_time?: string
           barber_id?: string | null
+          campaign_id?: string | null
           cancellation_deadline?: string | null
           client_id?: string | null
           confirmation_number?: string
@@ -117,6 +122,7 @@ export type Database = {
           payment_locked?: boolean | null
           payment_required_reason?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          promo_code_used?: string | null
           require_prepayment?: boolean | null
           service_id?: string
           status?: Database["public"]["Enums"]["appointment_status"]
@@ -131,6 +137,13 @@ export type Database = {
             columns: ["barber_id"]
             isOneToOne: false
             referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "promotional_campaigns"
             referencedColumns: ["id"]
           },
           {
@@ -831,6 +844,7 @@ export type Database = {
           failed_count: number | null
           id: string
           message_body: string
+          opened_count: number | null
           promo_code: string | null
           promo_discount: number | null
           promo_expires_at: string | null
@@ -855,6 +869,7 @@ export type Database = {
           failed_count?: number | null
           id?: string
           message_body: string
+          opened_count?: number | null
           promo_code?: string | null
           promo_discount?: number | null
           promo_expires_at?: string | null
@@ -879,6 +894,7 @@ export type Database = {
           failed_count?: number | null
           id?: string
           message_body?: string
+          opened_count?: number | null
           promo_code?: string | null
           promo_discount?: number | null
           promo_expires_at?: string | null

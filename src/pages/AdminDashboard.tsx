@@ -6,7 +6,7 @@ import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Users, Scissors, Gift, CalendarClock, Database, Image, Settings, FileText } from 'lucide-react';
+import { LogOut, Calendar, Users, Scissors, Gift, CalendarClock, Database, Image, Settings, FileText, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -101,6 +101,12 @@ const AdminDashboard = () => {
                 <Button variant="outline" className="w-full justify-start">
                   <FileText className="mr-2 h-4 w-4" />
                   Blog
+                </Button>
+              </Link>
+              <Link to="/admin/promotions" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <Send className="mr-2 h-4 w-4" />
+                  Promotions
                 </Button>
               </Link>
               <Link to="/admin/clients" className="w-full">

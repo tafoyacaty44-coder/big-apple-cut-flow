@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
-import { Calendar } from 'lucide-react';
+import { Calendar, Tag } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getServices } from '@/lib/api/services';
 import { getBarbersWithRealAvailability } from '@/lib/api/barbers';
@@ -45,6 +45,9 @@ const Book = () => {
   const [showMobileSummary, setShowMobileSummary] = useState(false);
   const [vipCodeFromForm, setVipCodeFromForm] = useState('');
   const [vipCodeValid, setVipCodeValid] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoCampaignId, setPromoCampaignId] = useState<string | undefined>();
   const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, resetBooking } = useBooking();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -72,6 +75,12 @@ const Book = () => {
   const handleVipCodeChange = (code: string, isValid: boolean) => {
     setVipCodeFromForm(code);
     setVipCodeValid(isValid);
+  };
+
+  const handlePromoCodeChange = (code: string, discount: number, campaignId?: string) => {
+    setPromoCode(code);
+    setPromoDiscount(discount);
+    setPromoCampaignId(campaignId);
   };
 
   const { data: services = [], isLoading: isLoadingServices } = useQuery({
@@ -149,6 +158,8 @@ const Book = () => {
           guest_email: !user ? booking.customerInfo.email : null,
           guest_phone: !user ? booking.customerInfo.phone : null,
           vip_code: vipCode || null,
+          promo_code: promoCode || null,
+          campaign_id: promoCampaignId || null,
         },
       });
 
@@ -462,12 +473,15 @@ const Book = () => {
                   </CardContent>
                 </Card>
 
-                {/* Customer Info Form */}
+                 {/* Customer Info Form */}
                 <div>
                   <h3 className="text-xl font-bold mb-4">Your Information</h3>
                   <CustomerInfoForm 
                     onSubmit={handleCustomerInfoSubmit}
                     onVipCodeChange={handleVipCodeChange}
+                    onPromoCodeChange={handlePromoCodeChange}
+                    selectedServiceId={booking.selectedServiceId}
+                    promoDiscount={promoDiscount}
                   />
                 </div>
               </div>
