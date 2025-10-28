@@ -20,6 +20,8 @@ import BarberDashboard from "./pages/BarberDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import Rewards from "./pages/Rewards";
 import RewardsProgram from "./pages/RewardsProgram";
+import AppointmentAction from "./pages/AppointmentAction";
+import NotificationPreferences from "./pages/NotificationPreferences";
 import VipPricing from "./pages/admin/VipPricing";
 import BreakTime from "./pages/admin/BreakTime";
 import Clients from "./pages/admin/Clients";
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/book" element={<Book />} />
             <Route path="/booking-success" element={<BookingSuccess />} />
             <Route path="/rewards-program" element={<RewardsProgram />} />
+            <Route path="/a/:token/:action" element={<AppointmentAction />} />
+            <Route path="/notifications/manage" element={<NotificationPreferences />} />
             
             {/* Protected Routes */}
             <Route 

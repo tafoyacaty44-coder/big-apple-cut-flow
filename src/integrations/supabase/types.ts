@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_action_tokens: {
+        Row: {
+          action: string
+          appointment_id: string
+          created_at: string | null
+          expires_at: string
+          token: string
+        }
+        Insert: {
+          action: string
+          appointment_id: string
+          created_at?: string | null
+          expires_at: string
+          token: string
+        }
+        Update: {
+          action?: string
+          appointment_id?: string
+          created_at?: string | null
+          expires_at?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_action_tokens_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           appointment_date: string
@@ -288,6 +320,9 @@ export type Database = {
           guest: boolean | null
           id: string
           linked_profile_id: string | null
+          locale: string | null
+          opt_in_email: boolean | null
+          opt_in_sms: boolean | null
           phone: string | null
           phone_norm: string | null
         }
@@ -301,6 +336,9 @@ export type Database = {
           guest?: boolean | null
           id?: string
           linked_profile_id?: string | null
+          locale?: string | null
+          opt_in_email?: boolean | null
+          opt_in_sms?: boolean | null
           phone?: string | null
           phone_norm?: string | null
         }
@@ -314,6 +352,9 @@ export type Database = {
           guest?: boolean | null
           id?: string
           linked_profile_id?: string | null
+          locale?: string | null
+          opt_in_email?: boolean | null
+          opt_in_sms?: boolean | null
           phone?: string | null
           phone_norm?: string | null
         }
@@ -349,6 +390,50 @@ export type Database = {
             columns: ["barber_id"]
             isOneToOne: false
             referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_jobs: {
+        Row: {
+          appointment_id: string | null
+          attempts: number | null
+          channel: string
+          created_at: string | null
+          id: string
+          last_error: string | null
+          scheduled_for: string
+          status: Database["public"]["Enums"]["job_status"] | null
+          template: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          attempts?: number | null
+          channel: string
+          created_at?: string | null
+          id?: string
+          last_error?: string | null
+          scheduled_for: string
+          status?: Database["public"]["Enums"]["job_status"] | null
+          template: string
+        }
+        Update: {
+          appointment_id?: string | null
+          attempts?: number | null
+          channel?: string
+          created_at?: string | null
+          id?: string
+          last_error?: string | null
+          scheduled_for?: string
+          status?: Database["public"]["Enums"]["job_status"] | null
+          template?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_jobs_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
             referencedColumns: ["id"]
           },
         ]
@@ -834,7 +919,9 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "no_show"
+      job_status: "queued" | "sent" | "failed" | "canceled"
       payment_method: "zelle" | "apple_pay" | "cash_app"
+      payment_method_enum: "zelle" | "apple_pay" | "cash_app"
       payment_status: "none" | "deposit_paid" | "fully_paid"
       payment_status_enum: "pending" | "verified" | "rejected"
       reward_action:
@@ -979,7 +1066,9 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
+      job_status: ["queued", "sent", "failed", "canceled"],
       payment_method: ["zelle", "apple_pay", "cash_app"],
+      payment_method_enum: ["zelle", "apple_pay", "cash_app"],
       payment_status: ["none", "deposit_paid", "fully_paid"],
       payment_status_enum: ["pending", "verified", "rejected"],
       reward_action: [
