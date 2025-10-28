@@ -20,6 +20,10 @@ const Barbers = () => {
     navigate('/book', { state: { selectedBarber: { id: barberId, name: barberName } } });
   };
 
+  const handleViewDetail = (barberId: string) => {
+    navigate(`/barbers/${barberId}`);
+  };
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -39,20 +43,32 @@ const Barbers = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {barbers?.map((barber) => (
                 <div key={barber.id} className="relative">
-                  <BarberCard
-                    barber={barber}
-                    selectedServiceName="Select a service"
-                    selectedServicePrice={0}
-                    selectedServiceDuration={0}
-                    isSelected={false}
-                    onSelect={() => handleBooking(barber.id, barber.full_name)}
-                  />
-                  <GoldButton 
-                    className="w-full mt-4"
-                    onClick={() => handleBooking(barber.id, barber.full_name)}
+                  <div 
+                    className="cursor-pointer" 
+                    onClick={() => handleViewDetail(barber.id)}
                   >
-                    Book with {barber.full_name}
-                  </GoldButton>
+                    <BarberCard
+                      barber={barber}
+                      selectedServiceName="Select a service"
+                      selectedServicePrice={0}
+                      selectedServiceDuration={0}
+                      isSelected={false}
+                      onSelect={() => handleViewDetail(barber.id)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    <GoldButton 
+                      variant="outline"
+                      onClick={() => handleViewDetail(barber.id)}
+                    >
+                      View Schedule
+                    </GoldButton>
+                    <GoldButton 
+                      onClick={() => handleBooking(barber.id, barber.full_name)}
+                    >
+                      Book Now
+                    </GoldButton>
+                  </div>
                 </div>
               ))}
             </div>

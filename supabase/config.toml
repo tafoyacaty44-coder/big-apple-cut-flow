@@ -11,3 +11,15 @@ verify_jwt = false
 
 [functions.process-notification-jobs]
 verify_jwt = false
+
+[functions.compute-availability]
+verify_jwt = false
+
+[functions.request-schedule-change]
+verify_jwt = true
+
+[functions.review-schedule-change]
+verify_jwt = true
+
+[functions.admin-override-availability]
+verify_jwt = true

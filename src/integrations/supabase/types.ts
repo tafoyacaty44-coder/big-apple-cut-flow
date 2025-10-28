@@ -149,6 +149,54 @@ export type Database = {
           },
         ]
       }
+      availability_overrides: {
+        Row: {
+          barber_id: string
+          created_at: string | null
+          created_by: string | null
+          end_time: string
+          id: string
+          kind: Database["public"]["Enums"]["override_kind"]
+          note: string | null
+          start_time: string
+        }
+        Insert: {
+          barber_id: string
+          created_at?: string | null
+          created_by?: string | null
+          end_time: string
+          id?: string
+          kind: Database["public"]["Enums"]["override_kind"]
+          note?: string | null
+          start_time: string
+        }
+        Update: {
+          barber_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          end_time?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["override_kind"]
+          note?: string | null
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_overrides_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "availability_overrides_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       barber_availability: {
         Row: {
           barber_id: string
@@ -739,6 +787,81 @@ export type Database = {
           },
         ]
       }
+      schedule_change_requests: {
+        Row: {
+          barber_id: string
+          break_end: string | null
+          break_kind: string | null
+          break_start: string | null
+          break_weekday: number | null
+          created_at: string | null
+          date: string | null
+          day_off_date: string | null
+          end_time: string | null
+          id: string
+          kind: Database["public"]["Enums"]["request_kind"]
+          note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          start_time: string | null
+          status: Database["public"]["Enums"]["request_status"] | null
+          weekday: number | null
+        }
+        Insert: {
+          barber_id: string
+          break_end?: string | null
+          break_kind?: string | null
+          break_start?: string | null
+          break_weekday?: number | null
+          created_at?: string | null
+          date?: string | null
+          day_off_date?: string | null
+          end_time?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["request_kind"]
+          note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["request_status"] | null
+          weekday?: number | null
+        }
+        Update: {
+          barber_id?: string
+          break_end?: string | null
+          break_kind?: string | null
+          break_start?: string | null
+          break_weekday?: number | null
+          created_at?: string | null
+          date?: string | null
+          day_off_date?: string | null
+          end_time?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["request_kind"]
+          note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["request_status"] | null
+          weekday?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_change_requests_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_change_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_prices: {
         Row: {
           barber_id: string | null
@@ -920,10 +1043,13 @@ export type Database = {
         | "cancelled"
         | "no_show"
       job_status: "queued" | "sent" | "failed" | "canceled"
+      override_kind: "open" | "closed"
       payment_method: "zelle" | "apple_pay" | "cash_app"
       payment_method_enum: "zelle" | "apple_pay" | "cash_app"
       payment_status: "none" | "deposit_paid" | "fully_paid"
       payment_status_enum: "pending" | "verified" | "rejected"
+      request_kind: "working_hours" | "breaks" | "day_off"
+      request_status: "pending" | "approved" | "rejected"
       reward_action:
         | "review"
         | "checkin"
@@ -1067,10 +1193,13 @@ export const Constants = {
         "no_show",
       ],
       job_status: ["queued", "sent", "failed", "canceled"],
+      override_kind: ["open", "closed"],
       payment_method: ["zelle", "apple_pay", "cash_app"],
       payment_method_enum: ["zelle", "apple_pay", "cash_app"],
       payment_status: ["none", "deposit_paid", "fully_paid"],
       payment_status_enum: ["pending", "verified", "rejected"],
+      request_kind: ["working_hours", "breaks", "day_off"],
+      request_status: ["pending", "approved", "rejected"],
       reward_action: [
         "review",
         "checkin",
