@@ -21,6 +21,8 @@ interface BookingConfirmationProps {
   };
   onConfirm: (vipCode?: string) => void;
   isSubmitting: boolean;
+  vipPrice?: number;
+  vipCodeApplied?: boolean;
 }
 
 const BookingConfirmation = ({
@@ -33,10 +35,15 @@ const BookingConfirmation = ({
   customerInfo,
   onConfirm,
   isSubmitting,
+  vipPrice,
+  vipCodeApplied = false,
 }: BookingConfirmationProps) => {
   const [vipCode, setVipCode] = useState('');
-  const [showVipInput, setShowVipInput] = useState(false);
+  const [showVipInput, setShowVipInput] = useState(!vipCodeApplied);
   const { user } = useAuth();
+
+  const displayPrice = vipCodeApplied && vipPrice ? vipPrice : servicePrice;
+  const discount = vipCodeApplied && vipPrice ? servicePrice - vipPrice : 0;
 
   const handleConfirm = () => {
     onConfirm(vipCode || undefined);
@@ -60,9 +67,24 @@ const BookingConfirmation = ({
                 <p className="text-sm text-muted-foreground">Duration</p>
                 <p className="font-semibold">{serviceDuration} minutes</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Price</p>
-                <p className="font-semibold text-xl">${servicePrice}</p>
+              <div className="md:col-span-2">
+                <p className="text-sm text-muted-foreground mb-2">Price</p>
+                {vipCodeApplied && vipPrice ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-muted-foreground line-through">${servicePrice}</p>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))] font-semibold">
+                        VIP
+                      </span>
+                    </div>
+                    <p className="font-bold text-2xl text-green-600 dark:text-green-400">${displayPrice}</p>
+                    <p className="text-sm text-green-600 dark:text-green-400">
+                      ✓ You save ${discount.toFixed(2)}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="font-semibold text-xl">${displayPrice}</p>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Barber</p>
@@ -111,33 +133,35 @@ const BookingConfirmation = ({
           </div>
 
           {/* VIP Code Section */}
-          <div>
-            {!showVipInput ? (
-              <button
-                onClick={() => setShowVipInput(true)}
-                className="text-[hsl(var(--accent))] hover:underline text-sm font-medium flex items-center gap-2"
-              >
-                <Tag className="h-4 w-4" />
-                Have a VIP code?
-              </button>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="vipCode" className="text-[hsl(var(--accent))]">
-                  VIP Code (Optional)
-                </Label>
-                <Input
-                  id="vipCode"
-                  value={vipCode}
-                  onChange={(e) => setVipCode(e.target.value.toUpperCase())}
-                  placeholder="Enter your VIP code"
-                  className="max-w-xs"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Enter your VIP code to receive discounted pricing
-                </p>
-              </div>
-            )}
-          </div>
+          {!vipCodeApplied && (
+            <div>
+              {!showVipInput ? (
+                <button
+                  onClick={() => setShowVipInput(true)}
+                  className="text-[hsl(var(--accent))] hover:underline text-sm font-medium flex items-center gap-2"
+                >
+                  <Tag className="h-4 w-4" />
+                  Have a VIP code?
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="vipCode" className="text-[hsl(var(--accent))]">
+                    VIP Code (Optional)
+                  </Label>
+                  <Input
+                    id="vipCode"
+                    value={vipCode}
+                    onChange={(e) => setVipCode(e.target.value.toUpperCase())}
+                    placeholder="Enter your VIP code"
+                    className="max-w-xs"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter your VIP code to receive discounted pricing
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </Card>
 

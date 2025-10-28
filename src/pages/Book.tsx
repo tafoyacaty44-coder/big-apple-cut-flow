@@ -41,11 +41,18 @@ const serviceImages: Record<string, string> = {
 
 const Book = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [vipCodeFromForm, setVipCodeFromForm] = useState('');
+  const [vipCodeValid, setVipCodeValid] = useState(false);
   const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, resetBooking } = useBooking();
   const customerFormRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const handleVipCodeChange = (code: string, isValid: boolean) => {
+    setVipCodeFromForm(code);
+    setVipCodeValid(isValid);
+  };
 
   const { data: services = [], isLoading: isLoadingServices } = useQuery({
     queryKey: ['services'],
@@ -153,7 +160,9 @@ const Book = () => {
   });
 
   const handleConfirmBooking = (vipCode?: string) => {
-    bookingMutation.mutate(vipCode);
+    // Use VIP code from form if valid, otherwise use the one from confirmation step
+    const finalVipCode = vipCodeValid ? vipCodeFromForm : vipCode;
+    bookingMutation.mutate(finalVipCode);
   };
 
   const selectedService = services.find(s => s.id === booking.selectedServiceId);
@@ -396,6 +405,8 @@ const Book = () => {
                     email: booking.customerInfo.email,
                     phone: booking.customerInfo.phone,
                   } : null}
+                  onVipCodeChange={handleVipCodeChange}
+                  selectedServiceId={booking.selectedServiceId}
                 />
               </div>
 
@@ -423,6 +434,8 @@ const Book = () => {
                 customerInfo={booking.customerInfo}
                 onConfirm={handleConfirmBooking}
                 isSubmitting={bookingMutation.isPending}
+                vipPrice={selectedService.vip_price}
+                vipCodeApplied={vipCodeValid}
               />
 
               <div className="flex gap-4 justify-center mt-8">

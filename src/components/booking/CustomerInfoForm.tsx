@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -6,9 +6,11 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { Crown } from 'lucide-react';
 
 const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
 
@@ -34,10 +36,15 @@ type CustomerInfoFormData = z.infer<typeof customerInfoSchema>;
 interface CustomerInfoFormProps {
   onSubmit: (data: CustomerInfoFormData) => void;
   initialData?: CustomerInfoFormData | null;
+  onVipCodeChange?: (code: string, isValid: boolean) => void;
+  selectedServiceId?: string;
 }
 
-const CustomerInfoForm = ({ onSubmit, initialData }: CustomerInfoFormProps) => {
+const CustomerInfoForm = ({ onSubmit, initialData, onVipCodeChange, selectedServiceId }: CustomerInfoFormProps) => {
   const { user } = useAuth();
+  const [vipCode, setVipCode] = useState('');
+  const [vipCodeValid, setVipCodeValid] = useState(false);
+  const [vipCodeChecking, setVipCodeChecking] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ['profile', user?.id],
@@ -83,6 +90,50 @@ const CustomerInfoForm = ({ onSubmit, initialData }: CustomerInfoFormProps) => {
     if (numbers.length <= 3) return numbers;
     if (numbers.length <= 6) return `(${numbers.slice(0, 3)}) ${numbers.slice(3)}`;
     return `(${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
+  };
+
+  const { data: serviceData } = useQuery({
+    queryKey: ['service', selectedServiceId],
+    queryFn: async () => {
+      if (!selectedServiceId) return null;
+      const { data, error } = await supabase
+        .from('services')
+        .select('regular_price, vip_price')
+        .eq('id', selectedServiceId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedServiceId,
+  });
+
+  const handleValidateVipCode = async () => {
+    if (!vipCode.trim()) return;
+    
+    setVipCodeChecking(true);
+    try {
+      const { data: settings, error } = await supabase
+        .from('vip_settings')
+        .select('enabled, vip_code')
+        .eq('id', 1)
+        .single();
+
+      if (error) throw error;
+
+      const isValid = settings?.enabled && settings.vip_code === vipCode.trim();
+      setVipCodeValid(isValid);
+      
+      if (onVipCodeChange) {
+        onVipCodeChange(vipCode.trim(), isValid);
+      }
+    } catch (error) {
+      setVipCodeValid(false);
+      if (onVipCodeChange) {
+        onVipCodeChange('', false);
+      }
+    } finally {
+      setVipCodeChecking(false);
+    }
   };
 
   return (
@@ -155,6 +206,47 @@ const CustomerInfoForm = ({ onSubmit, initialData }: CustomerInfoFormProps) => {
           />
           {errors.notes && (
             <p className="text-sm text-destructive">{errors.notes.message}</p>
+          )}
+        </div>
+
+        {/* VIP Code Section */}
+        <div className="mt-6 p-4 border-2 border-dashed border-[hsl(var(--accent))]/30 rounded-lg bg-[hsl(var(--accent))]/5">
+          <div className="flex items-center gap-2 mb-3">
+            <Crown className="h-5 w-5 text-[hsl(var(--accent))]" />
+            <Label htmlFor="vip-code" className="text-base font-semibold">VIP Code (Optional)</Label>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              id="vip-code"
+              placeholder="Enter VIP code"
+              value={vipCode}
+              onChange={(e) => {
+                setVipCode(e.target.value);
+                setVipCodeValid(false);
+                if (onVipCodeChange) {
+                  onVipCodeChange('', false);
+                }
+              }}
+              className="flex-1"
+            />
+            <Button 
+              type="button"
+              onClick={handleValidateVipCode}
+              disabled={!vipCode.trim() || vipCodeChecking}
+              className="bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90 text-black"
+            >
+              {vipCodeChecking ? 'Checking...' : 'Apply'}
+            </Button>
+          </div>
+          {vipCodeValid && serviceData && (
+            <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-md">
+              <p className="text-sm font-semibold text-green-700 dark:text-green-400">
+                ✓ VIP pricing applied! Save ${(serviceData.regular_price - serviceData.vip_price).toFixed(2)}
+              </p>
+            </div>
+          )}
+          {vipCode.trim() && !vipCodeValid && !vipCodeChecking && (
+            <p className="text-sm text-destructive mt-2">Invalid VIP code</p>
           )}
         </div>
 
