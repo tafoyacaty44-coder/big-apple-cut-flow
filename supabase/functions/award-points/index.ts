@@ -55,6 +55,26 @@ Deno.serve(async (req) => {
 
     const pointsToAward = custom_amount || action.points;
 
+    // Check if customer has a linked profile (registered account)
+    // Only award points to registered customers with profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', targetId)
+      .maybeSingle();
+
+    if (!profile) {
+      console.log('Customer does not have a profile, points not awarded automatically');
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          message: 'Points can only be earned by registered customers. Create an account to start earning rewards!',
+          is_guest: true,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Create transaction in rewards_activity
     const { data: transaction, error: transactionError } = await supabase
       .from('rewards_activity')
@@ -79,7 +99,7 @@ Deno.serve(async (req) => {
     }
 
     // Get updated balance (trigger already updated profiles.rewards_points)
-    const { data: profile, error: profileError } = await supabase
+    const { data: updatedProfile, error: profileError } = await supabase
       .from('profiles')
       .select('rewards_points')
       .eq('id', targetId)
@@ -89,13 +109,13 @@ Deno.serve(async (req) => {
       console.error('Profile fetch error:', profileError);
     }
 
-    console.log(`Points awarded successfully: ${pointsToAward} points, new balance: ${profile?.rewards_points || 0}`);
+    console.log(`Points awarded successfully: ${pointsToAward} points, new balance: ${updatedProfile?.rewards_points || 0}`);
 
     return new Response(
       JSON.stringify({
         success: true,
         points_awarded: pointsToAward,
-        new_balance: profile?.rewards_points || 0,
+        new_balance: updatedProfile?.rewards_points || 0,
         transaction_id: transaction.id,
         action: action.code
       }),
@@ -104,8 +124,9 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Error in award-points:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
+      JSON.stringify({ error: 'Internal server error', details: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

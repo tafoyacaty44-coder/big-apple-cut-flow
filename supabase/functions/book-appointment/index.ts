@@ -13,6 +13,7 @@ interface BookingRequest {
   serviceId: string;
   startTime: string;
   vipCode?: string;
+  customerId?: string; // Optional: if user is logged in
 }
 
 Deno.serve(async (req) => {
@@ -33,6 +34,7 @@ Deno.serve(async (req) => {
     // Validate VIP code if provided
     let vipApplied = false;
     let priceToUse = 0;
+    let requirePrepayment = true;
     
     if (booking.vipCode) {
       const { data: vipSettings } = await supabase
@@ -43,6 +45,7 @@ Deno.serve(async (req) => {
       
       if (vipSettings?.enabled && vipSettings.vip_code === booking.vipCode) {
         vipApplied = true;
+        requirePrepayment = false; // VIP customers bypass prepayment
       }
     }
 
@@ -71,7 +74,7 @@ Deno.serve(async (req) => {
 
     const endTime = new Date(new Date(booking.startTime).getTime() + (service?.duration_minutes || 30) * 60000).toISOString();
 
-    // Check if slot is available (no overlapping appointments for this barber)
+    // Check if slot is available
     const { data: existingAppointments } = await supabase
       .from('appointments')
       .select('*')
@@ -86,16 +89,34 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Find or create client
+    // Normalize identity for matching
+    const normalizedEmail = booking.clientEmail?.toLowerCase().trim();
+    const normalizedPhone = booking.clientPhone?.replace(/\D/g, '');
+
+    // Find or create client using normalized identity
     let clientId: string;
     const { data: existingClient } = await supabase
       .from('clients')
-      .select('id')
-      .or(`phone.eq.${booking.clientPhone},email.eq.${booking.clientEmail}`)
+      .select('id, guest, linked_profile_id')
+      .or(`email_norm.eq.${normalizedEmail},phone_norm.eq.${normalizedPhone}`)
       .maybeSingle();
 
     if (existingClient) {
       clientId = existingClient.id;
+      console.log('Found existing client:', clientId);
+      
+      // If user is logged in and client isn't linked, link them now
+      if (booking.customerId && existingClient.guest && !existingClient.linked_profile_id) {
+        await supabase
+          .from('clients')
+          .update({
+            linked_profile_id: booking.customerId,
+            guest: false,
+            account_linked_at: new Date().toISOString(),
+          })
+          .eq('id', clientId);
+        console.log('Linked guest client to user account:', clientId);
+      }
     } else {
       const { data: newClient, error: clientError } = await supabase
         .from('clients')
@@ -103,14 +124,19 @@ Deno.serve(async (req) => {
           full_name: booking.clientName,
           phone: booking.clientPhone,
           email: booking.clientEmail,
+          guest: !booking.customerId,
+          linked_profile_id: booking.customerId || null,
+          account_linked_at: booking.customerId ? new Date().toISOString() : null,
         })
         .select('id')
         .single();
 
       if (clientError || !newClient) {
+        console.error('Client creation error:', clientError);
         throw new Error('Failed to create client');
       }
       clientId = newClient.id;
+      console.log('Created new client:', clientId);
     }
 
     // Create appointment
@@ -118,6 +144,7 @@ Deno.serve(async (req) => {
       .from('appointments')
       .insert({
         client_id: clientId,
+        customer_id: booking.customerId || null,
         barber_id: booking.barberId,
         service_id: booking.serviceId,
         start_time: booking.startTime,
@@ -125,9 +152,11 @@ Deno.serve(async (req) => {
         appointment_date: new Date(booking.startTime).toISOString().split('T')[0],
         appointment_time: new Date(booking.startTime).toTimeString().split(' ')[0],
         payment_amount: priceToUse,
-        payment_status: 'pending',
+        payment_status: vipApplied ? 'none' : 'pending',
         status: 'scheduled',
         vip_applied: vipApplied,
+        require_prepayment: requirePrepayment,
+        payment_required_reason: requirePrepayment ? 'Non-VIP booking requires payment verification' : null,
       })
       .select('*, clients(*), barbers(*), services(*)')
       .single();
@@ -139,19 +168,37 @@ Deno.serve(async (req) => {
 
     console.log('Appointment created:', appointment.id, 'Token:', appointment.token);
 
+    // If prepayment required, create pending payment record
+    if (requirePrepayment) {
+      const { error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          appointment_id: appointment.id,
+          method: 'zelle', // Default, will be updated by customer
+          amount_cents: priceToUse,
+          status: 'pending',
+        });
+
+      if (paymentError) {
+        console.error('Payment record error:', paymentError);
+      }
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         appointment,
-        token: appointment.token 
+        token: appointment.token,
+        requires_payment: requirePrepayment,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
