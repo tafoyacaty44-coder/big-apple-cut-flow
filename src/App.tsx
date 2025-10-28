@@ -30,8 +30,11 @@ import RewardsManagement from "./pages/admin/RewardsManagement";
 import ScheduleManagement from "./pages/admin/ScheduleManagement";
 import ServicesManagement from "./pages/admin/ServicesManagement";
 import GalleryManagement from "./pages/admin/GalleryManagement";
+import BlogManagement from "./pages/admin/BlogManagement";
 import MySchedule from "./pages/barber/MySchedule";
 import BarberDetail from "./pages/BarberDetail";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +54,8 @@ const App = () => (
             <Route path="/barbers" element={<Barbers />} />
             <Route path="/barbers/:id" element={<BarberDetail />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/book" element={<Book />} />
             <Route path="/booking-success" element={<BookingSuccess />} />
             <Route path="/rewards-program" element={<RewardsProgram />} />
@@ -143,6 +148,14 @@ const App = () => (
               element={
                 <AdminRoute>
                   <GalleryManagement />
+                </AdminRoute>
+              } 
+            />
+            <Route
+              path="/admin/blog" 
+              element={
+                <AdminRoute>
+                  <BlogManagement />
                 </AdminRoute>
               } 
             />

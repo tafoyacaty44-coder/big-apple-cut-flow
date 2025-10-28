@@ -40,6 +40,9 @@ const Navigation = () => {
             <a href="/gallery" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Gallery
             </a>
+            <a href="/blog" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+              Blog
+            </a>
             <a href="/#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Contact
             </a>
@@ -84,6 +87,9 @@ const Navigation = () => {
               </a>
               <a href="/gallery" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Gallery
+              </a>
+              <a href="/blog" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+                Blog
               </a>
               <a href="/#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Contact

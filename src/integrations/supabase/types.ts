@@ -274,6 +274,128 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_drafts: {
+        Row: {
+          author_id: string
+          auto_saved_at: string
+          category: string | null
+          content: string | null
+          excerpt: string | null
+          id: string
+          post_id: string | null
+          tags: string[] | null
+          title: string | null
+        }
+        Insert: {
+          author_id: string
+          auto_saved_at?: string
+          category?: string | null
+          content?: string | null
+          excerpt?: string | null
+          id?: string
+          post_id?: string | null
+          tags?: string[] | null
+          title?: string | null
+        }
+        Update: {
+          author_id?: string
+          auto_saved_at?: string
+          category?: string | null
+          content?: string | null
+          excerpt?: string | null
+          id?: string
+          post_id?: string | null
+          tags?: string[] | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_drafts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          archived_at: string | null
+          author_id: string | null
+          category: string
+          content: string
+          created_at: string
+          excerpt: string | null
+          featured_image_url: string | null
+          id: string
+          is_featured: boolean
+          is_pinned: boolean
+          is_published: boolean
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          reading_time_minutes: number
+          scheduled_publish_at: string | null
+          series_name: string | null
+          series_order: number | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          archived_at?: string | null
+          author_id?: string | null
+          category: string
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_featured?: boolean
+          is_pinned?: boolean
+          is_published?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number
+          scheduled_publish_at?: string | null
+          series_name?: string | null
+          series_order?: number | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          archived_at?: string | null
+          author_id?: string | null
+          category?: string
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_featured?: boolean
+          is_pinned?: boolean
+          is_published?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          reading_time_minutes?: number
+          scheduled_publish_at?: string | null
+          series_name?: string | null
+          series_order?: number | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: []
+      }
       breaks: {
         Row: {
           barber_id: string | null
