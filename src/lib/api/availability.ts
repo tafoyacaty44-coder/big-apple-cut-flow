@@ -183,3 +183,53 @@ export const deleteOverride = async (overrideId: string): Promise<void> => {
 
   if (error) throw error;
 };
+
+// Get next available slot across all barbers
+export const getNextAvailableSlot = async (): Promise<{
+  barber: { id: string; name: string };
+  date: string;
+  time: string;
+} | null> => {
+  const today = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  
+  const { data: barbers, error } = await supabase
+    .from('barbers')
+    .select('id, full_name')
+    .eq('is_active', true);
+
+  if (error) throw error;
+
+  for (const barber of barbers || []) {
+    try {
+      const { data, error: funcError } = await supabase.functions.invoke('compute-availability', {
+        body: {
+          barber_id: barber.id,
+          from_date: today,
+          to_date: tomorrow,
+          service_duration: 30
+        }
+      });
+
+      if (funcError) continue;
+
+      const slots = data || [];
+      for (const daySlot of slots) {
+        if (daySlot.time_slots?.length > 0) {
+          return {
+            barber: { id: barber.id, name: barber.full_name },
+            date: new Date(daySlot.date).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric' 
+            }),
+            time: daySlot.time_slots[0]
+          };
+        }
+      }
+    } catch (err) {
+      console.error(`Error computing availability for barber ${barber.id}:`, err);
+    }
+  }
+
+  return null;
+};

@@ -59,6 +59,16 @@ const Book = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Check for prefilled booking data
+  useEffect(() => {
+    if (booking.selectedServiceId && currentStep === 1) {
+      setCurrentStep(2);
+    }
+    if (booking.selectedBarberId && booking.selectedDate && booking.selectedTime && currentStep === 2) {
+      setCurrentStep(3);
+    }
+  }, [booking.selectedServiceId, booking.selectedBarberId, booking.selectedDate, booking.selectedTime]);
+
   const handleVipCodeChange = (code: string, isValid: boolean) => {
     setVipCodeFromForm(code);
     setVipCodeValid(isValid);

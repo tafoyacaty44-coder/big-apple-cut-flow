@@ -24,6 +24,14 @@ interface BookingState {
   } | null;
 }
 
+interface PrefilledData {
+  serviceId?: string;
+  barberId?: string;
+  barberName?: string;
+  date?: string;
+  time?: string;
+}
+
 interface BookingContextType {
   booking: BookingState;
   setSelectedService: (serviceId: string) => void;
@@ -31,6 +39,7 @@ interface BookingContextType {
   setSelectedDate: (date: Date) => void;
   setSelectedTime: (time: string) => void;
   setCustomerInfo: (info: { name: string; email: string; phone: string }) => void;
+  setPrefilled: (data: PrefilledData) => void;
   resetBooking: () => void;
 }
 
@@ -72,6 +81,20 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
     setBooking((prev) => ({ ...prev, customerInfo: info }));
   };
 
+  const setPrefilled = (data: PrefilledData) => {
+    const updates: Partial<BookingState> = {};
+    
+    if (data.serviceId) updates.selectedServiceId = data.serviceId;
+    if (data.barberId) {
+      updates.selectedBarberId = data.barberId;
+      updates.selectedBarberName = data.barberName || null;
+    }
+    if (data.date) updates.selectedDate = new Date(data.date);
+    if (data.time) updates.selectedTime = data.time;
+    
+    setBooking((prev) => ({ ...prev, ...updates }));
+  };
+
   const resetBooking = () => {
     setBooking({
       selectedServiceId: null,
@@ -93,6 +116,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
         setSelectedDate,
         setSelectedTime,
         setCustomerInfo,
+        setPrefilled,
         resetBooking,
       }}
     >

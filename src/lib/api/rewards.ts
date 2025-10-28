@@ -191,3 +191,41 @@ export const calculateRedemption = async (
   if (error) throw error;
   return data;
 };
+
+// Get current user's rewards data
+export const getCurrentUserRewards = async (): Promise<{
+  tier: string;
+  points: number;
+  pointsToNextTier: number;
+} | null> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('rewards_points')
+    .eq('id', user.id)
+    .single();
+
+  if (error) throw error;
+
+  const points = profile?.rewards_points || 0;
+  
+  // Determine tier
+  let tier = 'Bronze';
+  let pointsToNextTier = 500 - points;
+  
+  if (points >= 1000) {
+    tier = 'Gold';
+    pointsToNextTier = 0;
+  } else if (points >= 500) {
+    tier = 'Silver';
+    pointsToNextTier = 1000 - points;
+  }
+
+  return {
+    tier,
+    points,
+    pointsToNextTier: Math.max(0, pointsToNextTier)
+  };
+};
