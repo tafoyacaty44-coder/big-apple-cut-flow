@@ -14,6 +14,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Barbers from "./pages/Barbers";
 import Gallery from "./pages/Gallery";
 import Book from "./pages/Book";
+import BookingSuccess from "./pages/BookingSuccess";
 import AdminDashboard from "./pages/AdminDashboard";
 import BarberDashboard from "./pages/BarberDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/barbers" element={<Barbers />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/book" element={<Book />} />
+            <Route path="/booking-success" element={<BookingSuccess />} />
             
             {/* Protected Routes */}
             <Route 

@@ -1,18 +1,23 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import SectionHeading from '@/components/ui/section-heading';
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Check } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { getServices } from '@/lib/api/services';
 import { getBarbersWithAvailability } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
 import DateTimePicker from '@/components/booking/DateTimePicker';
 import CustomerInfoForm from '@/components/booking/CustomerInfoForm';
+import BookingConfirmation from '@/components/booking/BookingConfirmation';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 import haircutImg from '@/assets/services/haircut.jpg';
 import seniorImg from '@/assets/services/senior-haircut.jpg';
@@ -36,8 +41,11 @@ const serviceImages: Record<string, string> = {
 
 const Book = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo } = useBooking();
+  const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, resetBooking } = useBooking();
   const customerFormRef = useRef<HTMLFormElement>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: services = [], isLoading: isLoadingServices } = useQuery({
     queryKey: ['services'],
@@ -91,6 +99,61 @@ const Book = () => {
       const submitButton = customerFormRef.current.querySelector('button[type="submit"]') as HTMLButtonElement;
       submitButton?.click();
     }
+  };
+
+  const bookingMutation = useMutation({
+    mutationFn: async (vipCode?: string) => {
+      if (!booking.selectedServiceId || !booking.selectedBarberId || !booking.selectedDate || !booking.selectedTime || !booking.customerInfo) {
+        throw new Error('Missing booking information');
+      }
+
+      const { data, error } = await supabase.functions.invoke('book-appointment', {
+        body: {
+          service_id: booking.selectedServiceId,
+          barber_id: booking.selectedBarberId,
+          appointment_date: format(booking.selectedDate, 'yyyy-MM-dd'),
+          appointment_time: booking.selectedTime,
+          customer_id: user?.id || null,
+          guest_name: !user ? booking.customerInfo.name : null,
+          guest_email: !user ? booking.customerInfo.email : null,
+          guest_phone: !user ? booking.customerInfo.phone : null,
+          vip_code: vipCode || null,
+        },
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      const selectedService = services.find(s => s.id === booking.selectedServiceId);
+      
+      // Navigate to success page with booking details
+      const params = new URLSearchParams({
+        confirmation: data.confirmation_number,
+        service: selectedService?.name || '',
+        barber: booking.selectedBarberName || '',
+        date: booking.selectedDate ? format(booking.selectedDate, 'yyyy-MM-dd') : '',
+        time: booking.selectedTime || '',
+        name: booking.customerInfo?.name || '',
+        email: booking.customerInfo?.email || '',
+        phone: booking.customerInfo?.phone || '',
+        vip: data.vip_applied ? 'true' : 'false',
+      });
+
+      resetBooking();
+      navigate(`/booking-success?${params.toString()}`);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Booking Failed',
+        description: error.message || 'Failed to create appointment. Please try again.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleConfirmBooking = (vipCode?: string) => {
+    bookingMutation.mutate(vipCode);
   };
 
   const selectedService = services.find(s => s.id === booking.selectedServiceId);
@@ -342,6 +405,33 @@ const Book = () => {
                 </GoldButton>
                 <GoldButton onClick={handleNextFromCustomerInfo}>
                   Continue to Confirmation
+                </GoldButton>
+              </div>
+            </div>
+          )}
+
+          {/* Step 5: Confirmation */}
+          {currentStep === 5 && selectedService && booking.selectedDate && booking.selectedTime && booking.customerInfo && (
+            <div className="max-w-6xl mx-auto">
+              <BookingConfirmation
+                serviceName={selectedService.name}
+                servicePrice={selectedService.regular_price}
+                serviceDuration={selectedService.duration_minutes}
+                barberName={booking.selectedBarberName || ''}
+                date={booking.selectedDate}
+                time={booking.selectedTime}
+                customerInfo={booking.customerInfo}
+                onConfirm={handleConfirmBooking}
+                isSubmitting={bookingMutation.isPending}
+              />
+
+              <div className="flex gap-4 justify-center mt-8">
+                <GoldButton 
+                  variant="outline" 
+                  onClick={() => setCurrentStep(4)}
+                  disabled={bookingMutation.isPending}
+                >
+                  Back to Customer Info
                 </GoldButton>
               </div>
             </div>
