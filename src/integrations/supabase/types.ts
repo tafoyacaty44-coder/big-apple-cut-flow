@@ -437,6 +437,57 @@ export type Database = {
           },
         ]
       }
+      campaign_recipients: {
+        Row: {
+          campaign_id: string
+          channel: string
+          clicked_at: string | null
+          client_id: string
+          created_at: string | null
+          error_message: string | null
+          id: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["recipient_status"]
+        }
+        Insert: {
+          campaign_id: string
+          channel: string
+          clicked_at?: string | null
+          client_id: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["recipient_status"]
+        }
+        Update: {
+          campaign_id?: string
+          channel?: string
+          clicked_at?: string | null
+          client_id?: string
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["recipient_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "promotional_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_recipients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_notes: {
         Row: {
           barber_id: string | null
@@ -768,6 +819,89 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      promotional_campaigns: {
+        Row: {
+          channel: string
+          click_through_count: number | null
+          created_at: string | null
+          created_by: string
+          custom_filters: Json | null
+          email_html: string | null
+          failed_count: number | null
+          id: string
+          message_body: string
+          promo_code: string | null
+          promo_discount: number | null
+          promo_expires_at: string | null
+          scheduled_for: string | null
+          sent_at: string | null
+          sent_count: number | null
+          status: Database["public"]["Enums"]["campaign_status"]
+          subject: string | null
+          target_audience: Database["public"]["Enums"]["target_audience"]
+          title: string
+          total_recipients: number | null
+          type: Database["public"]["Enums"]["campaign_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          channel: string
+          click_through_count?: number | null
+          created_at?: string | null
+          created_by: string
+          custom_filters?: Json | null
+          email_html?: string | null
+          failed_count?: number | null
+          id?: string
+          message_body: string
+          promo_code?: string | null
+          promo_discount?: number | null
+          promo_expires_at?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: Database["public"]["Enums"]["campaign_status"]
+          subject?: string | null
+          target_audience?: Database["public"]["Enums"]["target_audience"]
+          title: string
+          total_recipients?: number | null
+          type?: Database["public"]["Enums"]["campaign_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          channel?: string
+          click_through_count?: number | null
+          created_at?: string | null
+          created_by?: string
+          custom_filters?: Json | null
+          email_html?: string | null
+          failed_count?: number | null
+          id?: string
+          message_body?: string
+          promo_code?: string | null
+          promo_discount?: number | null
+          promo_expires_at?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: Database["public"]["Enums"]["campaign_status"]
+          subject?: string | null
+          target_audience?: Database["public"]["Enums"]["target_audience"]
+          title?: string
+          total_recipients?: number | null
+          type?: Database["public"]["Enums"]["campaign_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotional_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referral_codes: {
         Row: {
@@ -1203,12 +1337,21 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "no_show"
+      campaign_status:
+        | "draft"
+        | "scheduled"
+        | "sending"
+        | "sent"
+        | "paused"
+        | "canceled"
+      campaign_type: "promotional" | "announcement" | "seasonal" | "loyalty"
       job_status: "queued" | "sent" | "failed" | "canceled"
       override_kind: "open" | "closed"
       payment_method: "zelle" | "apple_pay" | "cash_app"
       payment_method_enum: "zelle" | "apple_pay" | "cash_app"
       payment_status: "none" | "deposit_paid" | "fully_paid"
       payment_status_enum: "pending" | "verified" | "rejected"
+      recipient_status: "queued" | "sent" | "failed" | "bounced" | "clicked"
       request_kind: "working_hours" | "breaks" | "day_off"
       request_status: "pending" | "approved" | "rejected"
       reward_action:
@@ -1218,6 +1361,12 @@ export type Database = {
         | "social_share"
         | "redeemed"
       service_category: "haircut" | "shave" | "combo" | "treatment"
+      target_audience:
+        | "all_customers"
+        | "vip_only"
+        | "recent_customers"
+        | "inactive_customers"
+        | "custom"
       user_role: "customer" | "barber" | "admin"
     }
     CompositeTypes: {
@@ -1353,12 +1502,22 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
+      campaign_status: [
+        "draft",
+        "scheduled",
+        "sending",
+        "sent",
+        "paused",
+        "canceled",
+      ],
+      campaign_type: ["promotional", "announcement", "seasonal", "loyalty"],
       job_status: ["queued", "sent", "failed", "canceled"],
       override_kind: ["open", "closed"],
       payment_method: ["zelle", "apple_pay", "cash_app"],
       payment_method_enum: ["zelle", "apple_pay", "cash_app"],
       payment_status: ["none", "deposit_paid", "fully_paid"],
       payment_status_enum: ["pending", "verified", "rejected"],
+      recipient_status: ["queued", "sent", "failed", "bounced", "clicked"],
       request_kind: ["working_hours", "breaks", "day_off"],
       request_status: ["pending", "approved", "rejected"],
       reward_action: [
@@ -1369,6 +1528,13 @@ export const Constants = {
         "redeemed",
       ],
       service_category: ["haircut", "shave", "combo", "treatment"],
+      target_audience: [
+        "all_customers",
+        "vip_only",
+        "recent_customers",
+        "inactive_customers",
+        "custom",
+      ],
       user_role: ["customer", "barber", "admin"],
     },
   },

@@ -12,6 +12,9 @@ verify_jwt = false
 [functions.process-notification-jobs]
 verify_jwt = false
 
+[functions.send-promotional-campaign]
+verify_jwt = false
+
 [functions.compute-availability]
 verify_jwt = false
 
