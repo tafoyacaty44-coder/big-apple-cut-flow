@@ -6,7 +6,7 @@ import SectionHeading from '@/components/ui/section-heading';
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Check } from 'lucide-react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getServices } from '@/lib/api/services';
 import { getBarbersWithAvailability } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
@@ -48,6 +48,7 @@ const Book = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const handleVipCodeChange = (code: string, isValid: boolean) => {
     setVipCodeFromForm(code);
@@ -133,6 +134,14 @@ const Book = () => {
     },
     onSuccess: (data) => {
       const selectedService = services.find(s => s.id === booking.selectedServiceId);
+      
+      // Invalidate availability caches to refresh data immediately
+      queryClient.invalidateQueries({ queryKey: ['availability', 'today'] });
+      if (booking.selectedBarberId) {
+        queryClient.invalidateQueries({ 
+          queryKey: ['availability', 'barber', booking.selectedBarberId] 
+        });
+      }
       
       // Navigate to success page with booking details
       const params = new URLSearchParams({

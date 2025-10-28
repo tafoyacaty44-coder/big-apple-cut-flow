@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { format, addDays } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface SevenDayAvailabilityProps {
   barberId: string;
@@ -17,10 +18,10 @@ export const SevenDayAvailability = ({
   serviceDuration = 30,
   onSelectTime 
 }: SevenDayAvailabilityProps) => {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  
   const today = new Date();
   const fromDate = format(today, 'yyyy-MM-dd');
+  const [selectedDate, setSelectedDate] = useState<string | null>(fromDate);
+  
   const toDate = format(addDays(today, 6), 'yyyy-MM-dd');
 
   const { data: availability, isLoading } = useQuery({
@@ -78,16 +79,23 @@ export const SevenDayAvailability = ({
               const dayAvailability = availability?.find(a => a.date === dateStr);
               const hasSlots = (dayAvailability?.time_slots.length || 0) > 0;
               const isSelected = selectedDate === dateStr;
+              const isToday = dateStr === fromDate;
 
               return (
                 <Button
                   key={dateStr}
-                  variant={isSelected ? 'default' : 'outline'}
+                  variant={isSelected ? 'default' : isToday ? 'secondary' : 'outline'}
                   size="sm"
-                  className="flex flex-col h-auto py-2"
+                  className={cn(
+                    "flex flex-col h-auto py-2",
+                    isToday && !isSelected && "border-primary border-2"
+                  )}
                   disabled={!hasSlots}
                   onClick={() => setSelectedDate(dateStr)}
                 >
+                  {isToday && (
+                    <span className="text-xs font-bold text-primary">TODAY</span>
+                  )}
                   <span className="text-xs font-medium">
                     {format(date, 'EEE')}
                   </span>
