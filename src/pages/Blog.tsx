@@ -57,7 +57,7 @@ const Blog = () => {
   const regularPosts = posts.filter(p => !p.is_featured);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-20">
       <Navigation />
       
       <main className="flex-1 container mx-auto px-4 py-12">

@@ -20,7 +20,7 @@ const Gallery = () => {
   const filteredImages = images;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-20">
       <Navigation />
       
       <section className="py-24 bg-background">

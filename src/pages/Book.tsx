@@ -205,7 +205,7 @@ const Book = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pt-20">
       <Navigation />
       
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">

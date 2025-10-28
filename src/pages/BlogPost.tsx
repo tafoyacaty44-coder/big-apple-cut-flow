@@ -38,7 +38,7 @@ const BlogPost = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pt-20">
         <Navigation />
         <main className="flex-1 container mx-auto px-4 py-12">
           <div className="text-center">Loading...</div>
@@ -50,7 +50,7 @@ const BlogPost = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pt-20">
         <Navigation />
         <main className="flex-1 container mx-auto px-4 py-12">
           <div className="text-center">
@@ -69,7 +69,7 @@ const BlogPost = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-20">
       <Navigation />
       
       <main className="flex-1">
