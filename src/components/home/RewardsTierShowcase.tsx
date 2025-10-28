@@ -45,7 +45,7 @@ const RewardsTierShowcase = () => {
   });
 
   return (
-    <section className="py-16 px-4 bg-muted/30">
+    <section className="py-16 px-4 bg-gradient-to-b from-background to-muted/30 animate-fade-in">
       <div className="container mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -57,18 +57,18 @@ const RewardsTierShowcase = () => {
         </div>
 
         {user && rewardsData && (
-          <div className="max-w-2xl mx-auto mb-12">
-            <Card className="border-[hsl(var(--accent))]/30 bg-gradient-to-br from-[hsl(var(--accent))]/5 to-transparent">
+          <div className="max-w-2xl mx-auto mb-12 animate-fade-in">
+            <Card className="border-[hsl(var(--accent))]/30 bg-gradient-to-br from-[hsl(var(--accent))]/5 to-transparent shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="font-bold text-xl">Your Progress</h3>
+                    <h3 className="font-bold text-xl capitalize">{rewardsData.tier} Member</h3>
                     <p className="text-sm text-muted-foreground">
-                      Current Tier: <span className="font-semibold text-foreground">{rewardsData.tier}</span>
+                      {rewardsData.points} points earned
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-[hsl(var(--accent))]">
+                    <p className="text-3xl font-bold text-[hsl(var(--accent))] tabular-nums">
                       {rewardsData.points}
                     </p>
                     <p className="text-xs text-muted-foreground">points</p>
@@ -76,10 +76,15 @@ const RewardsTierShowcase = () => {
                 </div>
                 {rewardsData.pointsToNextTier > 0 && (
                   <div className="space-y-2">
-                    <Progress value={(rewardsData.points / (rewardsData.points + rewardsData.pointsToNextTier)) * 100} />
-                    <p className="text-xs text-muted-foreground text-center">
-                      {rewardsData.pointsToNextTier} points to next tier
-                    </p>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Progress to next tier</span>
+                      <span className="font-medium">{rewardsData.pointsToNextTier} points to go</span>
+                    </div>
+                    <Progress 
+                      value={(rewardsData.points / (rewardsData.points + rewardsData.pointsToNextTier)) * 100} 
+                      className="h-3"
+                      aria-label={`${Math.round((rewardsData.points / (rewardsData.points + rewardsData.pointsToNextTier)) * 100)}% progress to next tier`}
+                    />
                   </div>
                 )}
               </CardContent>
@@ -95,11 +100,12 @@ const RewardsTierShowcase = () => {
             return (
               <Card 
                 key={tier.name}
-                className={`overflow-hidden transition-all hover:scale-105 hover:shadow-xl ${
-                  isCurrentTier ? 'border-[hsl(var(--accent))] border-2 shadow-lg' : ''
+                className={`overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl animate-fade-in ${
+                  isCurrentTier ? 'border-[hsl(var(--accent))] border-2 shadow-lg ring-2 ring-[hsl(var(--accent))]/50' : ''
                 }`}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className={`h-24 bg-gradient-to-br ${tier.color} flex items-center justify-center`}>
+                <div className={`h-24 bg-gradient-to-br ${tier.color} flex items-center justify-center transition-transform duration-300 hover:scale-110`}>
                   <Icon className="h-12 w-12 text-white" />
                 </div>
                 <CardContent className="p-6 space-y-4">
@@ -112,16 +118,16 @@ const RewardsTierShowcase = () => {
                       {tier.minPoints === 0 ? 'Starting tier' : `${tier.minPoints}+ points`}
                     </p>
                   </div>
-                  <ul className="space-y-2 text-sm">
+                  <ul className="space-y-2 text-sm" role="list">
                     {tier.benefits.map((benefit, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <span className="text-[hsl(var(--accent))] mt-0.5">✓</span>
+                        <span className="text-[hsl(var(--accent))] mt-0.5" aria-hidden="true">✓</span>
                         <span>{benefit}</span>
                       </li>
                     ))}
                   </ul>
                   {isCurrentTier && (
-                    <div className="text-center pt-2">
+                    <div className="text-center pt-2 animate-pulse">
                       <span className="inline-block px-3 py-1 rounded-full bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))] text-xs font-semibold">
                         Current Tier
                       </span>
@@ -133,18 +139,20 @@ const RewardsTierShowcase = () => {
           })}
         </div>
 
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '400ms' }}>
           {user ? (
             <Button
               onClick={() => navigate('/rewards')}
-              className="bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90"
+              className="bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+              aria-label="View your rewards dashboard"
             >
               View My Rewards
             </Button>
           ) : (
             <Button
               onClick={() => navigate('/signup')}
-              className="bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90"
+              className="bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+              aria-label="Join the rewards program"
             >
               Join Free Today
             </Button>

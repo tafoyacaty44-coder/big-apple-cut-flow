@@ -49,26 +49,33 @@ const CompactServicesGrid = () => {
   }
 
   return (
-    <section className="py-16 px-4">
+    <section className="py-16 px-4 animate-fade-in">
       <div className="container mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-          Our Services
-        </h2>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Our Services
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Premium grooming services tailored to your style
+          </p>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {displayServices.map((service) => {
+          {displayServices.map((service, index) => {
             const imageSrc = serviceImages[service.name] || serviceImages["Haircut"];
             
             return (
               <Card 
                 key={service.id} 
-                className="overflow-hidden hover:shadow-xl transition-all hover:scale-[1.02]"
+                className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animate-fade-in"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="aspect-[3/2] overflow-hidden">
                   <img
                     src={imageSrc}
                     alt={service.name}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
                   />
                 </div>
                 <CardContent className="p-4 space-y-3">
@@ -95,8 +102,9 @@ const CompactServicesGrid = () => {
                   </div>
                   <Button
                     size="sm"
-                    className="w-full bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90"
+                    className="w-full bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90 transition-all duration-200 hover:scale-105"
                     onClick={() => handleBookService(service.id)}
+                    aria-label={`Book ${service.name}`}
                   >
                     Book Now
                   </Button>
@@ -107,11 +115,13 @@ const CompactServicesGrid = () => {
         </div>
 
         {services.length > 6 && (
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 animate-fade-in">
             <Button
               variant="outline"
               onClick={() => setShowAll(!showAll)}
-              className="border-[hsl(var(--accent))] text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/10"
+              className="border-[hsl(var(--accent))] text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/10 transition-all duration-300 hover:scale-105"
+              aria-expanded={showAll}
+              aria-label={showAll ? 'Show less services' : 'View all services'}
             >
               {showAll ? (
                 <>
