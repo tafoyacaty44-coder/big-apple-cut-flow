@@ -1,18 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Logo from '@/components/Logo';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Eye, EyeOff } from 'lucide-react';
 
 const ResetPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const { resetPassword } = useAuth();
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { resetPassword, updatePassword } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user came from password reset email
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsUpdatingPassword(true);
+      }
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +54,48 @@ const ResetPassword = () => {
     setLoading(false);
   };
 
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword.length < 6) {
+      toast({
+        title: 'Error',
+        description: 'Password must be at least 6 characters long',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: 'Error',
+        description: 'Passwords do not match',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    const { error } = await updatePassword(newPassword);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Success',
+        description: 'Password updated successfully',
+      });
+      setTimeout(() => navigate('/login'), 1500);
+    }
+
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center px-4 relative overflow-hidden">
       {/* Subtle texture overlay */}
@@ -52,14 +111,65 @@ const ResetPassword = () => {
               </div>
             </div>
           </div>
-          <h1 className="text-3xl font-bold mb-2 text-primary-foreground">Reset Password</h1>
+          <h1 className="text-3xl font-bold mb-2 text-primary-foreground">
+            {isUpdatingPassword ? 'Set New Password' : 'Reset Password'}
+          </h1>
           <p className="text-primary-foreground/70">
-            {sent ? 'Check your email' : 'Enter your email to reset your password'}
+            {isUpdatingPassword 
+              ? 'Enter your new password' 
+              : sent ? 'Check your email' : 'Enter your email to reset your password'
+            }
           </p>
         </div>
 
         <div className="bg-card/95 backdrop-blur-sm border-2 border-[hsl(var(--accent))]/30 rounded-lg p-8 shadow-[0_0_30px_rgba(212,175,55,0.15)]">
-          {!sent ? (
+          {isUpdatingPassword ? (
+            <form onSubmit={handlePasswordUpdate} className="space-y-4">
+              <div>
+                <Label htmlFor="newPassword">New Password</Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="newPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+              <GoldButton type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Updating...' : 'Update Password'}
+              </GoldButton>
+            </form>
+          ) : !sent ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="email">Email</Label>
