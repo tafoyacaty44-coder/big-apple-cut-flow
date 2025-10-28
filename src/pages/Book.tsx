@@ -133,6 +133,11 @@ const Book = () => {
         throw new Error('Missing booking information');
       }
 
+      toast({
+        title: 'Booking in progress...',
+        description: 'Please wait while we confirm your appointment.',
+      });
+
       const { data, error } = await supabase.functions.invoke('book-appointment', {
         body: {
           service_id: booking.selectedServiceId,
@@ -147,7 +152,12 @@ const Book = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes('time slot is no longer available')) {
+          throw new Error('This time slot was just booked by another customer. Please select a different time.');
+        }
+        throw new Error(error.message || 'Failed to create appointment');
+      }
       return data;
     },
     onSuccess: (data) => {
@@ -159,6 +169,11 @@ const Book = () => {
           queryKey: ['availability', 'barber', booking.selectedBarberId] 
         });
       }
+
+      toast({
+        title: '✓ Booking Confirmed!',
+        description: `Your appointment is set for ${booking.selectedTime}`,
+      });
       
       const params = new URLSearchParams({
         confirmation: data.confirmation_number,
@@ -178,7 +193,7 @@ const Book = () => {
     onError: (error: any) => {
       toast({
         title: 'Booking Failed',
-        description: error.message || 'Failed to create appointment. Please try again.',
+        description: error.message || 'Something went wrong. Please try again or contact us for assistance.',
         variant: 'destructive',
       });
     },
@@ -219,10 +234,10 @@ const Book = () => {
 
         {/* Mobile Summary Header */}
         {isMobile && (
-          <div className="sticky top-0 z-10 bg-background border-b">
+          <div className="sticky top-0 z-50 bg-background border-b shadow-sm">
             <button
               onClick={() => setShowMobileSummary(!showMobileSummary)}
-              className="w-full flex items-center justify-between p-4"
+              className="w-full flex items-center justify-between p-4 active:bg-muted/50 transition-colors"
             >
               <div className="text-left">
                 <div className="font-semibold">Step {currentStep} of 3</div>
@@ -249,7 +264,18 @@ const Book = () => {
                   <p className="text-muted-foreground">Choose the service you'd like to book</p>
                 </div>
                 {isLoadingServices ? (
-                  <p>Loading services...</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <Card key={i} className="animate-pulse">
+                        <div className="aspect-[3/2] bg-muted rounded-t-lg" />
+                        <CardContent className="p-4 space-y-2">
+                          <div className="h-6 bg-muted rounded w-3/4" />
+                          <div className="h-4 bg-muted rounded w-full" />
+                          <div className="h-4 bg-muted rounded w-1/2" />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {services.map((service) => {
@@ -259,7 +285,7 @@ const Book = () => {
                         <Card
                           key={service.id}
                           className={cn(
-                            "cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]",
+                            "cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
                             booking.selectedServiceId === service.id && 'border-[hsl(var(--accent))] border-2 shadow-lg'
                           )}
                           onClick={() => handleServiceSelect(service.id)}
@@ -268,6 +294,7 @@ const Book = () => {
                             <img
                               src={imageSrc}
                               alt={service.name}
+                              loading="lazy"
                               className="w-full h-full object-cover"
                             />
                           </div>
@@ -296,13 +323,13 @@ const Book = () => {
                   </div>
                 )}
                 {isMobile && (
-                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
+                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                     <GoldButton
-                      className="w-full"
+                      className="w-full min-h-[48px]"
                       onClick={handleNextFromService}
                       disabled={!booking.selectedServiceId}
                     >
-                      Continue
+                      Continue to Barber Selection
                     </GoldButton>
                   </div>
                 )}
@@ -317,7 +344,24 @@ const Book = () => {
                   <p className="text-muted-foreground">Select a barber and pick your preferred date and time</p>
                 </div>
                 {isLoadingBarbers ? (
-                  <p>Loading barbers...</p>
+                  <div className="space-y-4">
+                    <Card className="animate-pulse">
+                      <CardContent className="p-6">
+                        <div className="h-32 bg-muted rounded" />
+                      </CardContent>
+                    </Card>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <Card key={i} className="animate-pulse">
+                          <CardContent className="p-6 space-y-3">
+                            <div className="h-20 bg-muted rounded" />
+                            <div className="h-4 bg-muted rounded w-3/4" />
+                            <div className="h-4 bg-muted rounded w-1/2" />
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                 ) : (
                   <div className="space-y-6">
                     {/* Any Available Barber Option */}
@@ -362,13 +406,13 @@ const Book = () => {
                   </div>
                 )}
                 {isMobile && (
-                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
+                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                     <GoldButton
-                      className="w-full"
+                      className="w-full min-h-[48px]"
                       onClick={() => canContinueStep(2) && setCurrentStep(3)}
                       disabled={!canContinueStep(2)}
                     >
-                      Continue
+                      Continue to Checkout
                     </GoldButton>
                   </div>
                 )}
