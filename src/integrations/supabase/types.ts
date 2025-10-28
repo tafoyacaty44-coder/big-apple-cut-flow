@@ -30,7 +30,10 @@ export type Database = {
           id: string
           notes: string | null
           payment_amount: number | null
+          payment_locked: boolean | null
+          payment_required_reason: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          require_prepayment: boolean | null
           service_id: string
           status: Database["public"]["Enums"]["appointment_status"]
           stripe_payment_intent_id: string | null
@@ -53,7 +56,10 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_amount?: number | null
+          payment_locked?: boolean | null
+          payment_required_reason?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          require_prepayment?: boolean | null
           service_id: string
           status?: Database["public"]["Enums"]["appointment_status"]
           stripe_payment_intent_id?: string | null
@@ -76,7 +82,10 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_amount?: number | null
+          payment_locked?: boolean | null
+          payment_required_reason?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          require_prepayment?: boolean | null
           service_id?: string
           status?: Database["public"]["Enums"]["appointment_status"]
           stripe_payment_intent_id?: string | null
@@ -270,27 +279,53 @@ export type Database = {
       }
       clients: {
         Row: {
+          account_linked_at: string | null
           created_at: string | null
           email: string | null
+          email_norm: string | null
+          first_seen: string | null
           full_name: string
+          guest: boolean | null
           id: string
+          linked_profile_id: string | null
           phone: string | null
+          phone_norm: string | null
         }
         Insert: {
+          account_linked_at?: string | null
           created_at?: string | null
           email?: string | null
+          email_norm?: string | null
+          first_seen?: string | null
           full_name: string
+          guest?: boolean | null
           id?: string
+          linked_profile_id?: string | null
           phone?: string | null
+          phone_norm?: string | null
         }
         Update: {
+          account_linked_at?: string | null
           created_at?: string | null
           email?: string | null
+          email_norm?: string | null
+          first_seen?: string | null
           full_name?: string
+          guest?: boolean | null
           id?: string
+          linked_profile_id?: string | null
           phone?: string | null
+          phone_norm?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_linked_profile_id_fkey"
+            columns: ["linked_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       days_off: {
         Row: {
@@ -346,6 +381,63 @@ export type Database = {
             columns: ["appointment_id"]
             isOneToOne: false
             referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_cents: number
+          appointment_id: string | null
+          created_at: string | null
+          id: string
+          method: Database["public"]["Enums"]["payment_method"]
+          proof_url: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["payment_status_enum"] | null
+          updated_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          amount_cents: number
+          appointment_id?: string | null
+          created_at?: string | null
+          id?: string
+          method: Database["public"]["Enums"]["payment_method"]
+          proof_url?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status_enum"] | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          appointment_id?: string | null
+          created_at?: string | null
+          id?: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          proof_url?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status_enum"] | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -728,6 +820,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      norm_email: { Args: { e: string }; Returns: string }
+      norm_phone: { Args: { p: string }; Returns: string }
       promote_user_to_admin: {
         Args: { target_email: string }
         Returns: boolean
@@ -740,7 +834,9 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "no_show"
+      payment_method: "zelle" | "apple_pay" | "cash_app"
       payment_status: "none" | "deposit_paid" | "fully_paid"
+      payment_status_enum: "pending" | "verified" | "rejected"
       reward_action:
         | "review"
         | "checkin"
@@ -883,7 +979,9 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
+      payment_method: ["zelle", "apple_pay", "cash_app"],
       payment_status: ["none", "deposit_paid", "fully_paid"],
+      payment_status_enum: ["pending", "verified", "rejected"],
       reward_action: [
         "review",
         "checkin",
