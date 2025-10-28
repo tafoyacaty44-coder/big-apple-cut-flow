@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
           referral_code: existingCode.code,
           times_used: existingCode.times_used,
           created_at: existingCode.created_at,
-          referral_link: `${Deno.env.get('SUPABASE_URL').replace('//', '//')}signup?ref=${existingCode.code}`
+          referral_link: `${supabaseUrl}signup?ref=${existingCode.code}`
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -122,15 +122,16 @@ Deno.serve(async (req) => {
         referral_code: newCode.code,
         times_used: 0,
         created_at: newCode.created_at,
-        referral_link: `${Deno.env.get('SUPABASE_URL').replace('//', '//')}signup?ref=${code}`
+        referral_link: `${supabaseUrl}signup?ref=${code}`
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error in generate-referral:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
+      JSON.stringify({ error: 'Internal server error', details: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
