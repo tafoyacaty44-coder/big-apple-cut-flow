@@ -43,7 +43,7 @@ const CustomerDashboard = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Logo size="md" />
+              <Logo size="md" variant="dark" />
               <div>
                 <h1 className="text-2xl font-bold">My Dashboard</h1>
                 <p className="text-sm text-muted-foreground">Big Apple Barbers</p>

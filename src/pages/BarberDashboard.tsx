@@ -34,7 +34,7 @@ const BarberDashboard = () => {
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Logo />
+            <Logo variant="dark" />
             <div>
               <h1 className="text-xl font-bold">Barber Dashboard</h1>
               <p className="text-sm text-muted-foreground">

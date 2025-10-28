@@ -1,11 +1,28 @@
 import { GoldButton } from "@/components/ui/gold-button";
-import { Phone, Menu, X } from "lucide-react";
+import { Phone, Menu, X, User, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import Logo from "./Logo";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user, userRole, signOut } = useAuth();
+
+  const getDashboardPath = () => {
+    if (userRole === 'admin') return '/admin';
+    if (userRole === 'barber') return '/barber';
+    return '/dashboard';
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,30 +39,30 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <a href="/" className="flex items-center space-x-2">
-            <Logo size="sm" className="gold-glow" />
-          </a>
+          <Link to="/" className="flex items-center space-x-2">
+            <Logo size="sm" variant="light" className="gold-glow" />
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="/" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+            <Link to="/" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Home
-            </a>
-            <a href="/#services" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+            </Link>
+            <Link to="/#services" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Services
-            </a>
-            <a href="/barbers" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+            </Link>
+            <Link to="/barbers" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Barbers
-            </a>
-            <a href="/gallery" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+            </Link>
+            <Link to="/gallery" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Gallery
-            </a>
-            <a href="/blog" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+            </Link>
+            <Link to="/blog" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Blog
-            </a>
-            <a href="/#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
+            </Link>
+            <Link to="/#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-0 after:bg-[hsl(var(--accent))] after:transition-all after:duration-300 hover:after:w-full">
               Contact
-            </a>
+            </Link>
           </div>
 
           {/* CTA Buttons */}
@@ -54,12 +71,39 @@ const Navigation = () => {
               <Phone className="h-4 w-4" />
               <span className="font-semibold">(212) 651-4858</span>
             </a>
-            <a href="/login" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors text-sm font-semibold">
-              Sign In
-            </a>
-            <GoldButton onClick={() => window.location.href = '/book'}>
-              Book Now
-            </GoldButton>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center space-x-2">
+                    <div className="h-8 w-8 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center border-2 border-[hsl(var(--accent))]">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="text-primary-foreground font-semibold">
+                      {user.email?.split('@')[0]}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to={getDashboardPath()} className="cursor-pointer">
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/login" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors text-sm font-semibold">
+                Sign In
+              </Link>
+            )}
+            <Link to="/book">
+              <GoldButton>Book Now</GoldButton>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -76,34 +120,46 @@ const Navigation = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-[hsl(var(--accent))]">
             <div className="flex flex-col space-y-4">
-              <a href="/" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+              <Link to="/" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Home
-              </a>
-              <a href="/#services" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+              </Link>
+              <Link to="/#services" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Services
-              </a>
-              <a href="/barbers" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+              </Link>
+              <Link to="/barbers" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Barbers
-              </a>
-              <a href="/gallery" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+              </Link>
+              <Link to="/gallery" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Gallery
-              </a>
-              <a href="/blog" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+              </Link>
+              <Link to="/blog" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Blog
-              </a>
-              <a href="/#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
+              </Link>
+              <Link to="/#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Contact
-              </a>
+              </Link>
               <a href="tel:2126514858" className="flex items-center space-x-2 text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors">
                 <Phone className="h-4 w-4" />
                 <span className="font-semibold">(212) 651-4858</span>
               </a>
-              <a href="/login" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors font-semibold">
-                Sign In
-              </a>
-              <GoldButton className="w-full" onClick={() => window.location.href = '/book'}>
-                Book Now
-              </GoldButton>
+              {user ? (
+                <>
+                  <Link to={getDashboardPath()} className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors font-semibold" onClick={() => setIsMenuOpen(false)}>
+                    Dashboard
+                  </Link>
+                  <Button variant="ghost" onClick={() => { signOut(); setIsMenuOpen(false); }} className="justify-start text-primary-foreground hover:text-[hsl(var(--accent))]">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Link to="/login" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors font-semibold" onClick={() => setIsMenuOpen(false)}>
+                  Sign In
+                </Link>
+              )}
+              <Link to="/book" onClick={() => setIsMenuOpen(false)}>
+                <GoldButton className="w-full">Book Now</GoldButton>
+              </Link>
             </div>
           </div>
         )}
