@@ -23,3 +23,6 @@ verify_jwt = true
 
 [functions.admin-override-availability]
 verify_jwt = true
+
+[functions.seed-demo-data]
+verify_jwt = true

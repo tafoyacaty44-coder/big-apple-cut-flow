@@ -27,6 +27,9 @@ import BreakTime from "./pages/admin/BreakTime";
 import Clients from "./pages/admin/Clients";
 import ClientDetail from "./pages/admin/ClientDetail";
 import RewardsManagement from "./pages/admin/RewardsManagement";
+import ScheduleManagement from "./pages/admin/ScheduleManagement";
+import MySchedule from "./pages/barber/MySchedule";
+import BarberDetail from "./pages/BarberDetail";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +47,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/barbers" element={<Barbers />} />
+            <Route path="/barbers/:id" element={<BarberDetail />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/book" element={<Book />} />
             <Route path="/booking-success" element={<BookingSuccess />} />
@@ -106,6 +110,22 @@ const App = () => (
                 <BarberRoute>
                   <BarberDashboard />
                 </BarberRoute>
+              } 
+            />
+            <Route
+              path="/barber/my-schedule" 
+              element={
+                <BarberRoute>
+                  <MySchedule />
+                </BarberRoute>
+              } 
+            />
+            <Route
+              path="/admin/schedule" 
+              element={
+                <AdminRoute>
+                  <ScheduleManagement />
+                </AdminRoute>
               } 
             />
             <Route 

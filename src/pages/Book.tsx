@@ -11,7 +11,7 @@ import { getServices } from '@/lib/api/services';
 import { getBarbersWithAvailability } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
-import DateTimePicker from '@/components/booking/DateTimePicker';
+import { SevenDayAvailability } from '@/components/booking/SevenDayAvailability';
 import CustomerInfoForm from '@/components/booking/CustomerInfoForm';
 import BookingConfirmation from '@/components/booking/BookingConfirmation';
 import { format } from 'date-fns';
@@ -336,47 +336,49 @@ const Book = () => {
           )}
 
           {/* Step 3: Date & Time Selection */}
-          {currentStep === 3 && booking.barberAvailability && (
+          {currentStep === 3 && booking.selectedBarberId && (
             <div className="max-w-6xl mx-auto">
-              {/* Summary Card */}
-              <Card className="mb-8 p-4 bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-bold text-lg">Service: {selectedService?.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      ${selectedService?.regular_price} • {selectedService?.duration_minutes} min
-                    </p>
+              <div className="space-y-8">
+                {/* Summary Card */}
+                <Card className="p-4 bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="font-bold text-lg">Service: {selectedService?.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        ${selectedService?.regular_price} • {selectedService?.duration_minutes} min
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Barber: {booking.selectedBarberName}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {booking.selectedDate && booking.selectedTime
+                          ? `${format(new Date(booking.selectedDate), 'MMMM d, yyyy')} at ${booking.selectedTime}`
+                          : 'Select a date and time below'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg">Barber: {booking.selectedBarberName}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {booking.selectedDate && booking.selectedTime
-                        ? `${format(booking.selectedDate, 'MMMM d, yyyy')} at ${booking.selectedTime}`
-                        : 'Select a date and time below'}
-                    </p>
-                  </div>
+                </Card>
+
+                <SevenDayAvailability
+                  barberId={booking.selectedBarberId}
+                  serviceDuration={selectedService?.duration_minutes || 30}
+                  onSelectTime={(date, time) => {
+                    setSelectedDate(new Date(date));
+                    setSelectedTime(time);
+                  }}
+                />
+
+                <div className="flex gap-4 justify-center">
+                  <GoldButton variant="outline" onClick={() => setCurrentStep(2)}>
+                    Back to Barbers
+                  </GoldButton>
+                  <GoldButton 
+                    onClick={handleNextFromDateTime}
+                    disabled={!booking.selectedDate || !booking.selectedTime}
+                  >
+                    Continue to Customer Info
+                  </GoldButton>
                 </div>
-              </Card>
-
-              <DateTimePicker
-                barberAvailability={booking.barberAvailability}
-                serviceDuration={selectedService?.duration_minutes || 30}
-                selectedDate={booking.selectedDate}
-                selectedTime={booking.selectedTime}
-                onDateSelect={setSelectedDate}
-                onTimeSelect={setSelectedTime}
-              />
-
-              <div className="flex gap-4 justify-center mt-8">
-                <GoldButton variant="outline" onClick={() => setCurrentStep(2)}>
-                  Back to Barbers
-                </GoldButton>
-                <GoldButton 
-                  onClick={handleNextFromDateTime}
-                  disabled={!booking.selectedDate || !booking.selectedTime}
-                >
-                  Continue to Customer Info
-                </GoldButton>
               </div>
             </div>
           )}

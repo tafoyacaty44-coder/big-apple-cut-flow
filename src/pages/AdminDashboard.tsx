@@ -1,16 +1,56 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { getAllScheduleRequests } from '@/lib/api/availability';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, Calendar, Users, Scissors, Gift } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { LogOut, Calendar, Users, Scissors, Gift, CalendarClock, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { AppointmentsTable } from '@/components/admin/AppointmentsTable';
 import { UsersTable } from '@/components/admin/UsersTable';
 import { BarbersTable } from '@/components/admin/BarbersTable';
 
 const AdminDashboard = () => {
   const { user, signOut } = useAuth();
+  const { toast } = useToast();
+  const [isSeedingData, setIsSeedingData] = useState(false);
+
+  const { data: pendingCount } = useQuery({
+    queryKey: ['schedule-requests', 'pending-count'],
+    queryFn: async () => {
+      const requests = await getAllScheduleRequests('pending');
+      return requests.length;
+    },
+    refetchInterval: 30000,
+  });
+
+  const handleSeedDemoData = async () => {
+    setIsSeedingData(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('seed-demo-data');
+      if (error) throw error;
+      
+      toast({
+        title: 'Demo Data Seeded',
+        description: data?.message || 'Successfully created demo data',
+      });
+      
+      // Refresh all data
+      window.location.reload();
+    } catch (error: any) {
+      toast({
+        title: 'Seed Failed',
+        description: error.message || 'Failed to seed demo data',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSeedingData(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,7 +79,7 @@ const AdminDashboard = () => {
             <p className="text-muted-foreground">Manage your barbershop operations</p>
           </div>
 
-          <div className="mb-4 flex gap-4">
+          <div className="mb-4 flex flex-wrap gap-4">
             <Link to="/admin/vip-pricing">
               <Button variant="outline">VIP Pricing</Button>
             </Link>
@@ -55,6 +95,25 @@ const AdminDashboard = () => {
                 Rewards
               </Button>
             </Link>
+            <Link to="/admin/schedule">
+              <Button variant="outline" className="relative">
+                <CalendarClock className="mr-2 h-4 w-4" />
+                Schedule Requests
+                {pendingCount && pendingCount > 0 && (
+                  <Badge className="ml-2 bg-red-500 text-white">
+                    {pendingCount}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+            <Button 
+              variant="outline" 
+              onClick={handleSeedDemoData}
+              disabled={isSeedingData}
+            >
+              <Database className="mr-2 h-4 w-4" />
+              {isSeedingData ? 'Seeding...' : 'Seed Demo Data'}
+            </Button>
           </div>
 
           <Tabs defaultValue="appointments" className="w-full">

@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getBarberProfile } from '@/lib/api/barber';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, LayoutDashboard, Calendar } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { DashboardStats } from '@/components/barber/DashboardStats';
 import { AppointmentsList } from '@/components/barber/AppointmentsList';
 import { WeeklyCalendar } from '@/components/barber/WeeklyCalendar';
@@ -12,6 +13,7 @@ import { MyAvailability } from '@/components/barber/MyAvailability';
 
 const BarberDashboard = () => {
   const { user, signOut } = useAuth();
+  const location = useLocation();
   const [barberId, setBarberId] = useState<string | null>(null);
 
   const { data: barberProfile } = useQuery({
@@ -61,6 +63,22 @@ const BarberDashboard = () => {
             <div>
               <h2 className="text-2xl font-bold mb-2">Welcome back!</h2>
               <p className="text-muted-foreground">Here's your schedule overview</p>
+            </div>
+            
+            {/* Navigation Tabs */}
+            <div className="flex gap-3">
+              <Link to="/barber">
+                <Button variant={location.pathname === '/barber' ? 'default' : 'outline'}>
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Link to="/barber/my-schedule">
+                <Button variant={location.pathname === '/barber/my-schedule' ? 'default' : 'outline'}>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  My Schedule
+                </Button>
+              </Link>
             </div>
 
             {/* Stats */}
