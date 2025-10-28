@@ -38,18 +38,23 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#about" className="text-primary-foreground/80 hover:text-[hsl(var(--accent))] transition-colors text-sm">
-                  About
+                <a href="/rewards-program" className="text-primary-foreground/80 hover:text-[hsl(var(--accent))] transition-colors text-sm">
+                  Rewards Program
+                </a>
+              </li>
+              <li>
+                <a href="/barbers" className="text-primary-foreground/80 hover:text-[hsl(var(--accent))] transition-colors text-sm">
+                  Our Barbers
+                </a>
+              </li>
+              <li>
+                <a href="/book" className="text-primary-foreground/80 hover:text-[hsl(var(--accent))] transition-colors text-sm">
+                  Book Now
                 </a>
               </li>
               <li>
                 <a href="#contact" className="text-primary-foreground/80 hover:text-[hsl(var(--accent))] transition-colors text-sm">
-                  Contact
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-primary-foreground/80 hover:text-[hsl(var(--accent))] transition-colors text-sm">
-                  Book Now
+                  Contact & FAQ
                 </a>
               </li>
             </ul>

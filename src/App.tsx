@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import BarberDashboard from "./pages/BarberDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import Rewards from "./pages/Rewards";
+import RewardsProgram from "./pages/RewardsProgram";
 import VipPricing from "./pages/admin/VipPricing";
 import BreakTime from "./pages/admin/BreakTime";
 import Clients from "./pages/admin/Clients";
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/book" element={<Book />} />
             <Route path="/booking-success" element={<BookingSuccess />} />
+            <Route path="/rewards-program" element={<RewardsProgram />} />
             
             {/* Protected Routes */}
             <Route 
