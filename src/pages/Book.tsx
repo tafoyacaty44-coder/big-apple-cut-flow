@@ -1,11 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
-import SectionHeading from '@/components/ui/section-heading';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
-import { Check } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getServices } from '@/lib/api/services';
 import { getBarbersWithRealAvailability } from '@/lib/api/barbers';
@@ -13,11 +11,13 @@ import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
 import { SevenDayAvailability } from '@/components/booking/SevenDayAvailability';
 import CustomerInfoForm from '@/components/booking/CustomerInfoForm';
-import BookingConfirmation from '@/components/booking/BookingConfirmation';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { BookingSidebar } from '@/components/booking/BookingSidebar';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 import haircutImg from '@/assets/services/haircut.jpg';
 import seniorImg from '@/assets/services/senior-haircut.jpg';
@@ -41,14 +41,23 @@ const serviceImages: Record<string, string> = {
 
 const Book = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSummary, setShowMobileSummary] = useState(false);
   const [vipCodeFromForm, setVipCodeFromForm] = useState('');
   const [vipCodeValid, setVipCodeValid] = useState(false);
   const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, resetBooking } = useBooking();
-  const customerFormRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleVipCodeChange = (code: string, isValid: boolean) => {
     setVipCodeFromForm(code);
@@ -82,16 +91,9 @@ const Book = () => {
     }
   };
 
-  const handleNextFromBarber = () => {
-    if (booking.selectedBarberId && currentStep === 2) {
-      setCurrentStep(3);
-    }
-  };
-
-  const handleNextFromDateTime = () => {
-    if (booking.selectedDate && booking.selectedTime && currentStep === 3) {
-      setCurrentStep(4);
-    }
+  const handleDateTimeSelect = (date: string, time: string) => {
+    setSelectedDate(new Date(date));
+    setSelectedTime(time);
   };
 
   const handleCustomerInfoSubmit = (data: { full_name: string; email: string; phone: string; notes?: string }) => {
@@ -100,15 +102,19 @@ const Book = () => {
       email: data.email,
       phone: data.phone,
     });
-    setCurrentStep(5);
+    // Submit booking immediately
+    handleConfirmBooking();
   };
 
-  const handleNextFromCustomerInfo = () => {
-    // Trigger form submission programmatically
-    if (customerFormRef.current) {
-      const submitButton = customerFormRef.current.querySelector('button[type="submit"]') as HTMLButtonElement;
-      submitButton?.click();
-    }
+  const handleEditStep = (step: number) => {
+    setCurrentStep(step);
+    if (isMobile) setShowMobileSummary(false);
+  };
+
+  const canContinueStep = (step: number) => {
+    if (step === 1) return !!booking.selectedServiceId;
+    if (step === 2) return !!booking.selectedBarberId && !!booking.selectedDate && !!booking.selectedTime;
+    return false;
   };
 
   const bookingMutation = useMutation({
@@ -135,9 +141,8 @@ const Book = () => {
       return data;
     },
     onSuccess: (data) => {
-      const selectedService = services.find(s => s.id === booking.selectedServiceId);
+      const selectedSvc = services.find(s => s.id === booking.selectedServiceId);
       
-      // Invalidate availability caches to refresh data immediately
       queryClient.invalidateQueries({ queryKey: ['availability', 'today'] });
       if (booking.selectedBarberId) {
         queryClient.invalidateQueries({ 
@@ -145,10 +150,9 @@ const Book = () => {
         });
       }
       
-      // Navigate to success page with booking details
       const params = new URLSearchParams({
         confirmation: data.confirmation_number,
-        service: selectedService?.name || '',
+        service: selectedSvc?.name || '',
         barber: booking.selectedBarberName || '',
         date: booking.selectedDate ? format(booking.selectedDate, 'yyyy-MM-dd') : '',
         time: booking.selectedTime || '',
@@ -171,325 +175,252 @@ const Book = () => {
   });
 
   const handleConfirmBooking = (vipCode?: string) => {
-    // Use VIP code from form if valid, otherwise use the one from confirmation step
     const finalVipCode = vipCodeValid ? vipCodeFromForm : vipCode;
     bookingMutation.mutate(finalVipCode);
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <SectionHeading 
-            title="Book Your Appointment"
-            subtitle="Select your service to get started"
-          />
-
-          {/* Progress Indicator */}
-          <div className="max-w-3xl mx-auto mb-12">
-            <div className="flex items-center justify-center gap-2">
-              {[1, 2, 3, 4, 5].map((step) => (
-                <div key={step} className="flex items-center">
-                  <div 
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors ${
-                      step <= currentStep 
-                        ? 'bg-[hsl(var(--accent))] text-black' 
-                        : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {step < currentStep ? <Check className="h-5 w-5" /> : step}
-                  </div>
-                  {step < 5 && (
-                    <div className={`w-12 h-1 ${step < currentStep ? 'bg-[hsl(var(--accent))]' : 'bg-muted'}`} />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between text-xs mt-2 text-muted-foreground max-w-3xl mx-auto px-2">
-              <span>Service</span>
-              <span>Barber</span>
-              <span>Date</span>
-              <span>Info</span>
-              <span>Confirm</span>
-            </div>
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <div className="w-80 flex-shrink-0">
+            <BookingSidebar
+              currentStep={currentStep}
+              selectedService={selectedService ? {
+                name: selectedService.name,
+                price: selectedService.regular_price,
+                vip_price: selectedService.vip_price
+              } : null}
+              selectedBarber={booking.selectedBarberName ? { name: booking.selectedBarberName } : null}
+              selectedDate={booking.selectedDate}
+              selectedTime={booking.selectedTime}
+              onEditStep={handleEditStep}
+              onContinue={() => {
+                if (currentStep === 1 && canContinueStep(1)) setCurrentStep(2);
+                if (currentStep === 2 && canContinueStep(2)) setCurrentStep(3);
+              }}
+              canContinue={canContinueStep(currentStep)}
+            />
           </div>
+        )}
 
-          {/* Step 1: Service Selection */}
-          {currentStep === 1 && (
-            <div className="max-w-6xl mx-auto">
-              {selectedService && (
-                <Card className="mb-8 p-4 bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-bold text-lg">Selected: {selectedService.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        ${selectedService.regular_price} • {selectedService.duration_minutes} min
-                      </p>
-                    </div>
-                    <Check className="h-6 w-6 text-[hsl(var(--accent))]" />
-                  </div>
-                </Card>
-              )}
+        {/* Mobile Summary Header */}
+        {isMobile && (
+          <div className="sticky top-0 z-10 bg-background border-b">
+            <button
+              onClick={() => setShowMobileSummary(!showMobileSummary)}
+              className="w-full flex items-center justify-between p-4"
+            >
+              <div className="text-left">
+                <div className="font-semibold">Step {currentStep} of 3</div>
+                <div className="text-sm text-muted-foreground truncate">
+                  {selectedService?.name}
+                  {booking.selectedBarberName && ` • ${booking.selectedBarberName}`}
+                </div>
+              </div>
+              <div className="text-[hsl(var(--accent))] font-bold">
+                ${selectedService?.regular_price || 0}
+              </div>
+            </button>
+          </div>
+        )}
 
-              {isLoadingServices ? (
-                <div className="text-center py-12">Loading services...</div>
-              ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {services.map((service) => (
-                    <Card
-                      key={service.id}
-                      onClick={() => handleServiceSelect(service.id)}
-                      className={`cursor-pointer transition-all duration-300 overflow-hidden ${
-                        booking.selectedServiceId === service.id
-                          ? 'border-[hsl(var(--accent))] border-2 shadow-[0_0_20px_rgba(212,175,55,0.3)]'
-                          : 'border-border border-2 hover:border-[hsl(var(--accent))]/50'
-                      }`}
-                    >
-                      <div className="aspect-[4/3] overflow-hidden relative">
-                        <img 
-                          src={serviceImages[service.name]}
-                          alt={service.name}
-                          className="w-full h-full object-cover"
-                        />
-                        {booking.selectedServiceId === service.id && (
-                          <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center">
-                            <Check className="h-5 w-5 text-black" />
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-8">
+          <div className="max-w-5xl mx-auto">
+            {/* Step 1: Select Service */}
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Select a Service</h2>
+                  <p className="text-muted-foreground">Choose the service you'd like to book</p>
+                </div>
+                {isLoadingServices ? (
+                  <p>Loading services...</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {services.map((service) => {
+                      const imageSrc = serviceImages[service.name] || serviceImages["Haircut"];
+                      
+                      return (
+                        <Card
+                          key={service.id}
+                          className={cn(
+                            "cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]",
+                            booking.selectedServiceId === service.id && 'border-[hsl(var(--accent))] border-2 shadow-lg'
+                          )}
+                          onClick={() => handleServiceSelect(service.id)}
+                        >
+                          <div className="aspect-[3/2] overflow-hidden rounded-t-lg">
+                            <img
+                              src={imageSrc}
+                              alt={service.name}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-lg mb-2">{service.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold">${service.regular_price}</span>
-                          <span className="text-sm text-muted-foreground">{service.duration_minutes} min</span>
-                        </div>
-                        <div className="mt-2 text-xs text-[hsl(var(--accent))]">
-                          VIP: ${service.vip_price}
-                        </div>
-                      </div>
+                          <CardContent className="p-4">
+                            <h3 className="font-bold text-lg mb-1">{service.name}</h3>
+                            <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{service.description}</p>
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <span className="text-lg font-bold text-[hsl(var(--accent))]">
+                                  ${service.regular_price}
+                                </span>
+                                {service.vip_price && (
+                                  <span className="text-xs text-muted-foreground ml-2">
+                                    VIP: ${service.vip_price}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {service.duration_minutes} min
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+                {isMobile && (
+                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
+                    <GoldButton
+                      className="w-full"
+                      onClick={handleNextFromService}
+                      disabled={!booking.selectedServiceId}
+                    >
+                      Continue
+                    </GoldButton>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 2: Select Barber + Date/Time (Combined) */}
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Choose Your Barber & Time</h2>
+                  <p className="text-muted-foreground">Select a barber and pick your preferred date and time</p>
+                </div>
+                {isLoadingBarbers ? (
+                  <p>Loading barbers...</p>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Any Available Barber Option */}
+                    <Card 
+                      className="border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 hover:bg-[hsl(var(--accent))]/10 transition-colors cursor-pointer"
+                      onClick={() => handleBarberSelect('any', 'Any Available Barber')}
+                    >
+                      <CardContent className="p-6 text-center">
+                        <Calendar className="h-12 w-12 mx-auto mb-3 text-[hsl(var(--accent))]" />
+                        <h3 className="font-bold text-lg mb-2">Any Available Barber</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Get the first available time slot with any of our skilled barbers
+                        </p>
+                      </CardContent>
                     </Card>
-                  ))}
-                </div>
-              )}
 
-              <div className="text-center">
-                <GoldButton 
-                  size="lg" 
-                  onClick={handleNextFromService}
-                  disabled={!booking.selectedServiceId}
-                >
-                  Continue to Barber Selection
-                </GoldButton>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Barber Selection */}
-          {currentStep === 2 && (
-            <div className="max-w-6xl mx-auto">
-              {selectedService && (
-                <Card className="mb-8 p-4 bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-bold text-lg">Selected: {selectedService.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        ${selectedService.regular_price} • {selectedService.duration_minutes} min
-                      </p>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {barbers.map((barber) => (
+                        <BarberCard
+                          key={barber.id}
+                          barber={barber}
+                          selectedServiceName={selectedService?.name || ""}
+                          selectedServicePrice={selectedService?.regular_price || 0}
+                          selectedServiceDuration={selectedService?.duration_minutes || 0}
+                          isSelected={booking.selectedBarberId === barber.id}
+                          onSelect={() => handleBarberSelect(barber.id, barber.full_name)}
+                        />
+                      ))}
                     </div>
-                  </div>
-                </Card>
-              )}
 
-              {isLoadingBarbers ? (
-                <div className="text-center py-12">Loading barbers...</div>
-              ) : (
-                <>
-                  {/* Any Available Barber Option */}
-                  <Card 
-                    className="mb-6 border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 hover:bg-[hsl(var(--accent))]/10 transition-all cursor-pointer"
-                    onClick={() => {
-                      handleBarberSelect('any', 'Any Available Barber');
-                      handleNextFromBarber();
-                    }}
-                  >
-                    <div className="p-6 text-center">
-                      <div className="w-16 h-16 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center mx-auto mb-3">
-                        <svg className="h-8 w-8 text-[hsl(var(--accent))]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                    {/* Date/Time Picker - Show after barber selection */}
+                    {booking.selectedBarberId && selectedService && (
+                      <div className="mt-8 pt-8 border-t">
+                        <h3 className="text-2xl font-bold mb-4">Pick Your Date & Time</h3>
+                        <SevenDayAvailability
+                          barberId={booking.selectedBarberId}
+                          serviceDuration={selectedService.duration_minutes}
+                          onSelectTime={handleDateTimeSelect}
+                        />
                       </div>
-                      <h3 className="font-bold text-lg mb-2">Any Available Barber</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Get the first available time slot with any of our skilled barbers
-                      </p>
-                      <div className="text-[hsl(var(--accent))] font-semibold">
-                        Show All Available Times →
-                      </div>
-                    </div>
-                  </Card>
-
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {barbers.map((barber) => (
-                      <BarberCard
-                        key={barber.id}
-                        barber={barber}
-                        selectedServiceName={selectedService?.name || ''}
-                        selectedServicePrice={selectedService?.regular_price || 0}
-                        selectedServiceDuration={selectedService?.duration_minutes || 0}
-                        isSelected={booking.selectedBarberId === barber.id}
-                        onSelect={() => handleBarberSelect(barber.id, barber.full_name)}
-                      />
-                    ))}
+                    )}
                   </div>
-                </>
-              )}
-
-              <div className="flex gap-4 justify-center">
-                <GoldButton variant="outline" onClick={() => setCurrentStep(1)}>
-                  Back to Services
-                </GoldButton>
-                <GoldButton 
-                  onClick={handleNextFromBarber}
-                  disabled={!booking.selectedBarberId}
-                >
-                  Continue to Date & Time
-                </GoldButton>
+                )}
+                {isMobile && (
+                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
+                    <GoldButton
+                      className="w-full"
+                      onClick={() => canContinueStep(2) && setCurrentStep(3)}
+                      disabled={!canContinueStep(2)}
+                    >
+                      Continue
+                    </GoldButton>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Step 3: Date & Time Selection */}
-          {currentStep === 3 && booking.selectedBarberId && (
-            <div className="max-w-6xl mx-auto">
+            {/* Step 3: Customer Information + Confirmation (Combined) */}
+            {currentStep === 3 && selectedService && (
               <div className="space-y-8">
-                {/* Summary Card */}
-                <Card className="p-4 bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="font-bold text-lg">Service: {selectedService?.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        ${selectedService?.regular_price} • {selectedService?.duration_minutes} min
-                      </p>
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Complete Your Booking</h2>
+                  <p className="text-muted-foreground">Enter your information to confirm</p>
+                </div>
+
+                {/* Booking Summary Card */}
+                <Card className="border-[hsl(var(--accent))]/20 bg-muted/50">
+                  <CardContent className="p-6">
+                    <h3 className="font-bold text-xl mb-4">Booking Details</h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Service:</span>
+                        <span className="font-semibold">{selectedService.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Barber:</span>
+                        <span className="font-semibold">{booking.selectedBarberName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Date & Time:</span>
+                        <span className="font-semibold">
+                          {booking.selectedDate && booking.selectedTime 
+                            ? `${format(booking.selectedDate, "MMM d, yyyy")} at ${booking.selectedTime}`
+                            : ""
+                          }
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Duration:</span>
+                        <span className="font-semibold">{selectedService.duration_minutes} minutes</span>
+                      </div>
+                      <Separator className="my-2" />
+                      <div className="flex justify-between text-lg">
+                        <span className="font-bold">Total:</span>
+                        <span className="font-bold text-[hsl(var(--accent))]">${selectedService.regular_price}</span>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-lg">Barber: {booking.selectedBarberName}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {booking.selectedDate && booking.selectedTime
-                          ? `${format(new Date(booking.selectedDate), 'MMMM d, yyyy')} at ${booking.selectedTime}`
-                          : 'Select a date and time below'}
-                      </p>
-                    </div>
-                  </div>
+                  </CardContent>
                 </Card>
 
-                <SevenDayAvailability
-                  barberId={booking.selectedBarberId}
-                  serviceDuration={selectedService?.duration_minutes || 30}
-                  onSelectTime={(date, time) => {
-                    setSelectedDate(new Date(date));
-                    setSelectedTime(time);
-                  }}
-                />
-
-                <div className="flex gap-4 justify-center">
-                  <GoldButton variant="outline" onClick={() => setCurrentStep(2)}>
-                    Back to Barbers
-                  </GoldButton>
-                  <GoldButton 
-                    onClick={handleNextFromDateTime}
-                    disabled={!booking.selectedDate || !booking.selectedTime}
-                  >
-                    Continue to Customer Info
-                  </GoldButton>
+                {/* Customer Info Form */}
+                <div>
+                  <h3 className="text-xl font-bold mb-4">Your Information</h3>
+                  <CustomerInfoForm 
+                    onSubmit={handleCustomerInfoSubmit}
+                    onVipCodeChange={handleVipCodeChange}
+                  />
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Step 4: Customer Information */}
-          {currentStep === 4 && (
-            <div className="max-w-6xl mx-auto">
-              {/* Summary Card */}
-              <Card className="mb-8 p-4 bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <h3 className="font-bold">Service</h3>
-                    <p className="text-sm">{selectedService?.name}</p>
-                    <p className="text-xs text-muted-foreground">${selectedService?.regular_price}</p>
-                  </div>
-                  <div>
-                    <h3 className="font-bold">Barber</h3>
-                    <p className="text-sm">{booking.selectedBarberName}</p>
-                  </div>
-                  <div>
-                    <h3 className="font-bold">Date & Time</h3>
-                    <p className="text-sm">
-                      {booking.selectedDate && format(booking.selectedDate, 'MMM d, yyyy')}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{booking.selectedTime}</p>
-                  </div>
-                </div>
-              </Card>
-
-              <div ref={customerFormRef as any}>
-                <CustomerInfoForm
-                  onSubmit={handleCustomerInfoSubmit}
-                  initialData={booking.customerInfo ? {
-                    full_name: booking.customerInfo.name,
-                    email: booking.customerInfo.email,
-                    phone: booking.customerInfo.phone,
-                  } : null}
-                  onVipCodeChange={handleVipCodeChange}
-                  selectedServiceId={booking.selectedServiceId}
-                />
-              </div>
-
-              <div className="flex gap-4 justify-center mt-8">
-                <GoldButton variant="outline" onClick={() => setCurrentStep(3)}>
-                  Back to Date & Time
-                </GoldButton>
-                <GoldButton onClick={handleNextFromCustomerInfo}>
-                  Continue to Confirmation
-                </GoldButton>
-              </div>
-            </div>
-          )}
-
-          {/* Step 5: Confirmation */}
-          {currentStep === 5 && selectedService && booking.selectedDate && booking.selectedTime && booking.customerInfo && (
-            <div className="max-w-6xl mx-auto">
-              <BookingConfirmation
-                serviceName={selectedService.name}
-                servicePrice={selectedService.regular_price}
-                serviceDuration={selectedService.duration_minutes}
-                barberName={booking.selectedBarberName || ''}
-                date={booking.selectedDate}
-                time={booking.selectedTime}
-                customerInfo={booking.customerInfo}
-                onConfirm={handleConfirmBooking}
-                isSubmitting={bookingMutation.isPending}
-                vipPrice={selectedService.vip_price}
-                vipCodeApplied={vipCodeValid}
-              />
-
-              <div className="flex gap-4 justify-center mt-8">
-                <GoldButton 
-                  variant="outline" 
-                  onClick={() => setCurrentStep(4)}
-                  disabled={bookingMutation.isPending}
-                >
-                  Back to Customer Info
-                </GoldButton>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </section>
-
-      <Footer />
+      </div>
     </div>
   );
 };
