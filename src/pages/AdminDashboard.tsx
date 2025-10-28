@@ -3,7 +3,8 @@ import { useAuth } from '@/hooks/useAuth';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, Calendar, Users, Scissors } from 'lucide-react';
+import { LogOut, Calendar, Users, Scissors, Gift } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { AppointmentsTable } from '@/components/admin/AppointmentsTable';
 import { UsersTable } from '@/components/admin/UsersTable';
 import { BarbersTable } from '@/components/admin/BarbersTable';
@@ -38,18 +39,36 @@ const AdminDashboard = () => {
             <p className="text-muted-foreground">Manage your barbershop operations</p>
           </div>
 
-          <Tabs defaultValue="appointments" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="appointments" className="gap-2">
-                <Calendar className="h-4 w-4" />
+          <div className="mb-4 flex gap-4">
+            <Link to="/admin/vip-pricing">
+              <Button variant="outline">VIP Pricing</Button>
+            </Link>
+            <Link to="/admin/breaks">
+              <Button variant="outline">Break Times</Button>
+            </Link>
+            <Link to="/admin/clients">
+              <Button variant="outline">Clients</Button>
+            </Link>
+            <Link to="/admin/rewards">
+              <Button variant="outline">
+                <Gift className="mr-2 h-4 w-4" />
+                Rewards
+              </Button>
+            </Link>
+          </div>
+
+          <Tabs defaultValue="appointments" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="appointments">
+                <Calendar className="mr-2 h-4 w-4" />
                 Appointments
               </TabsTrigger>
-              <TabsTrigger value="users" className="gap-2">
-                <Users className="h-4 w-4" />
+              <TabsTrigger value="users">
+                <Users className="mr-2 h-4 w-4" />
                 Users
               </TabsTrigger>
-              <TabsTrigger value="barbers" className="gap-2">
-                <Scissors className="h-4 w-4" />
+              <TabsTrigger value="barbers">
+                <Scissors className="mr-2 h-4 w-4" />
                 Barbers
               </TabsTrigger>
             </TabsList>

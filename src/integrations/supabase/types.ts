@@ -383,35 +383,176 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          customer_id: string
+          id: string
+          times_used: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          customer_id: string
+          id?: string
+          times_used?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          customer_id?: string
+          id?: string
+          times_used?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_conversions: {
+        Row: {
+          created_at: string | null
+          id: string
+          new_customer_id: string | null
+          points_awarded: number | null
+          referral_code_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          new_customer_id?: string | null
+          points_awarded?: number | null
+          referral_code_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          new_customer_id?: string | null
+          points_awarded?: number | null
+          referral_code_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_conversions_new_customer_id_fkey"
+            columns: ["new_customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_conversions_referral_code_id_fkey"
+            columns: ["referral_code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reward_actions: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          points: number
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          points: number
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          points?: number
+        }
+        Relationships: []
+      }
+      reward_tiers: {
+        Row: {
+          benefits: string[] | null
+          created_at: string | null
+          discount_percent: number
+          display_order: number | null
+          id: string
+          min_points: number
+          name: string
+        }
+        Insert: {
+          benefits?: string[] | null
+          created_at?: string | null
+          discount_percent: number
+          display_order?: number | null
+          id?: string
+          min_points: number
+          name: string
+        }
+        Update: {
+          benefits?: string[] | null
+          created_at?: string | null
+          discount_percent?: number
+          display_order?: number | null
+          id?: string
+          min_points?: number
+          name?: string
+        }
+        Relationships: []
+      }
       rewards_activity: {
         Row: {
+          action_id: string | null
           action_type: Database["public"]["Enums"]["reward_action"]
           created_at: string
           customer_id: string
+          description: string | null
           id: string
           points_earned: number | null
           points_redeemed: number | null
           related_appointment_id: string | null
         }
         Insert: {
+          action_id?: string | null
           action_type: Database["public"]["Enums"]["reward_action"]
           created_at?: string
           customer_id: string
+          description?: string | null
           id?: string
           points_earned?: number | null
           points_redeemed?: number | null
           related_appointment_id?: string | null
         }
         Update: {
+          action_id?: string | null
           action_type?: Database["public"]["Enums"]["reward_action"]
           created_at?: string
           customer_id?: string
+          description?: string | null
           id?: string
           points_earned?: number | null
           points_redeemed?: number | null
           related_appointment_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "rewards_activity_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "reward_actions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rewards_activity_related_appointment_id_fkey"
             columns: ["related_appointment_id"]

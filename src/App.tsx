@@ -18,10 +18,12 @@ import BookingSuccess from "./pages/BookingSuccess";
 import AdminDashboard from "./pages/AdminDashboard";
 import BarberDashboard from "./pages/BarberDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
+import Rewards from "./pages/Rewards";
 import VipPricing from "./pages/admin/VipPricing";
 import BreakTime from "./pages/admin/BreakTime";
 import Clients from "./pages/admin/Clients";
 import ClientDetail from "./pages/admin/ClientDetail";
+import RewardsManagement from "./pages/admin/RewardsManagement";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +87,14 @@ const App = () => (
               } 
             />
             <Route 
+              path="/admin/rewards" 
+              element={
+                <AdminRoute>
+                  <RewardsManagement />
+                </AdminRoute>
+              } 
+            />
+            <Route
               path="/barber" 
               element={
                 <BarberRoute>
@@ -97,6 +107,14 @@ const App = () => (
               element={
                 <CustomerRoute>
                   <CustomerDashboard />
+                </CustomerRoute>
+              } 
+            />
+            <Route 
+              path="/rewards" 
+              element={
+                <CustomerRoute>
+                  <Rewards />
                 </CustomerRoute>
               } 
             />
