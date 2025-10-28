@@ -8,7 +8,7 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { Check } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getServices } from '@/lib/api/services';
-import { getBarbersWithAvailability } from '@/lib/api/barbers';
+import { getBarbersWithRealAvailability } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
 import { SevenDayAvailability } from '@/components/booking/SevenDayAvailability';
@@ -60,18 +60,20 @@ const Book = () => {
     queryFn: getServices,
   });
 
+  const selectedService = services.find((s) => s.id === booking.selectedServiceId);
+
   const { data: barbers = [], isLoading: isLoadingBarbers } = useQuery({
-    queryKey: ['barbers'],
-    queryFn: getBarbersWithAvailability,
-    enabled: currentStep === 2,
+    queryKey: ['barbers', 'real-availability', selectedService?.duration_minutes],
+    queryFn: () => getBarbersWithRealAvailability(selectedService?.duration_minutes || 30),
+    enabled: currentStep === 2 && !!selectedService,
   });
 
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
   };
 
-  const handleBarberSelect = (barberId: string, barberName: string, availability: any[]) => {
-    setSelectedBarber(barberId, barberName, availability);
+  const handleBarberSelect = (barberId: string, barberName: string) => {
+    setSelectedBarber(barberId, barberName, []);
   };
 
   const handleNextFromService = () => {
@@ -173,8 +175,6 @@ const Book = () => {
     const finalVipCode = vipCodeValid ? vipCodeFromForm : vipCode;
     bookingMutation.mutate(finalVipCode);
   };
-
-  const selectedService = services.find(s => s.id === booking.selectedServiceId);
 
   return (
     <div className="min-h-screen">
@@ -306,19 +306,45 @@ const Book = () => {
               {isLoadingBarbers ? (
                 <div className="text-center py-12">Loading barbers...</div>
               ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {barbers.map((barber) => (
-                    <BarberCard
-                      key={barber.id}
-                      barber={barber}
-                      selectedServiceName={selectedService?.name || ''}
-                      selectedServicePrice={selectedService?.regular_price || 0}
-                      selectedServiceDuration={selectedService?.duration_minutes || 0}
-                      isSelected={booking.selectedBarberId === barber.id}
-                      onSelect={() => handleBarberSelect(barber.id, barber.full_name, barber.availability)}
-                    />
-                  ))}
-                </div>
+                <>
+                  {/* Any Available Barber Option */}
+                  <Card 
+                    className="mb-6 border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 hover:bg-[hsl(var(--accent))]/10 transition-all cursor-pointer"
+                    onClick={() => {
+                      handleBarberSelect('any', 'Any Available Barber');
+                      handleNextFromBarber();
+                    }}
+                  >
+                    <div className="p-6 text-center">
+                      <div className="w-16 h-16 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center mx-auto mb-3">
+                        <svg className="h-8 w-8 text-[hsl(var(--accent))]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-lg mb-2">Any Available Barber</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Get the first available time slot with any of our skilled barbers
+                      </p>
+                      <div className="text-[hsl(var(--accent))] font-semibold">
+                        Show All Available Times →
+                      </div>
+                    </div>
+                  </Card>
+
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    {barbers.map((barber) => (
+                      <BarberCard
+                        key={barber.id}
+                        barber={barber}
+                        selectedServiceName={selectedService?.name || ''}
+                        selectedServicePrice={selectedService?.regular_price || 0}
+                        selectedServiceDuration={selectedService?.duration_minutes || 0}
+                        isSelected={booking.selectedBarberId === barber.id}
+                        onSelect={() => handleBarberSelect(barber.id, barber.full_name)}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
 
               <div className="flex gap-4 justify-center">

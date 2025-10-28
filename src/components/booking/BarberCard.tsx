@@ -1,10 +1,10 @@
 import { Card } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { BarberWithDetails } from '@/lib/api/barbers';
-import WeeklyAvailabilityBadges from './WeeklyAvailabilityBadges';
+import RealTimeAvailabilityBadges from './RealTimeAvailabilityBadges';
 
 interface BarberCardProps {
-  barber: BarberWithDetails;
+  barber: any;
   selectedServiceName: string;
   selectedServicePrice: number;
   selectedServiceDuration: number;
@@ -28,13 +28,24 @@ const BarberCard = ({
       .toUpperCase();
   };
 
-  const statusMessage = barber.availability[0]?.status_message || 'Available';
-  const hasAvailability = barber.availability.some((slot) => slot.is_available);
+  const totalSlots = barber.totalSlotsThisWeek || 0;
+  const nextSlot = barber.nextAvailableSlot;
+  
+  const getStatusMessage = () => {
+    if (totalSlots === 0) return 'Fully booked this week';
+    if (nextSlot) {
+      const date = new Date(nextSlot.date);
+      const isToday = date.toDateString() === new Date().toDateString();
+      return isToday 
+        ? `Next: Today at ${nextSlot.time}`
+        : `Next: ${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at ${nextSlot.time}`;
+    }
+    return `${totalSlots} slots available`;
+  };
 
   const getStatusColor = () => {
-    if (!hasAvailability) return 'text-red-500';
-    if (statusMessage.toLowerCase().includes('not available')) return 'text-red-500';
-    if (statusMessage.toLowerCase().includes('part time') || statusMessage.toLowerCase().includes('limited')) return 'text-yellow-500';
+    if (totalSlots === 0) return 'text-red-500';
+    if (totalSlots < 5) return 'text-yellow-500';
     return 'text-green-500';
   };
 
@@ -87,16 +98,18 @@ const BarberCard = ({
           </p>
         </div>
 
-        {/* Weekly Availability */}
-        <div className="mb-4">
-          <p className="text-xs text-muted-foreground mb-2 text-center">Weekly Availability</p>
-          <WeeklyAvailabilityBadges availability={barber.availability} />
-        </div>
+        {/* Real-Time Weekly Availability */}
+        {barber.realAvailability && barber.realAvailability.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs text-muted-foreground mb-2 text-center">Next 7 Days</p>
+            <RealTimeAvailabilityBadges availability={barber.realAvailability} />
+          </div>
+        )}
 
         {/* Status Message */}
         <div className="p-3 bg-background/50 rounded-lg border border-border">
           <p className={`text-sm font-medium ${getStatusColor()}`}>
-            {statusMessage}
+            {getStatusMessage()}
           </p>
         </div>
 
