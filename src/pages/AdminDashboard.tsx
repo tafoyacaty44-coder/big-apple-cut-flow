@@ -6,13 +6,14 @@ import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Users, Scissors, Gift, CalendarClock, Database } from 'lucide-react';
+import { LogOut, Calendar, Users, Scissors, Gift, CalendarClock, Database, Image, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AppointmentsTable } from '@/components/admin/AppointmentsTable';
 import { UsersTable } from '@/components/admin/UsersTable';
 import { BarbersTable } from '@/components/admin/BarbersTable';
+import { DashboardStats } from '@/components/admin/DashboardStats';
 
 const AdminDashboard = () => {
   const { user, signOut } = useAuth();
@@ -79,50 +80,68 @@ const AdminDashboard = () => {
             <p className="text-muted-foreground">Manage your barbershop operations</p>
           </div>
 
-          <div className="mb-4 flex flex-wrap gap-4">
-            <Link to="/admin/services">
-              <Button variant="outline">
-                <Scissors className="mr-2 h-4 w-4" />
-                Services
+          <DashboardStats />
+
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <Link to="/admin/services" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <Scissors className="mr-2 h-4 w-4" />
+                  Services
+                </Button>
+              </Link>
+              <Link to="/admin/gallery" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <Image className="mr-2 h-4 w-4" />
+                  Gallery
+                </Button>
+              </Link>
+              <Link to="/admin/clients" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <Users className="mr-2 h-4 w-4" />
+                  Clients
+                </Button>
+              </Link>
+              <Link to="/admin/rewards" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <Gift className="mr-2 h-4 w-4" />
+                  Rewards
+                </Button>
+              </Link>
+              <Link to="/admin/vip-pricing" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <Settings className="mr-2 h-4 w-4" />
+                  VIP Pricing
+                </Button>
+              </Link>
+              <Link to="/admin/breaks" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <CalendarClock className="mr-2 h-4 w-4" />
+                  Break Times
+                </Button>
+              </Link>
+              <Link to="/admin/schedule" className="w-full">
+                <Button variant="outline" className="w-full justify-start relative">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Schedule Requests
+                  {pendingCount && pendingCount > 0 && (
+                    <Badge className="ml-auto bg-red-500 text-white">
+                      {pendingCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                onClick={handleSeedDemoData}
+                disabled={isSeedingData}
+                className="w-full justify-start"
+              >
+                <Database className="mr-2 h-4 w-4" />
+                {isSeedingData ? 'Seeding...' : 'Seed Demo Data'}
               </Button>
-            </Link>
-            <Link to="/admin/gallery">
-              <Button variant="outline">Gallery</Button>
-            </Link>
-            <Link to="/admin/vip-pricing">
-              <Button variant="outline">VIP Pricing</Button>
-            </Link>
-            <Link to="/admin/breaks">
-              <Button variant="outline">Break Times</Button>
-            </Link>
-            <Link to="/admin/clients">
-              <Button variant="outline">Clients</Button>
-            </Link>
-            <Link to="/admin/rewards">
-              <Button variant="outline">
-                <Gift className="mr-2 h-4 w-4" />
-                Rewards
-              </Button>
-            </Link>
-            <Link to="/admin/schedule">
-              <Button variant="outline" className="relative">
-                <CalendarClock className="mr-2 h-4 w-4" />
-                Schedule Requests
-                {pendingCount && pendingCount > 0 && (
-                  <Badge className="ml-2 bg-red-500 text-white">
-                    {pendingCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
-            <Button 
-              variant="outline" 
-              onClick={handleSeedDemoData}
-              disabled={isSeedingData}
-            >
-              <Database className="mr-2 h-4 w-4" />
-              {isSeedingData ? 'Seeding...' : 'Seed Demo Data'}
-            </Button>
+            </div>
           </div>
 
           <Tabs defaultValue="appointments" className="w-full">

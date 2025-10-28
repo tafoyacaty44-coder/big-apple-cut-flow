@@ -73,8 +73,12 @@ export function CreateServiceDialog({ open, onOpenChange, onSuccess }: CreateSer
       }
 
       const serviceData: CreateServiceData = {
-        ...data,
+        name: data.name,
         description: data.description || null,
+        regular_price: data.regular_price,
+        vip_price: data.vip_price,
+        duration_minutes: data.duration_minutes,
+        category: data.category,
         image_url: imageUrl,
       };
 
