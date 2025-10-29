@@ -116,67 +116,69 @@ export function CampaignsTable({ campaigns, isLoading, onEdit, onViewDetails }: 
 
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Campaign</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Channel</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Recipients</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead className="w-[50px]"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {campaigns.map((campaign) => (
-            <TableRow key={campaign.id}>
-              <TableCell>
-                <div>
-                  <p className="font-medium">{campaign.title}</p>
-                  {campaign.promo_code && (
-                    <p className="text-xs text-muted-foreground">
-                      Code: {campaign.promo_code}
-                    </p>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline" className="capitalize">
-                  {campaign.type}
-                </Badge>
-              </TableCell>
-              <TableCell>{getChannelIcon(campaign.channel)}</TableCell>
-              <TableCell>{getStatusBadge(campaign.status)}</TableCell>
-              <TableCell>
-                <div className="text-sm">
-                  {campaign.sent_count > 0 ? (
-                    <>
-                      <span className="font-medium">{campaign.sent_count}</span>
-                      <span className="text-muted-foreground">/{campaign.total_recipients}</span>
-                    </>
+      <div className="overflow-x-auto -mx-4 md:mx-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="whitespace-nowrap">Campaign</TableHead>
+              <TableHead className="hidden md:table-cell whitespace-nowrap">Type</TableHead>
+              <TableHead className="hidden sm:table-cell whitespace-nowrap">Channel</TableHead>
+              <TableHead className="whitespace-nowrap">Status</TableHead>
+              <TableHead className="hidden lg:table-cell whitespace-nowrap">Recipients</TableHead>
+              <TableHead className="hidden md:table-cell whitespace-nowrap">Date</TableHead>
+              <TableHead className="w-[50px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {campaigns.map((campaign) => (
+              <TableRow key={campaign.id}>
+                <TableCell className="whitespace-nowrap">
+                  <div>
+                    <p className="font-medium text-sm">{campaign.title}</p>
+                    {campaign.promo_code && (
+                      <p className="text-xs text-muted-foreground">
+                        Code: {campaign.promo_code}
+                      </p>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="hidden md:table-cell whitespace-nowrap">
+                  <Badge variant="outline" className="capitalize text-xs">
+                    {campaign.type}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">{getChannelIcon(campaign.channel)}</TableCell>
+                <TableCell className="whitespace-nowrap">{getStatusBadge(campaign.status)}</TableCell>
+                <TableCell className="hidden lg:table-cell whitespace-nowrap">
+                  <div className="text-xs sm:text-sm">
+                    {campaign.sent_count > 0 ? (
+                      <>
+                        <span className="font-medium">{campaign.sent_count}</span>
+                        <span className="text-muted-foreground">/{campaign.total_recipients}</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">{campaign.total_recipients || 0}</span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="hidden md:table-cell whitespace-nowrap">
+                  {campaign.sent_at ? (
+                    <span className="text-xs sm:text-sm">{format(new Date(campaign.sent_at), 'MMM d')}</span>
+                  ) : campaign.scheduled_for ? (
+                    <span className="text-xs sm:text-sm">{format(new Date(campaign.scheduled_for), 'MMM d')}</span>
                   ) : (
-                    <span className="text-muted-foreground">{campaign.total_recipients || 0}</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">Draft</span>
                   )}
-                </div>
-              </TableCell>
-              <TableCell>
-                {campaign.sent_at ? (
-                  <span className="text-sm">{format(new Date(campaign.sent_at), 'MMM d, yyyy')}</span>
-                ) : campaign.scheduled_for ? (
-                  <span className="text-sm">{format(new Date(campaign.scheduled_for), 'MMM d, yyyy')}</span>
-                ) : (
-                  <span className="text-sm text-muted-foreground">Draft</span>
-                )}
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="touch-target">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Actions</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="z-50">
                     {onViewDetails && campaign.status === 'sent' && (
                       <DropdownMenuItem onClick={() => onViewDetails(campaign.id)}>
                         <BarChart3 className="mr-2 h-4 w-4" />
@@ -214,13 +216,14 @@ export function CampaignsTable({ campaigns, isLoading, onEdit, onViewDetails }: 
                         Delete
                       </DropdownMenuItem>
                     )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

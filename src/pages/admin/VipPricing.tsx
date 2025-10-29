@@ -5,24 +5,26 @@ import { Settings, DollarSign } from 'lucide-react';
 
 const VipPricing = () => {
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-4 md:p-6 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">VIP Pricing</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">VIP Pricing</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Manage VIP pricing settings and service-specific VIP prices
           </p>
         </div>
 
         <Tabs defaultValue="settings" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="settings">
-              <Settings className="mr-2 h-4 w-4" />
-              VIP Settings
+          <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsTrigger value="settings" className="text-xs sm:text-sm py-2 sm:py-3">
+              <Settings className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">VIP Settings</span>
+              <span className="sm:hidden">Settings</span>
             </TabsTrigger>
-            <TabsTrigger value="prices">
-              <DollarSign className="mr-2 h-4 w-4" />
-              Service VIP Prices
+            <TabsTrigger value="prices" className="text-xs sm:text-sm py-2 sm:py-3">
+              <DollarSign className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Service VIP Prices</span>
+              <span className="sm:hidden">Prices</span>
             </TabsTrigger>
           </TabsList>
 

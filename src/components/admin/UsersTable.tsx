@@ -85,34 +85,34 @@ export const UsersTable = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">User Management</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-xl md:text-2xl font-bold">User Management</h2>
+          <p className="text-xs md:text-sm text-muted-foreground">
             Manage user accounts and assign roles
           </p>
         </div>
         <CreateAdminDialog />
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto -mx-4 md:mx-0">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="whitespace-nowrap">Name</TableHead>
+              <TableHead className="hidden sm:table-cell whitespace-nowrap">Email</TableHead>
+              <TableHead className="hidden md:table-cell whitespace-nowrap">Phone</TableHead>
+              <TableHead className="whitespace-nowrap">Role</TableHead>
+              <TableHead className="hidden lg:table-cell whitespace-nowrap">Created</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users?.map((user) => (
               <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.full_name}</TableCell>
-                <TableCell>{user.email || 'N/A'}</TableCell>
-                <TableCell>{user.phone || 'N/A'}</TableCell>
+                <TableCell className="font-medium whitespace-nowrap">{user.full_name}</TableCell>
+                <TableCell className="hidden sm:table-cell whitespace-nowrap">{user.email || 'N/A'}</TableCell>
+                <TableCell className="hidden md:table-cell whitespace-nowrap">{user.phone || 'N/A'}</TableCell>
                 <TableCell>
                   {editingUserId === user.id ? (
                     <Select
@@ -155,15 +155,16 @@ export const UsersTable = () => {
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden lg:table-cell whitespace-nowrap">
                   {new Date(user.created_at).toLocaleDateString()}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right whitespace-nowrap">
                   {editingUserId === user.id ? (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setEditingUserId(null)}
+                      className="touch-target"
                     >
                       Cancel
                     </Button>
@@ -172,8 +173,10 @@ export const UsersTable = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => setEditingUserId(user.id)}
+                      className="touch-target text-xs sm:text-sm"
                     >
-                      Change Role
+                      <span className="hidden sm:inline">Change Role</span>
+                      <span className="sm:hidden">Edit</span>
                     </Button>
                   )}
                 </TableCell>

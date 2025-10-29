@@ -29,28 +29,30 @@ const BarberDashboard = () => {
   }, [barberProfile]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Logo variant="dark" />
-            <div>
-              <h1 className="text-xl font-bold">Barber Dashboard</h1>
-              <p className="text-sm text-muted-foreground">
-                {barberProfile?.full_name || 'Loading...'}
-              </p>
+        <div className="max-w-full mx-auto px-4 py-3 md:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+              <Logo variant="dark" />
+              <div className="min-w-0">
+                <h1 className="text-lg md:text-xl font-bold truncate">Barber Dashboard</h1>
+                <p className="text-xs md:text-sm text-muted-foreground truncate">
+                  {barberProfile?.full_name || 'Loading...'}
+                </p>
+              </div>
             </div>
+            <Button variant="outline" onClick={signOut} className="touch-target flex-shrink-0 w-full sm:w-auto">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span className="sm:inline">Sign Out</span>
+            </Button>
           </div>
-          <Button variant="outline" onClick={signOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="max-w-full mx-auto px-4 py-4 md:py-8 overflow-x-hidden">
         {!barberId ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -59,14 +61,14 @@ const BarberDashboard = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8">
             <div>
-              <h2 className="text-2xl font-bold mb-2">Welcome back!</h2>
-              <p className="text-muted-foreground">Here's your schedule overview</p>
+              <h2 className="text-xl md:text-2xl font-bold mb-2">Welcome back!</h2>
+              <p className="text-sm md:text-base text-muted-foreground">Here's your schedule overview</p>
             </div>
             
             {/* Navigation Tabs */}
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2 md:gap-3">
               <Link to="/barber">
                 <Button variant={location.pathname === '/barber' ? 'default' : 'outline'}>
                   <LayoutDashboard className="mr-2 h-4 w-4" />

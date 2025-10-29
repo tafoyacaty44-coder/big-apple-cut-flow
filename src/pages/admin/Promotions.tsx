@@ -52,25 +52,25 @@ export default function Promotions() {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-20">
+    <div className="min-h-screen bg-background pt-20 overflow-x-hidden">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-full mx-auto px-4 py-4 md:py-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-4xl font-bold">Promotional Campaigns</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl md:text-4xl font-bold">Promotional Campaigns</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-2">
               Send targeted email and SMS campaigns to your customers
             </p>
           </div>
-          <Button onClick={handleCreate} size="lg">
-            <Plus className="mr-2 h-5 w-5" />
-            Create Campaign
+          <Button onClick={handleCreate} size="lg" className="w-full sm:w-auto touch-target">
+            <Plus className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+            <span className="sm:inline">Create Campaign</span>
           </Button>
         </div>
 
         {/* Quick Action Templates */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
           <Card 
             className="cursor-pointer hover:border-[hsl(var(--accent))] hover:shadow-lg transition-all"
             onClick={() => handleQuickSend('all')}
@@ -124,7 +124,7 @@ export default function Promotions() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
@@ -186,14 +186,16 @@ export default function Promotions() {
               Manage your promotional campaigns
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6">
             <Tabs defaultValue="all">
-              <TabsList>
-                <TabsTrigger value="all">All ({allCampaigns.length})</TabsTrigger>
-                <TabsTrigger value="draft">Drafts ({draftCampaigns.length})</TabsTrigger>
-                <TabsTrigger value="scheduled">Scheduled ({scheduledCampaigns.length})</TabsTrigger>
-                <TabsTrigger value="sent">Sent ({sentCampaigns.length})</TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto -mx-4 md:mx-0">
+                <TabsList className="inline-flex w-full sm:w-auto min-w-max">
+                  <TabsTrigger value="all" className="text-xs sm:text-sm whitespace-nowrap">All ({allCampaigns.length})</TabsTrigger>
+                  <TabsTrigger value="draft" className="text-xs sm:text-sm whitespace-nowrap">Drafts ({draftCampaigns.length})</TabsTrigger>
+                  <TabsTrigger value="scheduled" className="text-xs sm:text-sm whitespace-nowrap">Scheduled ({scheduledCampaigns.length})</TabsTrigger>
+                  <TabsTrigger value="sent" className="text-xs sm:text-sm whitespace-nowrap">Sent ({sentCampaigns.length})</TabsTrigger>
+                </TabsList>
+              </div>
 
               <TabsContent value="all" className="mt-6">
                 <CampaignsTable 

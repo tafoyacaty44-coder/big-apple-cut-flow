@@ -98,19 +98,20 @@ export const AppointmentsTable = () => {
 
   return (
     <>
-      <Card className="p-6">
+      <Card className="p-4 md:p-6 overflow-hidden">
         <div className="space-y-4">
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Appointments</h2>
-            <Button onClick={() => setCreateDialogOpen(true)}>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <h2 className="text-xl md:text-2xl font-bold">Appointments</h2>
+            <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto touch-target">
               <Plus className="mr-2 h-4 w-4" />
-              Add Appointment
+              <span className="sm:inline">Add</span>
+              <span className="hidden sm:inline"> Appointment</span>
             </Button>
           </div>
 
           {/* Filters */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -135,18 +136,18 @@ export const AppointmentsTable = () => {
           </div>
 
           {/* Table */}
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto -mx-4 md:mx-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Confirmation #</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Barber</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="whitespace-nowrap">Confirmation #</TableHead>
+                  <TableHead className="whitespace-nowrap">Customer</TableHead>
+                  <TableHead className="hidden md:table-cell whitespace-nowrap">Barber</TableHead>
+                  <TableHead className="hidden lg:table-cell whitespace-nowrap">Service</TableHead>
+                  <TableHead className="whitespace-nowrap">Date & Time</TableHead>
+                  <TableHead className="whitespace-nowrap">Status</TableHead>
+                  <TableHead className="hidden sm:table-cell whitespace-nowrap">Payment</TableHead>
+                  <TableHead className="whitespace-nowrap">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -159,28 +160,30 @@ export const AppointmentsTable = () => {
                 ) : (
                   filteredAppointments?.map((appointment) => (
                     <TableRow key={appointment.id}>
-                      <TableCell className="font-mono font-medium">
+                      <TableCell className="font-mono text-xs md:text-sm font-medium whitespace-nowrap">
                         {appointment.confirmation_number}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
                         {appointment.customer_name || appointment.guest_name || 'N/A'}
                       </TableCell>
-                      <TableCell>{appointment.barbers?.full_name || 'N/A'}</TableCell>
-                      <TableCell>{appointment.services?.name || 'N/A'}</TableCell>
-                      <TableCell>
-                        {format(new Date(appointment.appointment_date), 'MMM dd, yyyy')}
-                        <br />
-                        <span className="text-sm text-muted-foreground">
+                      <TableCell className="hidden md:table-cell whitespace-nowrap">{appointment.barbers?.full_name || 'N/A'}</TableCell>
+                      <TableCell className="hidden lg:table-cell whitespace-nowrap">{appointment.services?.name || 'N/A'}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        <div className="text-xs md:text-sm">
+                          {format(new Date(appointment.appointment_date), 'MMM dd, yyyy')}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
                           {appointment.appointment_time}
-                        </span>
+                        </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(appointment.status)}</TableCell>
-                      <TableCell>{getPaymentBadge(appointment.payment_status)}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{getPaymentBadge(appointment.payment_status)}</TableCell>
                       <TableCell>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleViewDetails(appointment)}
+                          className="touch-target"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>

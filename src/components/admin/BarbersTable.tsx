@@ -47,59 +47,59 @@ export const BarbersTable = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">Barber Management</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-xl md:text-2xl font-bold">Barber Management</h2>
+          <p className="text-xs md:text-sm text-muted-foreground">
             Manage barber profiles and schedules
           </p>
         </div>
         <CreateBarberDialog />
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto -mx-4 md:mx-0">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Experience</TableHead>
-              <TableHead>Specialties</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="whitespace-nowrap">Name</TableHead>
+              <TableHead className="hidden md:table-cell whitespace-nowrap">Experience</TableHead>
+              <TableHead className="hidden lg:table-cell whitespace-nowrap">Specialties</TableHead>
+              <TableHead className="whitespace-nowrap">Status</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {barbers?.map((barber) => (
               <TableRow key={barber.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
+                <TableCell className="whitespace-nowrap">
+                  <div className="flex items-center gap-2 md:gap-3">
                     {barber.profile_image_url ? (
                       <img
                         src={barber.profile_image_url}
                         alt={barber.full_name}
-                        className="h-10 w-10 rounded-full object-cover"
+                        className="h-8 w-8 md:h-10 md:w-10 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                        <User className="h-5 w-5 text-muted-foreground" />
+                      <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        <User className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                       </div>
                     )}
-                    <div>
-                      <div className="font-medium">{barber.full_name}</div>
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{barber.full_name}</div>
                       {barber.bio && (
-                        <div className="text-sm text-muted-foreground line-clamp-1">
+                        <div className="text-xs md:text-sm text-muted-foreground line-clamp-1 hidden sm:block">
                           {barber.bio}
                         </div>
                       )}
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell whitespace-nowrap">
                   {barber.years_experience
                     ? `${barber.years_experience} years`
                     : 'New'}
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden lg:table-cell">
                   <div className="flex flex-wrap gap-1">
                     {barber.specialties?.slice(0, 2).map((specialty, idx) => (
                       <Badge key={idx} variant="secondary" className="text-xs">
@@ -113,26 +113,30 @@ export const BarbersTable = () => {
                     )}
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   <Badge variant={barber.is_active ? 'default' : 'secondary'}>
                     {barber.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex gap-2 justify-end">
+                <TableCell className="text-right whitespace-nowrap">
+                  <div className="flex gap-1 md:gap-2 justify-end">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setEditingBarber(barber)}
+                      className="touch-target"
                     >
                       <Edit className="h-4 w-4" />
+                      <span className="sr-only">Edit</span>
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setAvailabilityBarber(barber)}
+                      className="touch-target"
                     >
                       <Calendar className="h-4 w-4" />
+                      <span className="sr-only">Schedule</span>
                     </Button>
                   </div>
                 </TableCell>

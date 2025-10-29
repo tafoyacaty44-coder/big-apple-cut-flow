@@ -38,31 +38,31 @@ const CustomerDashboard = () => {
     .sort((a, b) => new Date(a.appointment_date).getTime() - new Date(b.appointment_date).getTime())[0];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <header className="border-b-2 border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="max-w-full mx-auto px-4 py-3 md:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
               <Logo size="md" variant="dark" />
-              <div>
-                <h1 className="text-2xl font-bold">My Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Big Apple Barbers</p>
+              <div className="min-w-0">
+                <h1 className="text-lg md:text-2xl font-bold truncate">My Dashboard</h1>
+                <p className="text-xs md:text-sm text-muted-foreground truncate">Big Apple Barbers</p>
               </div>
             </div>
-            <GoldButton onClick={signOut} variant="outline">
+            <GoldButton onClick={signOut} variant="outline" className="w-full sm:w-auto touch-target">
               Sign Out
             </GoldButton>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Welcome Back!</h2>
-          <p className="text-muted-foreground">Manage your appointments and rewards</p>
+      <main className="max-w-full mx-auto px-4 py-4 md:py-8 overflow-x-hidden">
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">Welcome Back!</h2>
+          <p className="text-sm md:text-base text-muted-foreground">Manage your appointments and rewards</p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
           <div className="bg-card border-2 border-border rounded-lg p-6 vintage-shadow">
             <Calendar className="w-12 h-12 text-accent mb-4" />
             <h3 className="text-xl font-bold mb-2">Upcoming</h3>

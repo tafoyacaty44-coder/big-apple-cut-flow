@@ -54,37 +54,39 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Logo variant="dark" />
-            <div>
-              <h1 className="text-xl font-bold">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">Big Apple Barbershop</p>
+        <div className="max-w-full mx-auto px-4 py-3 md:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+              <Logo variant="dark" />
+              <div className="min-w-0">
+                <h1 className="text-lg md:text-xl font-bold truncate">Admin Dashboard</h1>
+                <p className="text-xs md:text-sm text-muted-foreground truncate">Big Apple Barbershop</p>
+              </div>
             </div>
+            <Button variant="outline" onClick={signOut} className="touch-target flex-shrink-0 w-full sm:w-auto">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span className="sm:inline">Sign Out</span>
+            </Button>
           </div>
-          <Button variant="outline" onClick={signOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="space-y-8">
+      <main className="max-w-full mx-auto px-4 py-4 md:py-8 overflow-x-hidden">
+        <div className="space-y-6 md:space-y-8">
           <div>
-            <h2 className="text-2xl font-bold mb-2">Welcome back!</h2>
-            <p className="text-muted-foreground">Manage your barbershop operations</p>
+            <h2 className="text-xl md:text-2xl font-bold mb-2">Welcome back!</h2>
+            <p className="text-sm md:text-base text-muted-foreground">Manage your barbershop operations</p>
           </div>
 
           <DashboardStats />
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <h3 className="text-base md:text-lg font-semibold mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
               <Link to="/admin/services" className="w-full">
                 <Button variant="outline" className="w-full justify-start">
                   <Scissors className="mr-2 h-4 w-4" />
@@ -157,18 +159,21 @@ const AdminDashboard = () => {
           </div>
 
           <Tabs defaultValue="appointments" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="appointments">
-                <Calendar className="mr-2 h-4 w-4" />
-                Appointments
+            <TabsList className="grid w-full grid-cols-3 h-auto">
+              <TabsTrigger value="appointments" className="text-xs sm:text-sm py-2 sm:py-3">
+                <Calendar className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Appointments</span>
+                <span className="sm:hidden">Appts</span>
               </TabsTrigger>
-              <TabsTrigger value="users">
-                <Users className="mr-2 h-4 w-4" />
-                Users
+              <TabsTrigger value="users" className="text-xs sm:text-sm py-2 sm:py-3">
+                <Users className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Users</span>
+                <span className="sm:hidden">Users</span>
               </TabsTrigger>
-              <TabsTrigger value="barbers">
-                <Scissors className="mr-2 h-4 w-4" />
-                Barbers
+              <TabsTrigger value="barbers" className="text-xs sm:text-sm py-2 sm:py-3">
+                <Scissors className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Barbers</span>
+                <span className="sm:hidden">Barbers</span>
               </TabsTrigger>
             </TabsList>
 
