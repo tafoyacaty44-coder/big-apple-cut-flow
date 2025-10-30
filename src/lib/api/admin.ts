@@ -246,6 +246,16 @@ export const updateBarberProfile = async (
   if (error) throw error;
 };
 
+// Delete barber (soft delete by setting is_active to false)
+export const deleteBarber = async (barberId: string) => {
+  const { error } = await supabase
+    .from('barbers')
+    .update({ is_active: false })
+    .eq('id', barberId);
+
+  if (error) throw error;
+};
+
 // Get barber availability
 export const getBarberAvailability = async (barberId: string) => {
   const { data, error } = await supabase

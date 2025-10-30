@@ -136,11 +136,13 @@ const AdminDashboard = () => {
                 </Button>
               </Link>
               <Link to="/admin/schedule" className="w-full">
-                <Button variant="outline" className="w-full justify-start relative">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Schedule Requests
-                  {pendingCount && pendingCount > 0 && (
-                    <Badge className="ml-auto bg-red-500 text-white">
+                <Button variant="outline" className="w-full justify-between">
+                  <span className="flex items-center">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Schedule Requests
+                  </span>
+                  {pendingCount !== null && pendingCount > 0 && (
+                    <Badge className="bg-red-500 text-white">
                       {pendingCount}
                     </Badge>
                   )}

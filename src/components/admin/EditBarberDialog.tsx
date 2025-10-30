@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateBarberProfile } from '@/lib/api/admin';
+import { updateBarberProfile, deleteBarber } from '@/lib/api/admin';
 import {
   Dialog,
   DialogContent,
@@ -8,12 +8,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { Trash2 } from 'lucide-react';
 
 interface Barber {
   id: string;
@@ -43,6 +55,7 @@ export const EditBarberDialog = ({
     yearsExperience: barber.years_experience?.toString() || '',
     isActive: barber.is_active,
   });
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -76,6 +89,19 @@ export const EditBarberDialog = ({
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update barber profile');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteBarber(barber.id),
+    onSuccess: () => {
+      toast.success('Barber deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['barbers'] });
+      setShowDeleteDialog(false);
+      onOpenChange(false);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to delete barber');
     },
   });
 
@@ -176,6 +202,26 @@ export const EditBarberDialog = ({
             />
           </div>
 
+          <Separator className="my-6" />
+
+          <div className="space-y-2 p-4 border border-destructive/30 rounded-lg bg-destructive/5">
+            <div className="space-y-1">
+              <Label className="text-destructive font-semibold">Danger Zone</Label>
+              <p className="text-sm text-muted-foreground">
+                This will deactivate the barber. They won't appear in bookings anymore.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+              className="w-full"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Barber
+            </Button>
+          </div>
+
           <div className="flex gap-2 justify-end pt-4">
             <Button
               type="button"
@@ -190,6 +236,27 @@ export const EditBarberDialog = ({
           </div>
         </form>
       </DialogContent>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will deactivate <strong>{barber.full_name}</strong> and they will no longer appear in the booking system. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete Barber'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
