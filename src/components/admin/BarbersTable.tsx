@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getAllBarbers } from '@/lib/api/admin';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getBarbers } from '@/lib/api/barbers';
+import { deleteBarber } from '@/lib/api/admin';
 import {
   Table,
   TableBody,
@@ -11,10 +12,21 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Edit, User } from 'lucide-react';
+import { Calendar, Edit, User, Trash2 } from 'lucide-react';
 import { CreateBarberDialog } from './CreateBarberDialog';
 import { EditBarberDialog } from './EditBarberDialog';
 import { BarberAvailabilityDialog } from './BarberAvailabilityDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 interface Barber {
   id: string;
@@ -31,10 +43,24 @@ interface Barber {
 export const BarbersTable = () => {
   const [editingBarber, setEditingBarber] = useState<Barber | null>(null);
   const [availabilityBarber, setAvailabilityBarber] = useState<Barber | null>(null);
+  const [deletingBarber, setDeletingBarber] = useState<Barber | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: barbers, isLoading } = useQuery({
     queryKey: ['barbers'],
-    queryFn: getAllBarbers,
+    queryFn: getBarbers,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteBarber,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['barbers'] });
+      toast.success('Barber deleted successfully');
+      setDeletingBarber(null);
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete barber: ${error.message}`);
+    },
   });
 
   if (isLoading) {
@@ -138,6 +164,15 @@ export const BarbersTable = () => {
                       <Calendar className="h-4 w-4" />
                       <span className="sr-only">Schedule</span>
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDeletingBarber(barber)}
+                      className="touch-target text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -161,6 +196,26 @@ export const BarbersTable = () => {
           onOpenChange={(open) => !open && setAvailabilityBarber(null)}
         />
       )}
+
+      <AlertDialog open={!!deletingBarber} onOpenChange={(open) => !open && setDeletingBarber(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Barber</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {deletingBarber?.full_name}? They will be deactivated and removed from the booking system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingBarber && deleteMutation.mutate(deletingBarber.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
