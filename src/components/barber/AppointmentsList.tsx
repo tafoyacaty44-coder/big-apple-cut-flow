@@ -1,9 +1,18 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getBarberAppointments } from '@/lib/api/barber';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, User, Scissors } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Clock, User, Scissors, Image } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ClientPicturesView } from './ClientPicturesView';
 
 interface AppointmentsListProps {
   barberId: string;
@@ -11,6 +20,7 @@ interface AppointmentsListProps {
 
 export const AppointmentsList = ({ barberId }: AppointmentsListProps) => {
   const today = new Date().toISOString().split('T')[0];
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
 
   const { data: appointments, isLoading } = useQuery({
     queryKey: ['barber-appointments', barberId, today],
@@ -84,6 +94,15 @@ export const AppointmentsList = ({ barberId }: AppointmentsListProps) => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedAppointmentId(apt.id)}
+                    className="text-primary hover:text-primary/80"
+                  >
+                    <Image className="h-4 w-4" />
+                    <span className="sr-only">View client photos</span>
+                  </Button>
                   <div className="text-right">
                     <div className="font-semibold">
                       {format(new Date(`2000-01-01T${apt.appointment_time}`), 'h:mm a')}
@@ -98,6 +117,17 @@ export const AppointmentsList = ({ barberId }: AppointmentsListProps) => {
           </div>
         )}
       </CardContent>
+
+      <Dialog open={!!selectedAppointmentId} onOpenChange={(open) => !open && setSelectedAppointmentId(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Client Reference Photos</DialogTitle>
+          </DialogHeader>
+          {selectedAppointmentId && (
+            <ClientPicturesView appointmentId={selectedAppointmentId} />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
