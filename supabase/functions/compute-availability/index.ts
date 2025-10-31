@@ -17,11 +17,26 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const barberId = url.searchParams.get('barber_id');
-    const fromDate = url.searchParams.get('from_date');
-    const toDate = url.searchParams.get('to_date');
-    const serviceDuration = parseInt(url.searchParams.get('service_duration') || '30');
+    let barberId: string | null = null;
+    let fromDate: string | null = null;
+    let toDate: string | null = null;
+    let serviceDuration = 30;
+
+    // Support both GET (query params) and POST (JSON body)
+    if (req.method === 'POST') {
+      const body = await req.json();
+      barberId = body.barber_id;
+      fromDate = body.from_date;
+      toDate = body.to_date;
+      serviceDuration = body.service_duration || 30;
+    } else {
+      // GET request - use query params
+      const url = new URL(req.url);
+      barberId = url.searchParams.get('barber_id');
+      fromDate = url.searchParams.get('from_date');
+      toDate = url.searchParams.get('to_date');
+      serviceDuration = parseInt(url.searchParams.get('service_duration') || '30');
+    }
 
     if (!barberId || !fromDate || !toDate) {
       return new Response(
