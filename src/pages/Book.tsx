@@ -163,6 +163,7 @@ const Book = () => {
     if (step === 1) return !!booking.customerInfo;
     if (step === 2) return !!booking.selectedServiceId;
     if (step === 3) return !!booking.selectedBarberId && !!booking.selectedDate && !!booking.selectedTime;
+    if (step === 4) return !!(booking.selectedServiceId && booking.selectedBarberId && booking.selectedDate && booking.selectedTime && booking.customerInfo);
     return false;
   };
 
@@ -272,6 +273,7 @@ const Book = () => {
                 if (currentStep === 4) handleConfirmBooking();
               }}
               canContinue={canContinueStep(currentStep)}
+              customerInfoFormId="customer-info-form"
             />
           </div>
         )}
@@ -325,9 +327,9 @@ const Book = () => {
                 {isMobile && (
                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                     <GoldButton
+                      type="submit"
+                      form="customer-info-form"
                       className="w-full min-h-[48px]"
-                      onClick={() => {}}
-                      disabled={!booking.customerInfo}
                     >
                       Continue to Service Selection
                     </GoldButton>

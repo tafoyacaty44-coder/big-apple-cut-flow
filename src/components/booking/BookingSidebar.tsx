@@ -15,6 +15,7 @@ interface BookingSidebarProps {
   onContinue: () => void;
   canContinue: boolean;
   isVip?: boolean;
+  customerInfoFormId?: string;
 }
 
 export const BookingSidebar = ({
@@ -28,6 +29,7 @@ export const BookingSidebar = ({
   onContinue,
   canContinue,
   isVip = false,
+  customerInfoFormId,
 }: BookingSidebarProps) => {
   const steps = [
     {
@@ -147,7 +149,10 @@ export const BookingSidebar = ({
         </div>
 
         <GoldButton
-          onClick={onContinue}
+          {...(currentStep === 1 && customerInfoFormId
+            ? { type: "submit", form: customerInfoFormId }
+            : { onClick: onContinue }
+          )}
           disabled={!canContinue}
           className="w-full"
           size="lg"

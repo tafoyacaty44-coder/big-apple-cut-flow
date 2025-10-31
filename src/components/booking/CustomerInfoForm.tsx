@@ -186,7 +186,7 @@ const CustomerInfoForm = ({ onSubmit, initialData, onVipCodeChange, onPromoCodeC
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form id="customer-info-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="full_name">Full Name *</Label>
           <Input
