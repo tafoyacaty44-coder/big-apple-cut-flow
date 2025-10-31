@@ -287,6 +287,33 @@ export type Database = {
         }
         Relationships: []
       }
+      blacklisted_customers: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          email_norm: string | null
+          id: string
+          phone_norm: string | null
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          email_norm?: string | null
+          id?: string
+          phone_norm?: string | null
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          email_norm?: string | null
+          id?: string
+          phone_norm?: string | null
+          reason?: string | null
+        }
+        Relationships: []
+      }
       blog_drafts: {
         Row: {
           author_id: string

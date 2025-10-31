@@ -10,6 +10,7 @@ interface BookingSidebarProps {
   selectedBarber?: { name: string } | null;
   selectedDate?: Date | null;
   selectedTime?: string | null;
+  customerInfo?: { name: string; email: string; phone: string } | null;
   onEditStep: (step: number) => void;
   onContinue: () => void;
   canContinue: boolean;
@@ -22,6 +23,7 @@ export const BookingSidebar = ({
   selectedBarber,
   selectedDate,
   selectedTime,
+  customerInfo,
   onEditStep,
   onContinue,
   canContinue,
@@ -30,6 +32,15 @@ export const BookingSidebar = ({
   const steps = [
     {
       number: 1,
+      label: "Your Info",
+      icon: User,
+      completed: !!customerInfo,
+      content: customerInfo
+        ? `${customerInfo.name}`
+        : "Enter your details",
+    },
+    {
+      number: 2,
       label: "Service",
       icon: Scissors,
       completed: !!selectedService,
@@ -38,7 +49,7 @@ export const BookingSidebar = ({
         : "Select a service",
     },
     {
-      number: 2,
+      number: 3,
       label: "Barber & Time",
       icon: User,
       completed: !!selectedBarber && !!selectedDate && !!selectedTime,
@@ -47,11 +58,11 @@ export const BookingSidebar = ({
         : "Choose barber & schedule",
     },
     {
-      number: 3,
-      label: "Confirm & Pay",
+      number: 4,
+      label: "Confirm",
       icon: Calendar,
       completed: false,
-      content: "Review your booking",
+      content: "Review booking",
     },
   ];
 
@@ -141,7 +152,7 @@ export const BookingSidebar = ({
           className="w-full"
           size="lg"
         >
-          {currentStep === 3 ? "Complete Booking" : "Continue"}
+          {currentStep === 4 ? "Complete Booking" : "Continue"}
         </GoldButton>
       </div>
     </Card>

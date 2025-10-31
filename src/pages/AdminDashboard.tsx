@@ -111,6 +111,12 @@ const AdminDashboard = () => {
                   Promotions
                 </Button>
               </Link>
+              <Link to="/admin/blacklist" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <Users className="mr-2 h-4 w-4" />
+                  Blacklist
+                </Button>
+              </Link>
               <Link to="/admin/clients" className="w-full">
                 <Button variant="outline" className="w-full justify-start">
                   <Users className="mr-2 h-4 w-4" />

@@ -32,6 +32,7 @@ import ServicesManagement from "./pages/admin/ServicesManagement";
 import GalleryManagement from "./pages/admin/GalleryManagement";
 import BlogManagement from "./pages/admin/BlogManagement";
 import Promotions from "./pages/admin/Promotions";
+import BlacklistManagement from "./pages/admin/BlacklistManagement";
 import MySchedule from "./pages/barber/MySchedule";
 import BarberDetail from "./pages/BarberDetail";
 import Blog from "./pages/Blog";
@@ -165,6 +166,14 @@ const App = () => (
               element={
                 <AdminRoute>
                   <Promotions />
+                </AdminRoute>
+              } 
+            />
+            <Route
+              path="/admin/blacklist" 
+              element={
+                <AdminRoute>
+                  <BlacklistManagement />
                 </AdminRoute>
               } 
             />

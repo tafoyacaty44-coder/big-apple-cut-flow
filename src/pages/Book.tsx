@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
-import { Calendar, Tag } from 'lucide-react';
+import { Calendar, AlertCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getServices } from '@/lib/api/services';
 import { getBarbersWithRealAvailability } from '@/lib/api/barbers';
@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { BookingSidebar } from '@/components/booking/BookingSidebar';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 import haircutImg from '@/assets/services/haircut.jpg';
 import seniorImg from '@/assets/services/senior-haircut.jpg';
@@ -48,7 +49,7 @@ const Book = () => {
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoCampaignId, setPromoCampaignId] = useState<string | undefined>();
-  const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, resetBooking } = useBooking();
+  const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, setBlacklisted, resetBooking } = useBooking();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -61,16 +62,6 @@ const Book = () => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // Check for prefilled booking data
-  useEffect(() => {
-    if (booking.selectedServiceId && currentStep === 1) {
-      setCurrentStep(2);
-    }
-    if (booking.selectedBarberId && booking.selectedDate && booking.selectedTime && currentStep === 2) {
-      setCurrentStep(3);
-    }
-  }, [booking.selectedServiceId, booking.selectedBarberId, booking.selectedDate, booking.selectedTime]);
 
   const handleVipCodeChange = (code: string, isValid: boolean) => {
     setVipCodeFromForm(code);
@@ -93,7 +84,7 @@ const Book = () => {
   const { data: barbers = [], isLoading: isLoadingBarbers } = useQuery({
     queryKey: ['barbers', 'real-availability', selectedService?.duration_minutes],
     queryFn: () => getBarbersWithRealAvailability(selectedService?.duration_minutes || 30),
-    enabled: currentStep === 2 && !!selectedService,
+    enabled: currentStep === 3 && !!selectedService,
   });
 
   const handleServiceSelect = (serviceId: string) => {
@@ -104,25 +95,63 @@ const Book = () => {
     setSelectedBarber(barberId, barberName, []);
   };
 
-  const handleNextFromService = () => {
-    if (booking.selectedServiceId && currentStep === 1) {
-      setCurrentStep(2);
-    }
-  };
-
   const handleDateTimeSelect = (date: string, time: string) => {
     setSelectedDate(new Date(date));
     setSelectedTime(time);
   };
 
-  const handleCustomerInfoSubmit = (data: { full_name: string; email: string; phone: string; notes?: string }) => {
-    setCustomerInfo({
-      name: data.full_name,
-      email: data.email,
-      phone: data.phone,
-    });
-    // Submit booking immediately
-    handleConfirmBooking();
+  const handleCustomerInfoSubmit = async (data: { full_name: string; email: string; phone: string; notes?: string }) => {
+    // Check blacklist
+    try {
+      const { data: blacklistResult, error } = await supabase.functions.invoke('check-blacklist', {
+        body: {
+          email: data.email,
+          phone: data.phone,
+        },
+      });
+
+      if (error) {
+        console.error('Blacklist check error:', error);
+        // Continue anyway if check fails - don't block legitimate customers
+      }
+
+      if (blacklistResult?.blacklisted) {
+        setBlacklisted(true);
+        setCustomerInfo({
+          name: data.full_name,
+          email: data.email,
+          phone: data.phone,
+        });
+        toast({
+          title: 'No Availability',
+          description: 'Unfortunately, we don\'t have any available appointments at this time. Please check back later.',
+          variant: 'destructive',
+        });
+        return; // Don't proceed
+      }
+
+      // Not blacklisted, proceed
+      setCustomerInfo({
+        name: data.full_name,
+        email: data.email,
+        phone: data.phone,
+      });
+      
+      // If on step 1, move to step 2
+      if (currentStep === 1) {
+        setCurrentStep(2);
+      } else if (currentStep === 4) {
+        // If on final step, submit booking
+        handleConfirmBooking();
+      }
+    } catch (error) {
+      console.error('Error checking blacklist:', error);
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleEditStep = (step: number) => {
@@ -131,8 +160,9 @@ const Book = () => {
   };
 
   const canContinueStep = (step: number) => {
-    if (step === 1) return !!booking.selectedServiceId;
-    if (step === 2) return !!booking.selectedBarberId && !!booking.selectedDate && !!booking.selectedTime;
+    if (step === 1) return !!booking.customerInfo;
+    if (step === 2) return !!booking.selectedServiceId;
+    if (step === 3) return !!booking.selectedBarberId && !!booking.selectedDate && !!booking.selectedTime;
     return false;
   };
 
@@ -233,10 +263,13 @@ const Book = () => {
               selectedBarber={booking.selectedBarberName ? { name: booking.selectedBarberName } : null}
               selectedDate={booking.selectedDate}
               selectedTime={booking.selectedTime}
+              customerInfo={booking.customerInfo}
               onEditStep={handleEditStep}
               onContinue={() => {
                 if (currentStep === 1 && canContinueStep(1)) setCurrentStep(2);
                 if (currentStep === 2 && canContinueStep(2)) setCurrentStep(3);
+                if (currentStep === 3 && canContinueStep(3)) setCurrentStep(4);
+                if (currentStep === 4) handleConfirmBooking();
               }}
               canContinue={canContinueStep(currentStep)}
             />
@@ -251,9 +284,10 @@ const Book = () => {
               className="w-full flex items-center justify-between p-4 active:bg-muted/50 transition-colors"
             >
               <div className="text-left">
-                <div className="font-semibold">Step {currentStep} of 3</div>
+                <div className="font-semibold">Step {currentStep} of 4</div>
                 <div className="text-sm text-muted-foreground truncate">
-                  {selectedService?.name}
+                  {booking.customerInfo?.name}
+                  {selectedService && ` • ${selectedService.name}`}
                   {booking.selectedBarberName && ` • ${booking.selectedBarberName}`}
                 </div>
               </div>
@@ -267,8 +301,43 @@ const Book = () => {
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto p-6 md:p-8">
           <div className="max-w-5xl mx-auto">
-            {/* Step 1: Select Service */}
-            {currentStep === 1 && (
+            {/* Blacklist Warning */}
+            {booking.isBlacklisted && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Unfortunately, we don't have any available appointments at this time. Please check back later.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Step 1: Customer Information */}
+            {currentStep === 1 && !booking.isBlacklisted && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Your Information</h2>
+                  <p className="text-muted-foreground">Let's start with your contact details</p>
+                </div>
+                <CustomerInfoForm 
+                  onSubmit={handleCustomerInfoSubmit}
+                  selectedServiceId={booking.selectedServiceId}
+                />
+                {isMobile && (
+                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
+                    <GoldButton
+                      className="w-full min-h-[48px]"
+                      onClick={() => {}}
+                      disabled={!booking.customerInfo}
+                    >
+                      Continue to Service Selection
+                    </GoldButton>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 2: Select Service */}
+            {currentStep === 2 && !booking.isBlacklisted && (
               <div className="space-y-6">
                 <div>
                   <h2 className="text-3xl font-bold mb-2">Select a Service</h2>
@@ -337,7 +406,7 @@ const Book = () => {
                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                     <GoldButton
                       className="w-full min-h-[48px]"
-                      onClick={handleNextFromService}
+                      onClick={() => booking.selectedServiceId && setCurrentStep(3)}
                       disabled={!booking.selectedServiceId}
                     >
                       Continue to Barber Selection
@@ -347,8 +416,8 @@ const Book = () => {
               </div>
             )}
 
-            {/* Step 2: Select Barber + Date/Time (Combined) */}
-            {currentStep === 2 && (
+            {/* Step 3: Select Barber + Date/Time */}
+            {currentStep === 3 && !booking.isBlacklisted && (
               <div className="space-y-6">
                 <div>
                   <h2 className="text-3xl font-bold mb-2">Choose Your Barber & Time</h2>
@@ -361,21 +430,9 @@ const Book = () => {
                         <div className="h-32 bg-muted rounded" />
                       </CardContent>
                     </Card>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {[1, 2, 3, 4].map((i) => (
-                        <Card key={i} className="animate-pulse">
-                          <CardContent className="p-6 space-y-3">
-                            <div className="h-20 bg-muted rounded" />
-                            <div className="h-4 bg-muted rounded w-3/4" />
-                            <div className="h-4 bg-muted rounded w-1/2" />
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {/* Any Available Barber Option */}
                     <Card 
                       className="border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 hover:bg-[hsl(var(--accent))]/10 transition-colors cursor-pointer"
                       onClick={() => handleBarberSelect('any', 'Any Available Barber')}
@@ -403,7 +460,6 @@ const Book = () => {
                       ))}
                     </div>
 
-                    {/* Date/Time Picker - Show after barber selection */}
                     {booking.selectedBarberId && selectedService && (
                       <div className="mt-8 pt-8 border-t">
                         <h3 className="text-2xl font-bold mb-4">Pick Your Date & Time</h3>
@@ -420,22 +476,22 @@ const Book = () => {
                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                     <GoldButton
                       className="w-full min-h-[48px]"
-                      onClick={() => canContinueStep(2) && setCurrentStep(3)}
-                      disabled={!canContinueStep(2)}
+                      onClick={() => canContinueStep(3) && setCurrentStep(4)}
+                      disabled={!canContinueStep(3)}
                     >
-                      Continue to Checkout
+                      Continue to Confirmation
                     </GoldButton>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Step 3: Customer Information + Confirmation (Combined) */}
-            {currentStep === 3 && selectedService && (
+            {/* Step 4: Review & Confirm */}
+            {currentStep === 4 && selectedService && !booking.isBlacklisted && (
               <div className="space-y-8">
                 <div>
-                  <h2 className="text-3xl font-bold mb-2">Complete Your Booking</h2>
-                  <p className="text-muted-foreground">Enter your information to confirm</p>
+                  <h2 className="text-3xl font-bold mb-2">Review Your Booking</h2>
+                  <p className="text-muted-foreground">Confirm your details and complete booking</p>
                 </div>
 
                 {/* Booking Summary Card */}
@@ -443,6 +499,10 @@ const Book = () => {
                   <CardContent className="p-6">
                     <h3 className="font-bold text-xl mb-4">Booking Details</h3>
                     <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Customer:</span>
+                        <span className="font-semibold">{booking.customerInfo?.name}</span>
+                      </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Service:</span>
                         <span className="font-semibold">{selectedService.name}</span>
@@ -473,18 +533,33 @@ const Book = () => {
                   </CardContent>
                 </Card>
 
-                 {/* Customer Info Form */}
+                {/* VIP/Promo Codes */}
                 <div>
-                  <h3 className="text-xl font-bold mb-4">Your Information</h3>
+                  <h3 className="text-xl font-bold mb-4">Optional: VIP or Promo Code</h3>
                   <CustomerInfoForm 
                     onSubmit={handleCustomerInfoSubmit}
                     onVipCodeChange={handleVipCodeChange}
                     onPromoCodeChange={handlePromoCodeChange}
                     selectedServiceId={booking.selectedServiceId}
                     promoDiscount={promoDiscount}
+                    initialData={booking.customerInfo ? {
+                      full_name: booking.customerInfo.name,
+                      email: booking.customerInfo.email,
+                      phone: booking.customerInfo.phone,
+                    } : undefined}
                   />
                 </div>
               </div>
+            )}
+
+            {/* Blacklisted - Show Dead End */}
+            {booking.isBlacklisted && currentStep > 1 && (
+              <Alert variant="destructive" className="mt-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  We apologize, but we're unable to show available appointments at this time. Please try again later or contact us directly.
+                </AlertDescription>
+              </Alert>
             )}
           </div>
         </div>

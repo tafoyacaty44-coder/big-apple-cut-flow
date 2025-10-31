@@ -123,6 +123,32 @@ const BookingSuccess = () => {
               </div>
             </Card>
 
+            {/* Payment Instructions - IMPORTANT */}
+            <Card className="p-6 mb-6 border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10">
+              <h2 className="text-xl font-bold mb-3 text-[hsl(var(--accent))]">💳 Payment Required</h2>
+              <div className="space-y-3">
+                <p className="font-semibold">To confirm your appointment, please send payment via:</p>
+                <div className="bg-background p-4 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">Zelle:</span>
+                    <span className="font-mono">info@bigapplebarbershop.com</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">Apple Pay:</span>
+                    <span className="font-mono">(555) 123-4567</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">Venmo:</span>
+                    <span className="font-mono">@BigAppleBarberShop</span>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-3">
+                  ⚠️ Your appointment will be confirmed once payment is received. 
+                  Please include your confirmation number <strong>{confirmationNumber}</strong> in the payment note.
+                </p>
+              </div>
+            </Card>
+
             {/* What's Next */}
             <Card className="p-6 mb-6 bg-muted/50">
               <h2 className="text-xl font-bold mb-3">What's Next?</h2>
