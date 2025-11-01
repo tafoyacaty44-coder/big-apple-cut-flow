@@ -155,36 +155,84 @@ const ClientDetail = () => {
           <Card>
             <CardHeader>
               <CardTitle>History & Notes</CardTitle>
-              <CardDescription>{notes?.length || 0} notes</CardDescription>
+              <CardDescription>
+                {(notes?.length || 0) + (appointments?.length || 0)} total entries
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {notes?.map(note => (
-                  <div key={note.id} className="border rounded-lg p-4 space-y-2">
-                    {note.photo_url && (
-                      <img
-                        src={note.photo_url}
-                        alt="Client photo"
-                        className="w-full h-48 object-cover rounded-md"
-                      />
-                    )}
-                    {note.note && (
-                      <p className="text-sm">{note.note}</p>
-                    )}
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(note.created_at).toLocaleString()}
-                      {note.barber_id && (
-                        <span className="ml-2">
-                          by {barbers?.find(b => b.id === note.barber_id)?.full_name}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                {/* Combine notes and appointments, sort by date */}
+                {[
+                  ...(notes?.map(note => ({ type: 'note' as const, data: note, date: note.created_at })) || []),
+                  ...(appointments?.map(apt => ({ type: 'appointment' as const, data: apt, date: apt.created_at })) || [])
+                ]
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((item, index) => {
+                    if (item.type === 'note') {
+                      const note = item.data;
+                      return (
+                        <div key={`note-${note.id}`} className="border rounded-lg p-4 space-y-2">
+                          {note.photo_url && (
+                            <img
+                              src={note.photo_url}
+                              alt="Client photo"
+                              className="w-full h-48 object-cover rounded-md"
+                            />
+                          )}
+                          {note.note && (
+                            <p className="text-sm">{note.note}</p>
+                          )}
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(note.created_at).toLocaleString()}
+                            {note.barber_id && (
+                              <span className="ml-2">
+                                by {barbers?.find(b => b.id === note.barber_id)?.full_name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      const apt = item.data;
+                      const statusColors = {
+                        pending: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+                        confirmed: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                        scheduled: 'bg-green-500/10 text-green-500 border-green-500/20',
+                        completed: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+                        cancelled: 'bg-red-500/10 text-red-500 border-red-500/20',
+                        no_show: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
+                      };
+                      
+                      return (
+                        <div key={`apt-${apt.id}`} className="border rounded-lg p-4 space-y-2 bg-muted/50">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">
+                                Appointment: {(apt.services as any)?.name || 'Service'}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(apt.appointment_date).toLocaleDateString()} at{' '}
+                                {apt.appointment_time}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Barber: {(apt.barbers as any)?.full_name || 'Not assigned'}
+                              </p>
+                            </div>
+                            <Badge className={statusColors[apt.status as keyof typeof statusColors] || ''}>
+                              {apt.status}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Booked {new Date(apt.created_at).toLocaleString()}
+                          </div>
+                        </div>
+                      );
+                    }
+                  })}
 
-                {(!notes || notes.length === 0) && (
+                {(!notes || notes.length === 0) && (!appointments || appointments.length === 0) && (
                   <p className="text-center text-muted-foreground py-8">
-                    No notes yet. Add a note or photo above.
+                    No history yet. Add a note or photo above.
                   </p>
                 )}
               </div>
