@@ -322,7 +322,7 @@ const Index = () => {
 
         {/* Contact Information Footer */}
         <motion.div
-          className="py-8 px-4 text-center space-y-2"
+          className="py-8 px-4 text-center space-y-6"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
@@ -339,6 +339,32 @@ const Index = () => {
               <MapPin className="h-4 w-4" />
               <span>New York, NY 10009</span>
             </div>
+          </div>
+
+          {/* Google Maps Embed */}
+          <div className="mt-6 max-w-2xl mx-auto">
+            <div className="rounded-xl overflow-hidden shadow-2xl border-2 border-accent/20">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.025!2d-73.98685!3d40.730824!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c2599e8b4c5c5b%3A0x1234567890abcdef!2s422%20E%2014th%20St%2C%20New%20York%2C%20NY%2010009!5e0!3m2!1sen!2sus!4v1234567890"
+                width="100%"
+                height="320"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Big Apple Barbers Location - 422 E 14th St, New York"
+                className="w-full"
+              />
+            </div>
+            <a 
+              href="https://maps.google.com/?q=422+E+14th+St,+New+York,+NY+10009" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 mt-3 text-accent hover:text-accent/80 transition-colors font-medium text-sm"
+            >
+              <MapPin className="h-4 w-4" />
+              Open in Google Maps →
+            </a>
           </div>
         </motion.div>
       </section>
