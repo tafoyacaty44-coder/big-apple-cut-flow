@@ -543,6 +543,20 @@ const Book = () => {
                   selectedServiceId={booking.selectedServiceId}
                   promoDiscount={promoDiscount}
                 />
+
+                {/* Mobile Complete Booking Button */}
+                {isMobile && (
+                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
+                    <GoldButton
+                      onClick={() => handleConfirmBooking()}
+                      disabled={!canContinueStep(4) || bookingMutation.isPending}
+                      className="w-full min-h-[48px]"
+                      size="lg"
+                    >
+                      {bookingMutation.isPending ? "Processing..." : "Complete Booking"}
+                    </GoldButton>
+                  </div>
+                )}
               </div>
             )}
 

@@ -74,8 +74,8 @@ export const BookingSidebar = ({
   };
 
   return (
-    <Card className="h-full flex flex-col border-r rounded-none border-l-0 border-t-0 border-b-0 bg-muted/30">
-      <div className="p-6 flex-1 overflow-y-auto">
+    <Card className="h-full flex flex-col border-r rounded-none border-l-0 border-t-0 border-b-0 bg-muted/30 overflow-hidden">
+      <div className="p-6 flex-1 overflow-y-auto min-h-0">
         <h2 className="text-lg font-bold mb-6">Booking Summary</h2>
 
         <div className="space-y-4">
@@ -135,7 +135,7 @@ export const BookingSidebar = ({
         </div>
       </div>
 
-      <div className="p-6 border-t bg-background">
+      <div className="p-6 border-t bg-background flex-shrink-0">
         <div className="mb-4">
           <div className="flex justify-between text-sm mb-2">
             <span className="text-muted-foreground">Subtotal</span>
