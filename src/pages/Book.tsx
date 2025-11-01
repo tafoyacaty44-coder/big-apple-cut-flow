@@ -11,6 +11,7 @@ import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
 import { SevenDayAvailability } from '@/components/booking/SevenDayAvailability';
 import CustomerInfoForm from '@/components/booking/CustomerInfoForm';
+import DiscountCodesForm from '@/components/booking/DiscountCodesForm';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -536,21 +537,12 @@ const Book = () => {
                 </Card>
 
                 {/* VIP/Promo Codes */}
-                <div>
-                  <h3 className="text-xl font-bold mb-4">Optional: VIP or Promo Code</h3>
-                  <CustomerInfoForm 
-                    onSubmit={handleCustomerInfoSubmit}
-                    onVipCodeChange={handleVipCodeChange}
-                    onPromoCodeChange={handlePromoCodeChange}
-                    selectedServiceId={booking.selectedServiceId}
-                    promoDiscount={promoDiscount}
-                    initialData={booking.customerInfo ? {
-                      full_name: booking.customerInfo.name,
-                      email: booking.customerInfo.email,
-                      phone: booking.customerInfo.phone,
-                    } : undefined}
-                  />
-                </div>
+                <DiscountCodesForm 
+                  onVipCodeChange={handleVipCodeChange}
+                  onPromoCodeChange={handlePromoCodeChange}
+                  selectedServiceId={booking.selectedServiceId}
+                  promoDiscount={promoDiscount}
+                />
               </div>
             )}
 
