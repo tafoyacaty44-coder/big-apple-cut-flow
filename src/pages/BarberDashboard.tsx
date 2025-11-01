@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getBarberProfile } from '@/lib/api/barber';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
-import { LogOut, LayoutDashboard, Calendar } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LogOut, LayoutDashboard, Calendar, Coffee, CalendarClock } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { DashboardStats } from '@/components/barber/DashboardStats';
 import { AppointmentsList } from '@/components/barber/AppointmentsList';
@@ -63,8 +64,39 @@ const BarberDashboard = () => {
         ) : (
           <div className="space-y-6 md:space-y-8">
             <div>
-              <h2 className="text-xl md:text-2xl font-bold mb-2">Welcome back!</h2>
-              <p className="text-sm md:text-base text-muted-foreground">Here's your schedule overview</p>
+              <h2 className="text-xl md:text-2xl font-bold mb-2">Welcome back, {barberProfile?.full_name}!</h2>
+              <p className="text-sm md:text-base text-muted-foreground">Here's your dashboard overview</p>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link to="/barber/my-schedule">
+                <Card className="hover:bg-accent/50 transition-colors cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Coffee className="h-5 w-5" />
+                      Request Break Time
+                    </CardTitle>
+                    <CardDescription>
+                      Submit a request for break times or time off
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+
+              <Link to="/barber/my-schedule">
+                <Card className="hover:bg-accent/50 transition-colors cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CalendarClock className="h-5 w-5" />
+                      View Schedule Requests
+                    </CardTitle>
+                    <CardDescription>
+                      Check the status of your submitted requests
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
             </div>
             
             {/* Navigation Tabs */}

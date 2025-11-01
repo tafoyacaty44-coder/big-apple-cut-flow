@@ -4,7 +4,7 @@ import { getBarberAppointments } from '@/lib/api/barber';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, User, Scissors, Image } from 'lucide-react';
+import { Clock, User, Scissors, Image, Camera } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ClientPicturesView } from './ClientPicturesView';
+import { ClientPhotoManager } from './ClientPhotoManager';
 
 interface AppointmentsListProps {
   barberId: string;
@@ -93,7 +94,14 @@ export const AppointmentsList = ({ barberId }: AppointmentsListProps) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  {apt.client_id && (
+                    <ClientPhotoManager
+                      clientId={apt.client_id}
+                      barberId={barberId}
+                      appointmentId={apt.id}
+                    />
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"

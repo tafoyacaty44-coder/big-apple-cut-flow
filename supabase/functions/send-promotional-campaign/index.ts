@@ -1,4 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { Twilio } from 'npm:twilio@5.3.4';
+import sgMail from 'npm:@sendgrid/mail@8.1.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +21,15 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    // Initialize Twilio and SendGrid
+    const twilioClient = new Twilio(
+      Deno.env.get('TWILIO_ACCOUNT_SID'),
+      Deno.env.get('TWILIO_AUTH_TOKEN')
+    );
+    const twilioPhone = Deno.env.get('TWILIO_PHONE_NUMBER');
+    
+    sgMail.setApiKey(Deno.env.get('SENDGRID_API_KEY') ?? '');
 
     const { campaign_id }: SendCampaignRequest = await req.json();
     
@@ -52,7 +63,6 @@ Deno.serve(async (req) => {
 
     // Apply audience filters
     if (campaign.target_audience === 'vip_only') {
-      // Get VIP customers (those with rewards points > threshold)
       const { data: vipProfiles } = await supabase
         .from('profiles')
         .select('id')
@@ -63,7 +73,6 @@ Deno.serve(async (req) => {
         clientsQuery = clientsQuery.in('linked_profile_id', vipIds);
       }
     } else if (campaign.target_audience === 'recent_customers') {
-      // Customers with appointments in last 90 days
       const ninetyDaysAgo = new Date();
       ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
       
@@ -78,7 +87,6 @@ Deno.serve(async (req) => {
         clientsQuery = clientsQuery.in('id', clientIds);
       }
     } else if (campaign.target_audience === 'inactive_customers') {
-      // Customers with no appointments in last 6 months
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
       
@@ -103,7 +111,6 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${clients?.length || 0} potential recipients`);
 
-    // Create recipient records and send notifications
     let sentCount = 0;
     let failedCount = 0;
     const recipients = clients || [];
@@ -152,13 +159,45 @@ Deno.serve(async (req) => {
                 status: 'queued',
               });
 
-            // Send notification via placeholder (actual sending would use Resend/Twilio)
-            console.log(`Would send ${channel} to ${client.full_name}:`, {
-              to: channel === 'email' ? client.email : client.phone,
-              subject: campaign.subject,
-              message: campaign.message_body,
-              promo_code: campaign.promo_code,
-            });
+            // Send via appropriate channel
+            if (channel === 'email') {
+              // Send email via SendGrid
+              const emailContent = campaign.email_html || `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h2>${campaign.subject}</h2>
+                  <div style="white-space: pre-wrap;">${campaign.message_body}</div>
+                  ${campaign.promo_code ? `<p style="background: #f0f0f0; padding: 15px; border-radius: 5px; font-size: 18px; font-weight: bold;">Promo Code: ${campaign.promo_code}</p>` : ''}
+                </div>
+              `;
+
+              await sgMail.send({
+                to: client.email!,
+                from: 'noreply@yourdomain.com', // Configure your verified sender
+                subject: campaign.subject || 'Special Offer',
+                html: emailContent,
+              });
+
+              console.log(`Email sent to ${client.full_name} at ${client.email}`);
+            } else if (channel === 'sms') {
+              // Send SMS via Twilio
+              let smsBody = campaign.message_body;
+              if (campaign.promo_code) {
+                smsBody += `\n\nPromo Code: ${campaign.promo_code}`;
+              }
+              
+              // Truncate if too long (SMS limit is 1600 chars)
+              if (smsBody.length > 1600) {
+                smsBody = smsBody.substring(0, 1597) + '...';
+              }
+
+              await twilioClient.messages.create({
+                body: smsBody,
+                to: client.phone!,
+                from: twilioPhone,
+              });
+
+              console.log(`SMS sent to ${client.full_name} at ${client.phone}`);
+            }
 
             // Mark as sent
             await supabase

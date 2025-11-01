@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { getClientById, getClientNotes, createClientNote } from '@/lib/api/clients';
 import { PhotoCapture } from '@/components/admin/PhotoCapture';
@@ -11,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getBarbers } from '@/lib/api/barbers';
+import { supabase } from '@/integrations/supabase/client';
 
 const ClientDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +37,26 @@ const ClientDetail = () => {
   const { data: barbers } = useQuery({
     queryKey: ['barbers'],
     queryFn: getBarbers,
+  });
+
+  const { data: appointments, isLoading: appointmentsLoading } = useQuery({
+    queryKey: ['client-appointments', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          services(name),
+          barbers(full_name)
+        `)
+        .eq('client_id', id)
+        .order('appointment_date', { ascending: false })
+        .order('appointment_time', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id,
   });
 
   const createNoteMutation = useMutation({

@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { UserPlus } from 'lucide-react';
+import { ImageUpload } from './ImageUpload';
 
 export const CreateBarberDialog = () => {
   const [open, setOpen] = useState(false);
@@ -25,6 +26,7 @@ export const CreateBarberDialog = () => {
     bio: '',
     specialties: '',
     yearsExperience: '',
+    profileImageUrl: '',
   });
 
   const queryClient = useQueryClient();
@@ -42,6 +44,7 @@ export const CreateBarberDialog = () => {
         yearsExperience: formData.yearsExperience
           ? parseInt(formData.yearsExperience)
           : undefined,
+        profileImageUrl: formData.profileImageUrl || undefined,
       }),
     onSuccess: () => {
       toast.success('Barber account created successfully');
@@ -54,6 +57,7 @@ export const CreateBarberDialog = () => {
         bio: '',
         specialties: '',
         yearsExperience: '',
+        profileImageUrl: '',
       });
     },
     onError: (error: Error) => {
@@ -185,6 +189,14 @@ export const CreateBarberDialog = () => {
               Enter multiple specialties separated by commas
             </p>
           </div>
+
+          <ImageUpload
+            currentImageUrl={formData.profileImageUrl}
+            onImageUploaded={(url) => setFormData({ ...formData, profileImageUrl: url })}
+            bucketName="avatars"
+            folder="barbers/"
+            label="Profile Picture"
+          />
 
           <div className="flex gap-2 justify-end pt-4">
             <Button

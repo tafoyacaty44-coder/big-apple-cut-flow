@@ -24,6 +24,7 @@ import AppointmentAction from "./pages/AppointmentAction";
 import NotificationPreferences from "./pages/NotificationPreferences";
 import VipPricing from "./pages/admin/VipPricing";
 import BreakTime from "./pages/admin/BreakTime";
+import BreakRequests from "./pages/admin/BreakRequests";
 import Clients from "./pages/admin/Clients";
 import ClientDetail from "./pages/admin/ClientDetail";
 import RewardsManagement from "./pages/admin/RewardsManagement";
@@ -90,7 +91,15 @@ const App = () => (
               } 
             />
             <Route 
-              path="/admin/clients" 
+              path="/admin/break-requests" 
+              element={
+                <AdminRoute>
+                  <BreakRequests />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/clients"
               element={
                 <AdminRoute>
                   <Clients />

@@ -26,6 +26,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { Trash2 } from 'lucide-react';
+import { ImageUpload } from './ImageUpload';
 
 interface Barber {
   id: string;
@@ -54,6 +55,7 @@ export const EditBarberDialog = ({
     specialties: barber.specialties?.join(', ') || '',
     yearsExperience: barber.years_experience?.toString() || '',
     isActive: barber.is_active,
+    profileImageUrl: barber.profile_image_url || '',
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -66,6 +68,7 @@ export const EditBarberDialog = ({
       specialties: barber.specialties?.join(', ') || '',
       yearsExperience: barber.years_experience?.toString() || '',
       isActive: barber.is_active,
+      profileImageUrl: barber.profile_image_url || '',
     });
   }, [barber]);
 
@@ -81,6 +84,7 @@ export const EditBarberDialog = ({
           ? parseInt(formData.yearsExperience)
           : null,
         is_active: formData.isActive,
+        profile_image_url: formData.profileImageUrl || null,
       }),
     onSuccess: () => {
       toast.success('Barber profile updated successfully');
@@ -201,6 +205,14 @@ export const EditBarberDialog = ({
               }
             />
           </div>
+
+          <ImageUpload
+            currentImageUrl={formData.profileImageUrl}
+            onImageUploaded={(url) => setFormData({ ...formData, profileImageUrl: url })}
+            bucketName="avatars"
+            folder="barbers/"
+            label="Profile Picture"
+          />
 
           <Separator className="my-6" />
 

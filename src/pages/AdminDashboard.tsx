@@ -6,7 +6,7 @@ import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Users, Scissors, Gift, CalendarClock, Database, Image, Settings, FileText, Send } from 'lucide-react';
+import { LogOut, Calendar, Users, Scissors, Gift, CalendarClock, Database, Image, Settings, FileText, Send, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -139,6 +139,12 @@ const AdminDashboard = () => {
                 <Button variant="outline" className="w-full justify-start">
                   <CalendarClock className="mr-2 h-4 w-4" />
                   Break Times
+                </Button>
+              </Link>
+              <Link to="/admin/break-requests" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <Clock className="mr-2 h-4 w-4" />
+                  Break Requests
                 </Button>
               </Link>
               <Link to="/admin/schedule" className="w-full">
