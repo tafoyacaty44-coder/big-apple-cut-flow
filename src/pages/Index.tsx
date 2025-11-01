@@ -5,6 +5,7 @@ import { motion, type Variants, useReducedMotion } from "framer-motion";
 import { useNextAvailableSlots } from "@/hooks/useNextAvailableSlots";
 import { useQuery } from "@tanstack/react-query";
 import { getGalleryImages } from "@/lib/api/gallery";
+import { TodayAvailability } from "@/components/TodayAvailability";
 import React from "react";
 
 const navItems = [
@@ -346,23 +347,15 @@ const Index = () => {
         </motion.div>
       </section>
 
+      {/* Today's Availability */}
+      <div className="relative z-10 py-12">
+        <TodayAvailability />
+      </div>
+
       {/* Gallery Section */}
       <div className="relative z-10">
         <GalleryRow />
       </div>
-
-      {/* Sticky phone CTA */}
-      <motion.a
-        href="tel:2126514858"
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-accent px-5 py-3 text-accent-foreground font-semibold shadow-md hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent/60 z-50"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.6, ease: "easeOut" }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <span className="mr-1">📞</span> 212-651-4858
-      </motion.a>
     </main>
   );
 };

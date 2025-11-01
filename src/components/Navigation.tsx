@@ -67,9 +67,14 @@ const Navigation = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <a href="tel:2126514858" className="flex items-center space-x-2 text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors">
-              <Phone className="h-4 w-4" />
-              <span className="font-semibold">(212) 651-4858</span>
+            <a href="tel:2126514858">
+              <Button 
+                variant="outline" 
+                className="border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all"
+              >
+                <Phone className="h-4 w-4 mr-2" />
+                <span className="font-semibold">(212) 651-4858</span>
+              </Button>
             </a>
             {user ? (
               <DropdownMenu>
@@ -138,9 +143,14 @@ const Navigation = () => {
               <Link to="/#contact" className="text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Contact
               </Link>
-              <a href="tel:2126514858" className="flex items-center space-x-2 text-primary-foreground hover:text-[hsl(var(--accent))] transition-colors">
-                <Phone className="h-4 w-4" />
-                <span className="font-semibold">(212) 651-4858</span>
+              <a href="tel:2126514858" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground justify-start"
+                >
+                  <Phone className="h-4 w-4 mr-2" />
+                  <span className="font-semibold">(212) 651-4858</span>
+                </Button>
               </a>
               {user ? (
                 <>
