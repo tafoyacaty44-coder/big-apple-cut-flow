@@ -257,7 +257,7 @@ const Index = () => {
       <div className="pointer-events-none absolute inset-0 mix-blend-soft-light opacity-[0.06]" style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"120\" height=\"120\"><filter id=\"n\"><feTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"2\" stitchTiles=\"stitch\"/></filter><rect width=\"100%\" height=\"100%\" filter=\"url(%23n)\" opacity=\"0.25\"/></svg>')" }} />
 
       {/* Content */}
-      <section className="relative z-10 flex min-h-[100dvh] flex-col items-center justify-center gap-8 px-4 py-16">
+      <section className="relative z-10 flex flex-col items-center justify-center gap-8 px-4 py-12 pt-24">
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -18, scale: 0.9 }}
@@ -279,33 +279,6 @@ const Index = () => {
           <span className="mr-1">⭐</span> 4.8 (<span className="tabular-nums">356</span> Google reviews) • East Village
         </motion.p>
 
-        {/* Live Availability Teaser */}
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.5, ease: "easeOut" }}
-          className="flex flex-col items-center gap-2"
-        >
-          <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">
-            {slots && slots.length > 0 ? "Next available" : "Walk-ins welcome"}
-          </p>
-          <div className="flex gap-2 flex-wrap justify-center">
-            {slots && slots.length > 0 ? (
-              slots.slice(0, 3).map((slot, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1.5 rounded-full bg-accent/20 text-accent text-sm font-medium"
-                >
-                  {slot}
-                </span>
-              ))
-            ) : (
-              <span className="px-3 py-1.5 rounded-full bg-accent/20 text-accent text-sm font-medium">
-                Call for times
-              </span>
-            )}
-          </div>
-        </motion.div>
 
         {/* Navigation Buttons */}
         <motion.div
@@ -348,7 +321,7 @@ const Index = () => {
       </section>
 
       {/* Today's Availability */}
-      <div className="relative z-10 py-12">
+      <div className="relative z-10 py-6">
         <TodayAvailability />
       </div>
 
