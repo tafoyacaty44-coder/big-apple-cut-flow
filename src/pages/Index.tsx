@@ -43,20 +43,6 @@ const navItems = [
     onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/barbers')
   },
   { 
-    label: "Contact Us", 
-    onClick: (navigate: ReturnType<typeof useNavigate>) => {
-      const contactSection = document.getElementById('contact');
-      if (contactSection) {
-        contactSection.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        navigate('/');
-        setTimeout(() => {
-          document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      }
-    }
-  },
-  { 
     label: "Cuts & styles gallery", 
     onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/gallery')
   },
@@ -292,9 +278,14 @@ const Index = () => {
       <section className="relative z-10 flex flex-col items-center justify-center gap-8 px-4 py-12 pt-24">
         {/* Logo */}
         <motion.div
-          initial={{ opacity: 0, y: -18, scale: 0.9 }}
+          initial={{ opacity: 0, y: -24, scale: 0.92 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ 
+            duration: 1.4, 
+            ease: [0.16, 1, 0.3, 1],
+            opacity: { duration: 1.2 },
+            scale: { duration: 1.4 }
+          }}
           className="flex items-center justify-center"
         >
           <Logo size="lg" className="opacity-95 drop-shadow-[0_2px_10px_rgba(217,168,45,0.15)]" />
@@ -359,6 +350,14 @@ const Index = () => {
 
       {/* Today's Availability */}
       <div className="relative z-10 py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-primary-foreground text-center">
+            Live Availability
+          </h2>
+          <p className="text-center text-primary-foreground/70 mt-2">
+            Book your appointment today
+          </p>
+        </div>
         <TodayAvailability />
       </div>
     </main>

@@ -56,11 +56,7 @@ export const TodayAvailability = () => {
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <SectionHeading 
-            title="Today's Availability" 
-            subtitle="Book your appointment today"
-          />
+        <div className="flex justify-end mb-6">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span>Updated {formatDistance(dataUpdatedAt, new Date(), { addSuffix: true })}</span>
             <Button variant="ghost" size="sm" onClick={() => refetch()}>
