@@ -7,6 +7,15 @@ import { useQuery } from "@tanstack/react-query";
 import { getGalleryImages } from "@/lib/api/gallery";
 import { TodayAvailability } from "@/components/TodayAvailability";
 import React from "react";
+import haircut from "@/assets/services/haircut.jpg";
+import beardTrim from "@/assets/services/beard-trim.jpg";
+import combo from "@/assets/services/haircut-beard-combo.jpg";
+import royalShave from "@/assets/services/royal-shave.jpg";
+import haircutWash from "@/assets/services/haircut-wash.jpg";
+import seniorCut from "@/assets/services/senior-haircut.jpg";
+import blackMask from "@/assets/services/black-mask.jpg";
+import wisemanSpecial from "@/assets/services/wiseman-special.jpg";
+
 
 const navItems = [
   { 
@@ -154,16 +163,31 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
   );
 }
 
+// Fallback gallery images
+const fallbackImages = [
+  { id: '1', image_url: haircut, title: 'Classic Cuts', category: 'Haircuts' },
+  { id: '2', image_url: beardTrim, title: 'Beard Work', category: 'Beard Styling' },
+  { id: '3', image_url: combo, title: 'Full Service', category: 'Combo' },
+  { id: '4', image_url: royalShave, title: 'Royal Shave', category: 'Shaving' },
+  { id: '5', image_url: haircutWash, title: 'Premium Experience', category: 'Full Service' },
+  { id: '6', image_url: seniorCut, title: 'Senior Care', category: 'Haircuts' },
+  { id: '7', image_url: blackMask, title: 'Treatments', category: 'Spa' },
+  { id: '8', image_url: wisemanSpecial, title: 'Signature Looks', category: 'Transformations' }
+];
+
 function GalleryRow() {
   const reduce = useReducedMotion();
   const trackRef = React.useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = React.useState(0);
   const [active, setActive] = React.useState<string | null>(null);
 
-  const { data: images = [] } = useQuery({
+  const { data: dbImages } = useQuery({
     queryKey: ['landing-gallery'],
     queryFn: () => getGalleryImages(),
   });
+
+  // Use database images if available, otherwise use fallback
+  const images = dbImages && dbImages.length > 0 ? dbImages : fallbackImages;
 
   React.useEffect(() => {
     const el = trackRef.current;
@@ -177,20 +201,18 @@ function GalleryRow() {
     return () => obs.disconnect();
   }, [images]);
 
-  if (images.length === 0) return null;
-
   return (
     <section id="gallery" className="relative w-full px-0 pt-8 pb-14">
-      <div className="mx-auto max-w-6xl px-4">
-        <h2 className="mb-4 text-lg font-semibold tracking-wide text-primary-foreground/90">
-          Cuts & styles
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <h2 className="mb-6 text-2xl font-bold tracking-tight text-primary-foreground">
+          Cuts & Styles
         </h2>
       </div>
 
       <motion.div className="overflow-hidden">
         <motion.div
           ref={trackRef}
-          className="flex gap-3 px-4"
+          className="flex gap-4 px-4 sm:px-6 cursor-grab active:cursor-grabbing"
           drag={reduce ? false : "x"}
           dragConstraints={{ left: -width, right: 0 }}
           dragElastic={0.04}
@@ -199,12 +221,12 @@ function GalleryRow() {
           {images.map((image) => (
             <motion.button
               key={image.id}
-              className="relative aspect-[4/5] w-[68vw] sm:w-[36vw] md:w-[28vw] lg:w-[22vw] overflow-hidden rounded-2xl bg-white/5"
+              className="relative aspect-[3/4] w-[75vw] sm:w-[45vw] md:w-[30vw] lg:w-[23vw] xl:w-[18vw] overflow-hidden rounded-xl bg-background/5 border border-border hover:border-accent transition-colors flex-shrink-0"
               whileHover={reduce ? undefined : { scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setActive(image.image_url)}
             >
-              <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-white/5 to-white/0" />
+              <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-muted/20 to-transparent" />
               <img
                 src={image.image_url}
                 loading="lazy"
@@ -215,13 +237,23 @@ function GalleryRow() {
                     ?.classList.add("hidden")
                 }
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
+                <div className="absolute bottom-3 left-3 right-3">
+                  {image.title && (
+                    <p className="text-white font-semibold text-sm mb-1">{image.title}</p>
+                  )}
+                  <span className="inline-block px-2 py-1 bg-accent text-accent-foreground text-xs font-semibold rounded">
+                    {image.category}
+                  </span>
+                </div>
+              </div>
             </motion.button>
           ))}
         </motion.div>
       </motion.div>
 
       {!reduce && (
-        <p className="mt-3 px-4 text-center text-xs text-primary-foreground/60">
+        <p className="mt-4 px-4 text-center text-sm text-muted-foreground">
           Drag to browse • Tap to enlarge
         </p>
       )}

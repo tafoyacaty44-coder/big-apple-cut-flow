@@ -43,10 +43,10 @@ const Gallery = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 max-w-7xl mx-auto">
             {isLoading ? (
               Array.from({ length: 8 }).map((_, index) => (
-                <Skeleton key={index} className="aspect-square rounded-lg" />
+                <Skeleton key={index} className="aspect-[3/4] rounded-lg" />
               ))
             ) : filteredImages.length === 0 ? (
               <div className="col-span-full text-center py-12">
@@ -56,20 +56,20 @@ const Gallery = () => {
               filteredImages.map((image) => (
                 <div 
                   key={image.id}
-                  className="group relative overflow-hidden rounded-lg border-2 border-border hover:border-[hsl(var(--accent))] transition-all duration-300 aspect-square cursor-pointer"
+                  className="group relative overflow-hidden rounded-lg aspect-[3/4] cursor-pointer border border-border hover:border-accent transition-all duration-300"
                 >
                   <img 
                     src={image.image_url} 
-                    alt={image.title || `${image.category} example`}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    alt={image.title || `${image.category} style`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute bottom-4 left-4 right-4">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-3 left-3 right-3">
                       {image.title && (
-                        <p className="text-white font-semibold mb-1">{image.title}</p>
+                        <p className="text-white font-semibold text-sm mb-1">{image.title}</p>
                       )}
-                      <span className="inline-block px-3 py-1 bg-[hsl(var(--accent))] text-black text-sm font-semibold rounded-full">
+                      <span className="inline-block px-2 py-1 bg-accent text-accent-foreground text-xs font-semibold rounded">
                         {image.category}
                       </span>
                     </div>
