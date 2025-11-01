@@ -1409,7 +1409,7 @@ export type Database = {
         | "referral"
         | "social_share"
         | "redeemed"
-      service_category: "haircut" | "shave" | "combo" | "treatment"
+      service_category: "haircut" | "shave" | "combo" | "treatment" | "addon"
       target_audience:
         | "all_customers"
         | "vip_only"
@@ -1576,7 +1576,7 @@ export const Constants = {
         "social_share",
         "redeemed",
       ],
-      service_category: ["haircut", "shave", "combo", "treatment"],
+      service_category: ["haircut", "shave", "combo", "treatment", "addon"],
       target_audience: [
         "all_customers",
         "vip_only",
