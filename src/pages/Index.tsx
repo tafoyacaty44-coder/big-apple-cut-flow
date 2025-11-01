@@ -320,14 +320,14 @@ const Index = () => {
         </motion.div>
       </section>
 
+      {/* Gallery Section */}
+      <div className="relative z-10 pt-6">
+        <GalleryRow />
+      </div>
+
       {/* Today's Availability */}
       <div className="relative z-10 py-6">
         <TodayAvailability />
-      </div>
-
-      {/* Gallery Section */}
-      <div className="relative z-10">
-        <GalleryRow />
       </div>
     </main>
   );
