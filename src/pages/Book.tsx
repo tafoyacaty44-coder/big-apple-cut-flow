@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Calendar, AlertCircle, CheckCircle, User as UserIcon, Scissors, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getServices } from '@/lib/api/services';
+import { getServices, getAddonServices } from '@/lib/api/services';
 import { getBarbersWithRealAvailability } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
@@ -51,11 +51,19 @@ const Book = () => {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoCampaignId, setPromoCampaignId] = useState<string | undefined>();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'zelle' | 'apple_pay' | 'venmo' | 'cash_app' | null>(null);
-  const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, setBlacklisted, resetBooking } = useBooking();
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+  const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, setBlacklisted, setSelectedAddons, resetBooking } = useBooking();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Sync selected add-ons with booking context
+  useEffect(() => {
+    if (booking.selectedAddonIds.length > 0 && selectedAddonIds.length === 0) {
+      setSelectedAddonIds(booking.selectedAddonIds);
+    }
+  }, [booking.selectedAddonIds]);
 
   // Check if mobile
   useEffect(() => {
@@ -83,6 +91,14 @@ const Book = () => {
 
   const selectedService = services.find((s) => s.id === booking.selectedServiceId);
 
+  const { data: addonServices = [], isLoading: isLoadingAddons } = useQuery({
+    queryKey: ['services', 'addons'],
+    queryFn: getAddonServices,
+    enabled: !!booking.selectedServiceId,
+  });
+
+  const selectedAddons = addonServices.filter(addon => selectedAddonIds.includes(addon.id));
+
   const { data: barbers = [], isLoading: isLoadingBarbers } = useQuery({
     queryKey: ['barbers', 'real-availability', selectedService?.duration_minutes],
     queryFn: () => getBarbersWithRealAvailability(selectedService?.duration_minutes || 30),
@@ -91,6 +107,15 @@ const Book = () => {
 
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
+    setSelectedAddonIds([]); // Reset add-ons when service changes
+  };
+
+  const handleAddonToggle = (addonId: string) => {
+    setSelectedAddonIds(prev => 
+      prev.includes(addonId) 
+        ? prev.filter(id => id !== addonId)
+        : [...prev, addonId]
+    );
   };
 
   const handleBarberSelect = (barberId: string, barberName: string) => {
@@ -163,7 +188,13 @@ const Book = () => {
 
   const canContinueStep = (step: number) => {
     if (step === 1) return !!booking.customerInfo;
-    if (step === 2) return !!booking.selectedServiceId;
+    if (step === 2) {
+      // Save add-ons to context when continuing from step 2
+      if (selectedAddonIds.length > 0) {
+        setSelectedAddons(selectedAddonIds);
+      }
+      return !!booking.selectedServiceId;
+    }
     if (step === 3) return !!booking.selectedBarberId && !!booking.selectedDate && !!booking.selectedTime;
     if (step === 4) return !!(booking.selectedServiceId && booking.selectedBarberId && booking.selectedDate && booking.selectedTime && booking.customerInfo && selectedPaymentMethod);
     return false;
@@ -194,6 +225,7 @@ const Book = () => {
           promo_code: promoCode || null,
           campaign_id: promoCampaignId || null,
           payment_method: selectedPaymentMethod,
+          addon_service_ids: selectedAddonIds.length > 0 ? selectedAddonIds : null,
         },
       });
 
@@ -222,6 +254,7 @@ const Book = () => {
       
       const params = new URLSearchParams({
         confirmation: data.confirmation_number,
+        appointmentId: data.appointment_id,
         service: selectedSvc?.name || '',
         barber: booking.selectedBarberName || '',
         date: booking.selectedDate ? format(booking.selectedDate, 'yyyy-MM-dd') : '',
@@ -269,6 +302,7 @@ const Book = () => {
               selectedDate={booking.selectedDate}
               selectedTime={booking.selectedTime}
               customerInfo={booking.customerInfo}
+              selectedAddons={selectedAddons}
               onEditStep={handleEditStep}
               onContinue={() => {
                 if (currentStep === 1 && canContinueStep(1)) setCurrentStep(2);
@@ -278,6 +312,7 @@ const Book = () => {
               }}
               canContinue={canContinueStep(currentStep)}
               customerInfoFormId="customer-info-form"
+              isVip={vipCodeValid}
             />
           </div>
         )}
@@ -294,11 +329,16 @@ const Book = () => {
                 <div className="text-sm text-muted-foreground truncate">
                   {booking.customerInfo?.name}
                   {selectedService && ` • ${selectedService.name}`}
+                  {selectedAddons.length > 0 && ` +${selectedAddons.length}`}
                   {booking.selectedBarberName && ` • ${booking.selectedBarberName}`}
                 </div>
               </div>
               <div className="text-[hsl(var(--accent))] font-bold">
-                ${selectedService?.regular_price || 0}
+                ${(() => {
+                  const basePrice = selectedService?.regular_price || 0;
+                  const addonTotal = selectedAddons.reduce((sum, addon) => sum + addon.regular_price, 0);
+                  return (basePrice + addonTotal).toFixed(2);
+                })()}
               </div>
             </button>
           </div>
@@ -408,6 +448,73 @@ const Book = () => {
                     })}
                   </div>
                 )}
+
+                {/* Add-Ons Section */}
+                {booking.selectedServiceId && (
+                  <div className="mt-8 pt-8 border-t">
+                    <div className="mb-4">
+                      <h3 className="text-2xl font-bold mb-2">Enhance Your Service</h3>
+                      <p className="text-muted-foreground">
+                        Select optional add-ons to complete your experience
+                      </p>
+                    </div>
+                    
+                    {isLoadingAddons ? (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {[1, 2, 3].map((i) => (
+                          <Card key={i} className="animate-pulse">
+                            <CardContent className="p-4">
+                              <div className="h-20 bg-muted rounded" />
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : addonServices.length > 0 ? (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {addonServices.map((addon) => {
+                            const isSelected = selectedAddonIds.includes(addon.id);
+                            
+                            return (
+                              <Card
+                                key={addon.id}
+                                className={cn(
+                                  "cursor-pointer transition-all hover:shadow-md active:scale-[0.98]",
+                                  isSelected && 'border-[hsl(var(--accent))] border-2 bg-[hsl(var(--accent))]/5'
+                                )}
+                                onClick={() => handleAddonToggle(addon.id)}
+                              >
+                                <CardContent className="p-4">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <h4 className="font-bold">{addon.name}</h4>
+                                    {isSelected && (
+                                      <CheckCircle className="h-5 w-5 text-[hsl(var(--accent))] flex-shrink-0" />
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mb-3">
+                                    {addon.description}
+                                  </p>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-sm font-bold text-[hsl(var(--accent))]">
+                                      +${addon.regular_price}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      +{addon.duration_minutes} min
+                                    </span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-3 text-center">
+                          💡 Add-ons can be selected or deselected at any time
+                        </p>
+                      </>
+                    ) : null}
+                  </div>
+                )}
+
                 {isMobile && (
                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                     <GoldButton

@@ -11,6 +11,7 @@ interface BookingSidebarProps {
   selectedDate?: Date | null;
   selectedTime?: string | null;
   customerInfo?: { name: string; email: string; phone: string } | null;
+  selectedAddons?: Array<{ name: string; regular_price: number; vip_price?: number }>;
   onEditStep: (step: number) => void;
   onContinue: () => void;
   canContinue: boolean;
@@ -25,6 +26,7 @@ export const BookingSidebar = ({
   selectedDate,
   selectedTime,
   customerInfo,
+  selectedAddons = [],
   onEditStep,
   onContinue,
   canContinue,
@@ -47,7 +49,7 @@ export const BookingSidebar = ({
       icon: Scissors,
       completed: !!selectedService,
       content: selectedService
-        ? `${selectedService.name} - $${isVip && selectedService.vip_price ? selectedService.vip_price : selectedService.price}`
+        ? `${selectedService.name}${selectedAddons.length > 0 ? ` +${selectedAddons.length} add-on${selectedAddons.length > 1 ? 's' : ''}` : ''}`
         : "Select a service",
     },
     {
@@ -70,7 +72,11 @@ export const BookingSidebar = ({
 
   const calculateTotal = () => {
     if (!selectedService) return 0;
-    return isVip && selectedService.vip_price ? selectedService.vip_price : selectedService.price;
+    const basePrice = isVip && selectedService.vip_price ? selectedService.vip_price : selectedService.price;
+    const addonTotal = selectedAddons.reduce((sum, addon) => {
+      return sum + (isVip && addon.vip_price ? addon.vip_price : addon.regular_price);
+    }, 0);
+    return basePrice + addonTotal;
   };
 
   return (

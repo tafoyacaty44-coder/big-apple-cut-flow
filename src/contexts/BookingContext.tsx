@@ -23,6 +23,7 @@ interface BookingState {
     phone: string;
   } | null;
   isBlacklisted: boolean;
+  selectedAddonIds: string[];
 }
 
 interface PrefilledData {
@@ -42,6 +43,7 @@ interface BookingContextType {
   setCustomerInfo: (info: { name: string; email: string; phone: string }) => void;
   setBlacklisted: (status: boolean) => void;
   setPrefilled: (data: PrefilledData) => void;
+  setSelectedAddons: (addonIds: string[]) => void;
   resetBooking: () => void;
 }
 
@@ -57,6 +59,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
     selectedTime: null,
     customerInfo: null,
     isBlacklisted: false,
+    selectedAddonIds: [],
   });
 
   const setSelectedService = (serviceId: string) => {
@@ -88,6 +91,10 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
     setBooking((prev) => ({ ...prev, isBlacklisted: status }));
   };
 
+  const setSelectedAddons = (addonIds: string[]) => {
+    setBooking((prev) => ({ ...prev, selectedAddonIds: addonIds }));
+  };
+
   const setPrefilled = (data: PrefilledData) => {
     const updates: Partial<BookingState> = {};
     
@@ -112,6 +119,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
       selectedTime: null,
       customerInfo: null,
       isBlacklisted: false,
+      selectedAddonIds: [],
     });
   };
 
@@ -126,6 +134,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
         setCustomerInfo,
         setBlacklisted,
         setPrefilled,
+        setSelectedAddons,
         resetBooking,
       }}
     >

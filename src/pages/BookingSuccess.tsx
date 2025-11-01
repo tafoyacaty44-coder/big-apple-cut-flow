@@ -4,15 +4,18 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
-import { CheckCircle2, CheckCircle, Calendar, Clock, User, Mail, Phone } from 'lucide-react';
+import { CheckCircle2, CheckCircle, Calendar, Clock, User, Mail, Phone, Plus } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { format } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const BookingSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
   const confirmationNumber = searchParams.get('confirmation');
+  const appointmentId = searchParams.get('appointmentId');
   const serviceName = searchParams.get('service');
   const barberName = searchParams.get('barber');
   const date = searchParams.get('date');
@@ -22,6 +25,34 @@ const BookingSuccess = () => {
   const customerPhone = searchParams.get('phone');
   const vipApplied = searchParams.get('vip') === 'true';
   const paymentMethod = searchParams.get('payment_method') || 'zelle';
+
+  // Fetch appointment add-ons
+  const { data: appointmentAddons = [] } = useQuery({
+    queryKey: ['appointment-addons', appointmentId],
+    queryFn: async () => {
+      if (!appointmentId) return [];
+      
+      const { data, error } = await supabase
+        .from('appointment_addons')
+        .select(`
+          addon_service_id,
+          price_paid,
+          services (
+            name,
+            duration_minutes
+          )
+        `)
+        .eq('appointment_id', appointmentId);
+      
+      if (error) {
+        console.error('Error fetching add-ons:', error);
+        return [];
+      }
+      
+      return data || [];
+    },
+    enabled: !!appointmentId,
+  });
 
   useEffect(() => {
     if (!confirmationNumber) {
@@ -81,9 +112,27 @@ const BookingSuccess = () => {
 
                 <div className="flex items-start gap-3">
                   <Clock className="h-5 w-5 text-[hsl(var(--accent))] mt-0.5" />
-                  <div>
+                  <div className="flex-1">
                     <p className="font-semibold">Service</p>
                     <p className="text-muted-foreground">{serviceName}</p>
+                    {appointmentAddons.length > 0 && (
+                      <div className="mt-2 p-3 bg-muted/50 rounded-lg">
+                        <p className="text-sm font-semibold mb-2 flex items-center gap-2">
+                          <Plus className="h-4 w-4" />
+                          Add-Ons:
+                        </p>
+                        <ul className="space-y-1">
+                          {appointmentAddons.map((addon: any) => (
+                            <li key={addon.addon_service_id} className="text-sm flex justify-between">
+                              <span>• {addon.services.name}</span>
+                              <span className="text-muted-foreground">
+                                ${(addon.price_paid / 100).toFixed(2)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
 

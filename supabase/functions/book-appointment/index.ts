@@ -18,6 +18,7 @@ interface BookingRequest {
   promo_code?: string;
   campaign_id?: string;
   payment_method?: 'zelle' | 'apple_pay' | 'venmo' | 'cash_app';
+  addon_service_ids?: string[];
 }
 
 Deno.serve(async (req) => {
@@ -100,8 +101,38 @@ Deno.serve(async (req) => {
       .eq('id', booking.service_id)
       .single();
 
+    // Get addon durations if provided
+    let totalAddonDuration = 0;
+    let addons: Array<{ id: string; default_price_cents: number; vip_price_cents: number | null }> = [];
+    if (booking.addon_service_ids && booking.addon_service_ids.length > 0) {
+      const { data: addonServices } = await supabase
+        .from('services')
+        .select('id, duration_minutes')
+        .in('id', booking.addon_service_ids);
+      
+      if (addonServices) {
+        totalAddonDuration = addonServices.reduce((sum, addon) => sum + addon.duration_minutes, 0);
+      }
+
+      // Get addon prices
+      const { data: addonPrices } = await supabase
+        .from('service_prices')
+        .select('service_id, default_price_cents, vip_price_cents')
+        .in('service_id', booking.addon_service_ids)
+        .eq('barber_id', booking.barber_id);
+      
+      if (addonPrices) {
+        addons = addonPrices.map(p => ({
+          id: p.service_id,
+          default_price_cents: p.default_price_cents,
+          vip_price_cents: p.vip_price_cents,
+        }));
+      }
+    }
+
+    const totalDuration = (service?.duration_minutes || 30) + totalAddonDuration;
     const startTime = new Date(`${booking.appointment_date}T${booking.appointment_time}`).toISOString();
-    const endTime = new Date(new Date(startTime).getTime() + (service?.duration_minutes || 30) * 60000).toISOString();
+    const endTime = new Date(new Date(startTime).getTime() + totalDuration * 60000).toISOString();
 
     // Check if slot is available
     const { data: existingAppointments } = await supabase
@@ -115,7 +146,7 @@ Deno.serve(async (req) => {
     if (existingAppointments && existingAppointments.length > 0) {
       const conflict = existingAppointments.some(apt => {
         const aptStart = new Date(`${apt.appointment_date}T${apt.appointment_time}`);
-        const aptEnd = new Date(aptStart.getTime() + (service?.duration_minutes || 30) * 60000);
+        const aptEnd = new Date(aptStart.getTime() + totalDuration * 60000);
         const bookingStart = new Date(startTime);
         const bookingEnd = new Date(endTime);
         return (bookingStart < aptEnd && bookingEnd > aptStart);
@@ -242,6 +273,23 @@ Deno.serve(async (req) => {
 
       if (paymentError) {
         console.error('Payment record error:', paymentError);
+      }
+    }
+
+    // Insert add-ons if provided
+    if (addons.length > 0) {
+      const addonRecords = addons.map(addon => ({
+        appointment_id: appointment.id,
+        addon_service_id: addon.id,
+        price_paid: vipApplied && addon.vip_price_cents ? addon.vip_price_cents : addon.default_price_cents,
+      }));
+      
+      const { error: insertAddonsError } = await supabase
+        .from('appointment_addons')
+        .insert(addonRecords);
+      
+      if (insertAddonsError) {
+        console.error('Error inserting add-ons:', insertAddonsError);
       }
     }
 

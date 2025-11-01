@@ -38,6 +38,18 @@ export const getServiceById = async (id: string): Promise<Service | null> => {
 // Alias for getServices (for consistency)
 export const getActiveServices = getServices;
 
+export const getAddonServices = async (): Promise<Service[]> => {
+  const { data, error } = await supabase
+    .from('services')
+    .select('*')
+    .eq('is_active', true)
+    .eq('category', 'addon')
+    .order('display_order');
+
+  if (error) throw error;
+  return data || [];
+};
+
 export const updateServiceVipPrice = async (
   serviceId: string,
   vipPrice: number

@@ -46,6 +46,45 @@ export type Database = {
           },
         ]
       }
+      appointment_addons: {
+        Row: {
+          addon_service_id: string
+          appointment_id: string
+          created_at: string | null
+          id: string
+          price_paid: number
+        }
+        Insert: {
+          addon_service_id: string
+          appointment_id: string
+          created_at?: string | null
+          id?: string
+          price_paid: number
+        }
+        Update: {
+          addon_service_id?: string
+          appointment_id?: string
+          created_at?: string | null
+          id?: string
+          price_paid?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_addons_addon_service_id_fkey"
+            columns: ["addon_service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_addons_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           appointment_date: string
