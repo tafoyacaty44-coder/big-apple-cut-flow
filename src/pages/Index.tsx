@@ -190,9 +190,9 @@ function GalleryRow() {
   return (
     <section id="gallery" className="relative w-full px-0 pt-8 pb-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <h2 className="mb-6 text-2xl font-bold tracking-tight text-primary-foreground">
-          Cuts & Styles
-        </h2>
+          <h2 className="mb-6 text-3xl md:text-4xl font-bold tracking-tight text-primary-foreground text-center">
+            Cuts & Styles
+          </h2>
       </div>
 
       <motion.div className="overflow-hidden">
