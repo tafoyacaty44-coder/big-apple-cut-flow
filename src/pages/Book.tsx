@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
-import { Calendar, AlertCircle } from 'lucide-react';
+import { Calendar, AlertCircle, CheckCircle, User as UserIcon, Scissors, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getServices } from '@/lib/api/services';
 import { getBarbersWithRealAvailability } from '@/lib/api/barbers';
@@ -19,7 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { BookingSidebar } from '@/components/booking/BookingSidebar';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import haircutImg from '@/assets/services/haircut.jpg';
 import seniorImg from '@/assets/services/senior-haircut.jpg';
@@ -50,6 +50,7 @@ const Book = () => {
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoCampaignId, setPromoCampaignId] = useState<string | undefined>();
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'zelle' | 'apple_pay' | 'venmo' | 'cash_app' | null>(null);
   const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, setBlacklisted, resetBooking } = useBooking();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -164,7 +165,7 @@ const Book = () => {
     if (step === 1) return !!booking.customerInfo;
     if (step === 2) return !!booking.selectedServiceId;
     if (step === 3) return !!booking.selectedBarberId && !!booking.selectedDate && !!booking.selectedTime;
-    if (step === 4) return !!(booking.selectedServiceId && booking.selectedBarberId && booking.selectedDate && booking.selectedTime && booking.customerInfo);
+    if (step === 4) return !!(booking.selectedServiceId && booking.selectedBarberId && booking.selectedDate && booking.selectedTime && booking.customerInfo && selectedPaymentMethod);
     return false;
   };
 
@@ -192,6 +193,7 @@ const Book = () => {
           vip_code: vipCode || null,
           promo_code: promoCode || null,
           campaign_id: promoCampaignId || null,
+          payment_method: selectedPaymentMethod,
         },
       });
 
@@ -228,6 +230,7 @@ const Book = () => {
         email: booking.customerInfo?.email || '',
         phone: booking.customerInfo?.phone || '',
         vip: data.vip_applied ? 'true' : 'false',
+        payment_method: selectedPaymentMethod || 'zelle',
       });
 
       resetBooking();
@@ -497,6 +500,15 @@ const Book = () => {
                   <p className="text-muted-foreground">Confirm your details and complete booking</p>
                 </div>
 
+                {/* Payment Verification Alert */}
+                <Alert className="bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]/30">
+                  <AlertCircle className="h-4 w-4 text-[hsl(var(--accent))]" />
+                  <AlertTitle className="text-[hsl(var(--accent))]">📋 Payment Verification Required</AlertTitle>
+                  <AlertDescription>
+                    Your appointment will be pending until we verify your payment. Once payment is confirmed, we'll send you a confirmation email (typically within 2-4 hours).
+                  </AlertDescription>
+                </Alert>
+
                 {/* Booking Summary Card */}
                 <Card className="border-[hsl(var(--accent))]/20 bg-muted/50">
                   <CardContent className="p-6">
@@ -533,6 +545,58 @@ const Book = () => {
                         <span className="font-bold text-[hsl(var(--accent))]">${selectedService.regular_price}</span>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* Payment Method Selection */}
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold mb-2">Select Payment Method</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Choose how you'll send your payment. You'll need to complete payment after booking.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                      {[
+                        { id: 'zelle' as const, name: 'Zelle', info: 'info@bigapplebarbershop.com' },
+                        { id: 'apple_pay' as const, name: 'Apple Pay', info: '(555) 123-4567' },
+                        { id: 'venmo' as const, name: 'Venmo', info: '@BigAppleBarberShop' },
+                        { id: 'cash_app' as const, name: 'Cash App', info: '$BigAppleBarbers' },
+                      ].map((method) => (
+                        <button
+                          key={method.id}
+                          type="button"
+                          onClick={() => setSelectedPaymentMethod(method.id)}
+                          className={`p-4 border-2 rounded-lg text-left transition-all ${
+                            selectedPaymentMethod === method.id
+                              ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10'
+                              : 'border-border hover:border-[hsl(var(--accent))]/50'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="font-semibold mb-1">{method.name}</p>
+                              <p className="text-xs text-muted-foreground">{method.info}</p>
+                            </div>
+                            {selectedPaymentMethod === method.id && (
+                              <CheckCircle className="h-5 w-5 text-[hsl(var(--accent))] flex-shrink-0" />
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {selectedPaymentMethod && (
+                      <Alert className="bg-[hsl(var(--accent))]/5 border-[hsl(var(--accent))]/20">
+                        <AlertDescription className="text-sm">
+                          After completing your booking, send ${selectedService.regular_price} via {
+                            selectedPaymentMethod === 'zelle' ? 'Zelle' :
+                            selectedPaymentMethod === 'apple_pay' ? 'Apple Pay' :
+                            selectedPaymentMethod === 'venmo' ? 'Venmo' : 'Cash App'
+                          } and include your confirmation number in the payment note.
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </CardContent>
                 </Card>
 

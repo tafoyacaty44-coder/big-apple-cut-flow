@@ -17,6 +17,7 @@ interface BookingRequest {
   vip_code?: string;
   promo_code?: string;
   campaign_id?: string;
+  payment_method?: 'zelle' | 'apple_pay' | 'venmo' | 'cash_app';
 }
 
 Deno.serve(async (req) => {
@@ -228,11 +229,13 @@ Deno.serve(async (req) => {
 
     // If prepayment required, create pending payment record
     if (requirePrepayment) {
+      const paymentMethod = booking.payment_method || 'zelle'; // Use customer's selected method or default to zelle
+      
       const { error: paymentError } = await supabase
         .from('payments')
         .insert({
           appointment_id: appointment.id,
-          method: 'zelle', // Default, will be updated by customer
+          method: paymentMethod,
           amount_cents: priceToUse,
           status: 'pending',
         });

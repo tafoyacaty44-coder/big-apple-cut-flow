@@ -32,7 +32,7 @@ const PaymentRequired = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedMethod, setSelectedMethod] = useState<'zelle' | 'apple_pay' | 'cash_app' | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<'zelle' | 'apple_pay' | 'venmo' | 'cash_app' | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [reference, setReference] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -40,8 +40,9 @@ const PaymentRequired = ({
   const amount = (amountCents / 100).toFixed(2);
 
   const paymentMethods = [
-    { id: 'zelle' as const, name: 'Zelle', instructions: 'Send to @BigAppleBarbers' },
+    { id: 'zelle' as const, name: 'Zelle', instructions: 'Send to info@bigapplebarbershop.com' },
     { id: 'apple_pay' as const, name: 'Apple Pay', instructions: 'Send to (555) 123-4567' },
+    { id: 'venmo' as const, name: 'Venmo', instructions: 'Send to @BigAppleBarberShop' },
     { id: 'cash_app' as const, name: 'Cash App', instructions: 'Send to $BigAppleBarbers' },
   ];
 

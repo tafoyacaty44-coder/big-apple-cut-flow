@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface Payment {
   id: string;
   appointment_id: string;
-  method: 'zelle' | 'apple_pay' | 'cash_app';
+  method: 'zelle' | 'apple_pay' | 'venmo' | 'cash_app';
   amount_cents: number;
   reference: string | null;
   proof_url: string | null;
@@ -46,7 +46,7 @@ export const uploadPaymentProof = async (
 
 export const submitPayment = async (paymentData: {
   appointmentId: string;
-  method: 'zelle' | 'apple_pay' | 'cash_app';
+  method: 'zelle' | 'apple_pay' | 'venmo' | 'cash_app';
   amountCents: number;
   reference?: string;
   proofUrl?: string;

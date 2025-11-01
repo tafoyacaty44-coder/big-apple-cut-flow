@@ -4,7 +4,8 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
-import { CheckCircle2, Calendar, Clock, User, Mail, Phone } from 'lucide-react';
+import { CheckCircle2, CheckCircle, Calendar, Clock, User, Mail, Phone } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { format } from 'date-fns';
 
 const BookingSuccess = () => {
@@ -20,6 +21,7 @@ const BookingSuccess = () => {
   const customerEmail = searchParams.get('email');
   const customerPhone = searchParams.get('phone');
   const vipApplied = searchParams.get('vip') === 'true';
+  const paymentMethod = searchParams.get('payment_method') || 'zelle';
 
   useEffect(() => {
     if (!confirmationNumber) {
@@ -125,27 +127,48 @@ const BookingSuccess = () => {
 
             {/* Payment Instructions - IMPORTANT */}
             <Card className="p-6 mb-6 border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10">
-              <h2 className="text-xl font-bold mb-3 text-[hsl(var(--accent))]">💳 Payment Required</h2>
-              <div className="space-y-3">
-                <p className="font-semibold">To confirm your appointment, please send payment via:</p>
-                <div className="bg-background p-4 rounded-lg space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">Zelle:</span>
-                    <span className="font-mono">info@bigapplebarbershop.com</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">Apple Pay:</span>
-                    <span className="font-mono">(555) 123-4567</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">Venmo:</span>
-                    <span className="font-mono">@BigAppleBarberShop</span>
+              <h2 className="text-xl font-bold mb-3 text-[hsl(var(--accent))]">
+                ⏳ Payment Required - Appointment Pending
+              </h2>
+              <div className="space-y-4">
+                <Alert className="bg-[hsl(var(--accent))]/20 border-[hsl(var(--accent))]">
+                  <AlertDescription className="font-semibold">
+                    Your appointment will be confirmed once we verify your payment (typically within 2-4 hours during business hours).
+                  </AlertDescription>
+                </Alert>
+
+                <div>
+                  <p className="font-semibold mb-3">Send payment via your selected method:</p>
+                  <div className="bg-background p-4 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-bold text-[hsl(var(--accent))]">
+                        {paymentMethod === 'zelle' && 'Zelle'}
+                        {paymentMethod === 'apple_pay' && 'Apple Pay'}
+                        {paymentMethod === 'venmo' && 'Venmo'}
+                        {paymentMethod === 'cash_app' && 'Cash App'}
+                      </span>
+                      <CheckCircle className="h-5 w-5 text-[hsl(var(--accent))]" />
+                    </div>
+                    <p className="font-mono text-lg">
+                      {paymentMethod === 'zelle' && 'info@bigapplebarbershop.com'}
+                      {paymentMethod === 'apple_pay' && '(555) 123-4567'}
+                      {paymentMethod === 'venmo' && '@BigAppleBarberShop'}
+                      {paymentMethod === 'cash_app' && '$BigAppleBarbers'}
+                    </p>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-3">
-                  ⚠️ Your appointment will be confirmed once payment is received. 
-                  Please include your confirmation number <strong>{confirmationNumber}</strong> in the payment note.
-                </p>
+
+                <Alert>
+                  <AlertDescription className="text-sm space-y-2">
+                    <p className="font-semibold">⚠️ Important Payment Instructions:</p>
+                    <ol className="list-decimal ml-4 space-y-1">
+                      <li>Send the payment amount shown above</li>
+                      <li>Include confirmation number <strong className="text-[hsl(var(--accent))]">{confirmationNumber}</strong> in the payment note</li>
+                      <li>Keep your payment receipt/screenshot</li>
+                      <li>We'll email you once payment is verified</li>
+                    </ol>
+                  </AlertDescription>
+                </Alert>
               </div>
             </Card>
 
@@ -154,15 +177,19 @@ const BookingSuccess = () => {
               <h2 className="text-xl font-bold mb-3">What's Next?</h2>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start gap-2">
-                  <span className="text-[hsl(var(--accent))]">•</span>
-                  <span>A confirmation email has been sent to {customerEmail}</span>
+                  <span className="text-[hsl(var(--accent))]">1.</span>
+                  <span><strong>Send your payment now</strong> using the method you selected above</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[hsl(var(--accent))]">•</span>
+                  <span className="text-[hsl(var(--accent))]">2.</span>
+                  <span><strong>Wait for confirmation</strong> - We'll verify your payment and email you within 2-4 hours</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[hsl(var(--accent))]">3.</span>
                   <span>You'll receive a reminder 24 hours before your appointment</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[hsl(var(--accent))]">•</span>
+                  <span className="text-[hsl(var(--accent))]">4.</span>
                   <span>Please arrive 5 minutes early for your appointment</span>
                 </li>
                 <li className="flex items-start gap-2">

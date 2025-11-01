@@ -1396,7 +1396,7 @@ export type Database = {
       campaign_type: "promotional" | "announcement" | "seasonal" | "loyalty"
       job_status: "queued" | "sent" | "failed" | "canceled"
       override_kind: "open" | "closed"
-      payment_method: "zelle" | "apple_pay" | "cash_app"
+      payment_method: "zelle" | "apple_pay" | "cash_app" | "venmo"
       payment_method_enum: "zelle" | "apple_pay" | "cash_app"
       payment_status: "none" | "deposit_paid" | "fully_paid"
       payment_status_enum: "pending" | "verified" | "rejected"
@@ -1562,7 +1562,7 @@ export const Constants = {
       campaign_type: ["promotional", "announcement", "seasonal", "loyalty"],
       job_status: ["queued", "sent", "failed", "canceled"],
       override_kind: ["open", "closed"],
-      payment_method: ["zelle", "apple_pay", "cash_app"],
+      payment_method: ["zelle", "apple_pay", "cash_app", "venmo"],
       payment_method_enum: ["zelle", "apple_pay", "cash_app"],
       payment_status: ["none", "deposit_paid", "fully_paid"],
       payment_status_enum: ["pending", "verified", "rejected"],
