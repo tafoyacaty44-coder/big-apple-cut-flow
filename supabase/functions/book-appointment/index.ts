@@ -224,7 +224,7 @@ Deno.serve(async (req) => {
         appointment_date: booking.appointment_date,
         appointment_time: booking.appointment_time,
         payment_amount: priceToUse,
-        payment_status: vipApplied ? 'none' : 'pending',
+        payment_status: 'none',
         status: 'pending',
         vip_applied: vipApplied,
         require_prepayment: requirePrepayment,
