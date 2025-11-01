@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { MapPin, Phone } from "lucide-react";
 import { motion, type Variants, useReducedMotion } from "framer-motion";
 import { useNextAvailableSlots } from "@/hooks/useNextAvailableSlots";
+import { useQuery } from "@tanstack/react-query";
+import { getGalleryImages } from "@/lib/api/gallery";
 import React from "react";
 
 const navItems = [
@@ -103,6 +105,131 @@ const item: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
 
+function Lightbox({ src, onClose }: { src: string | null; onClose: () => void }) {
+  const reduce = useReducedMotion();
+
+  React.useEffect(() => {
+    if (!src) return;
+    const onKey = (e: KeyboardEvent) => { 
+      if (e.key === "Escape") onClose(); 
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { 
+      window.removeEventListener("keydown", onKey); 
+      document.body.style.overflow = ""; 
+    };
+  }, [src, onClose]);
+
+  if (!src) return null;
+  
+  return (
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.img
+        onClick={(e) => e.stopPropagation()}
+        initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+        animate={reduce ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        src={src}
+        alt="Style preview"
+        className="max-h-[85vh] max-w-[92vw] rounded-2xl shadow-2xl"
+      />
+      <button
+        aria-label="Close"
+        className="absolute top-4 right-4 rounded-full bg-white/10 hover:bg-white/20 text-white px-3 py-1"
+        onClick={onClose}
+      >
+        ✕
+      </button>
+    </motion.div>
+  );
+}
+
+function GalleryRow() {
+  const reduce = useReducedMotion();
+  const trackRef = React.useRef<HTMLDivElement | null>(null);
+  const [width, setWidth] = React.useState(0);
+  const [active, setActive] = React.useState<string | null>(null);
+
+  const { data: images = [] } = useQuery({
+    queryKey: ['landing-gallery'],
+    queryFn: () => getGalleryImages(),
+  });
+
+  React.useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const update = () => {
+      setWidth(el.scrollWidth - el.clientWidth);
+    };
+    update();
+    const obs = new ResizeObserver(update);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [images]);
+
+  if (images.length === 0) return null;
+
+  return (
+    <section id="gallery" className="relative w-full px-0 pt-8 pb-14">
+      <div className="mx-auto max-w-6xl px-4">
+        <h2 className="mb-4 text-lg font-semibold tracking-wide text-primary-foreground/90">
+          Cuts & styles
+        </h2>
+      </div>
+
+      <motion.div className="overflow-hidden">
+        <motion.div
+          ref={trackRef}
+          className="flex gap-3 px-4"
+          drag={reduce ? false : "x"}
+          dragConstraints={{ left: -width, right: 0 }}
+          dragElastic={0.04}
+          dragMomentum={true}
+        >
+          {images.map((image) => (
+            <motion.button
+              key={image.id}
+              className="relative aspect-[4/5] w-[68vw] sm:w-[36vw] md:w-[28vw] lg:w-[22vw] overflow-hidden rounded-2xl bg-white/5"
+              whileHover={reduce ? undefined : { scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setActive(image.image_url)}
+            >
+              <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-white/5 to-white/0" />
+              <img
+                src={image.image_url}
+                loading="lazy"
+                alt={image.title || `${image.category} style`}
+                className="h-full w-full object-cover"
+                onLoad={(e) => 
+                  (e.currentTarget.previousElementSibling as HTMLElement)
+                    ?.classList.add("hidden")
+                }
+              />
+            </motion.button>
+          ))}
+        </motion.div>
+      </motion.div>
+
+      {!reduce && (
+        <p className="mt-3 px-4 text-center text-xs text-primary-foreground/60">
+          Drag to browse • Tap to enlarge
+        </p>
+      )}
+
+      <Lightbox src={active} onClose={() => setActive(null)} />
+    </section>
+  );
+}
+
 const Index = () => {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
@@ -148,8 +275,32 @@ const Index = () => {
           className="text-sm text-primary-foreground/80"
           aria-label="rating"
         >
-          <span className="mr-1">⭐</span> 4.8 (<span className="tabular-nums">356</span> Google reviews) • East Village • Walk-ins welcome
+          <span className="mr-1">⭐</span> 4.8 (<span className="tabular-nums">356</span> Google reviews) • East Village
         </motion.p>
+
+        {/* Live Availability Teaser */}
+        {slots && slots.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.5, ease: "easeOut" }}
+            className="flex flex-col items-center gap-2"
+          >
+            <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">
+              Next available
+            </p>
+            <div className="flex gap-2 flex-wrap justify-center">
+              {slots.slice(0, 3).map((slot, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1.5 rounded-full bg-accent/20 text-accent text-sm font-medium"
+                >
+                  {slot}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Navigation Buttons */}
         <motion.div
@@ -158,25 +309,13 @@ const Index = () => {
           initial="hidden"
           animate="visible"
         >
-          {navItems.map((navItem, idx) => (
-            <div key={navItem.label} className="flex flex-col items-center gap-2">
-              <CTAButton 
-                label={navItem.label} 
-                onClick={() => navItem.onClick(navigate)}
-                primary={idx === 0 && navItem.primary}
-              />
-              {/* Live availability teaser under primary CTA only */}
-              {idx === 0 && slots && slots.length > 0 && (
-                <motion.p
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="text-xs text-primary-foreground/70"
-                >
-                  Next openings: {slots.join(" • ")}
-                </motion.p>
-              )}
-            </div>
+          {navItems.map((navItem) => (
+            <CTAButton 
+              key={navItem.label}
+              label={navItem.label} 
+              onClick={() => navItem.onClick(navigate)}
+              primary={navItem.primary}
+            />
           ))}
         </motion.div>
 
@@ -202,6 +341,11 @@ const Index = () => {
           </div>
         </motion.div>
       </section>
+
+      {/* Gallery Section */}
+      <div className="relative z-10">
+        <GalleryRow />
+      </div>
 
       {/* Sticky phone CTA */}
       <motion.a
