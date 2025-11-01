@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { Twilio } from 'npm:twilio@5.3.4';
+import twilio from 'npm:twilio@5.3.4';
 import sgMail from 'npm:@sendgrid/mail@8.1.4';
 
 const corsHeaders = {
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     );
 
     // Initialize Twilio and SendGrid
-    const twilioClient = new Twilio(
+    const twilioClient = twilio(
       Deno.env.get('TWILIO_ACCOUNT_SID'),
       Deno.env.get('TWILIO_AUTH_TOKEN')
     );
@@ -57,63 +57,97 @@ Deno.serve(async (req) => {
       .eq('id', campaign_id);
 
     // Get target clients based on audience filter
-    let clientsQuery = supabase
-      .from('clients')
-      .select('id, full_name, email, phone, opt_in_email, opt_in_sms');
+    let recipients: any[] = [];
 
-    // Apply audience filters
-    if (campaign.target_audience === 'vip_only') {
-      const { data: vipProfiles } = await supabase
-        .from('profiles')
-        .select('id')
-        .gte('rewards_points', 500);
-      
-      if (vipProfiles && vipProfiles.length > 0) {
-        const vipIds = vipProfiles.map(p => p.id);
-        clientsQuery = clientsQuery.in('linked_profile_id', vipIds);
+    // Handle custom recipients
+    if (campaign.target_audience === 'custom') {
+      // Fetch specific clients by IDs
+      if (campaign.custom_recipient_ids && Array.isArray(campaign.custom_recipient_ids) && campaign.custom_recipient_ids.length > 0) {
+        const { data: customClients, error: customClientsError } = await supabase
+          .from('clients')
+          .select('id, full_name, email, phone, opt_in_email, opt_in_sms')
+          .in('id', campaign.custom_recipient_ids);
+
+        if (customClientsError) {
+          console.error('Error fetching custom clients:', customClientsError);
+        } else {
+          recipients = customClients || [];
+        }
       }
-    } else if (campaign.target_audience === 'recent_customers') {
-      const ninetyDaysAgo = new Date();
-      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-      
-      const { data: recentAppointments } = await supabase
-        .from('appointments')
-        .select('client_id')
-        .gte('appointment_date', ninetyDaysAgo.toISOString().split('T')[0])
-        .not('client_id', 'is', null);
-      
-      if (recentAppointments && recentAppointments.length > 0) {
-        const clientIds = [...new Set(recentAppointments.map(a => a.client_id))];
-        clientsQuery = clientsQuery.in('id', clientIds);
+
+      // Add manually entered phone numbers as temporary client records
+      if (campaign.custom_phone_numbers && Array.isArray(campaign.custom_phone_numbers) && campaign.custom_phone_numbers.length > 0) {
+        const manualClients = campaign.custom_phone_numbers.map((phone: string) => ({
+          id: `manual-${phone}`,
+          full_name: phone,
+          email: null,
+          phone: phone,
+          opt_in_email: false,
+          opt_in_sms: true
+        }));
+        recipients = [...recipients, ...manualClients];
       }
-    } else if (campaign.target_audience === 'inactive_customers') {
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      
-      const { data: recentAppointments } = await supabase
-        .from('appointments')
-        .select('client_id')
-        .gte('appointment_date', sixMonthsAgo.toISOString().split('T')[0])
-        .not('client_id', 'is', null);
-      
-      const recentClientIds = recentAppointments?.map(a => a.client_id) || [];
-      
-      if (recentClientIds.length > 0) {
-        clientsQuery = clientsQuery.not('id', 'in', `(${recentClientIds.join(',')})`);
+    } else {
+      // Original audience-based logic
+      let clientsQuery = supabase
+        .from('clients')
+        .select('id, full_name, email, phone, opt_in_email, opt_in_sms');
+
+      // Apply audience filters
+      if (campaign.target_audience === 'vip_only') {
+        const { data: vipProfiles } = await supabase
+          .from('profiles')
+          .select('id')
+          .gte('rewards_points', 500);
+        
+        if (vipProfiles && vipProfiles.length > 0) {
+          const vipIds = vipProfiles.map(p => p.id);
+          clientsQuery = clientsQuery.in('linked_profile_id', vipIds);
+        }
+      } else if (campaign.target_audience === 'recent_customers') {
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+        
+        const { data: recentAppointments } = await supabase
+          .from('appointments')
+          .select('client_id')
+          .gte('appointment_date', ninetyDaysAgo.toISOString().split('T')[0])
+          .not('client_id', 'is', null);
+        
+        if (recentAppointments && recentAppointments.length > 0) {
+          const clientIds = [...new Set(recentAppointments.map(a => a.client_id))];
+          clientsQuery = clientsQuery.in('id', clientIds);
+        }
+      } else if (campaign.target_audience === 'inactive_customers') {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        
+        const { data: recentAppointments } = await supabase
+          .from('appointments')
+          .select('client_id')
+          .gte('appointment_date', sixMonthsAgo.toISOString().split('T')[0])
+          .not('client_id', 'is', null);
+        
+        const recentClientIds = recentAppointments?.map(a => a.client_id) || [];
+        
+        if (recentClientIds.length > 0) {
+          clientsQuery = clientsQuery.not('id', 'in', `(${recentClientIds.join(',')})`);
+        }
       }
+
+      const { data: clients, error: clientsError } = await clientsQuery;
+
+      if (clientsError) {
+        throw clientsError;
+      }
+
+      recipients = clients || [];
     }
 
-    const { data: clients, error: clientsError } = await clientsQuery;
-
-    if (clientsError) {
-      throw clientsError;
-    }
-
-    console.log(`Found ${clients?.length || 0} potential recipients`);
+    console.log(`Found ${recipients.length} potential recipients`);
 
     let sentCount = 0;
     let failedCount = 0;
-    const recipients = clients || [];
 
     // Filter by opt-in preferences and channel
     const validRecipients = recipients.filter(client => {

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Calendar, Mail, MessageSquare, Users, Gift, Send, Save } from "lucide-react";
 import { getCampaign, createCampaign, updateCampaign, sendCampaign, generatePromoCode, getRecipientCount } from "@/lib/api/promotions";
 import { useAuth } from "@/hooks/useAuth";
+import { ManualRecipientSelector } from "./ManualRecipientSelector";
 
 const campaignSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -29,6 +30,8 @@ const campaignSchema = z.object({
   promo_discount: z.number().optional(),
   promo_expires_at: z.string().optional(),
   scheduled_for: z.string().optional(),
+  custom_recipient_ids: z.array(z.string()).optional(),
+  custom_phone_numbers: z.array(z.string()).optional(),
 });
 
 type CampaignFormData = z.infer<typeof campaignSchema>;
@@ -46,6 +49,8 @@ export function PromotionalCampaignForm({ open, onOpenChange, campaignId }: Prop
   const [enablePromo, setEnablePromo] = useState(false);
   const [scheduleLater, setScheduleLater] = useState(false);
   const [estimatedRecipients, setEstimatedRecipients] = useState(0);
+  const [selectedClientIds, setSelectedClientIds] = useState<string[]>([]);
+  const [manualPhoneNumbers, setManualPhoneNumbers] = useState<string[]>([]);
 
   const { data: existingCampaign } = useQuery({
     queryKey: ['campaign', campaignId],
@@ -78,9 +83,13 @@ export function PromotionalCampaignForm({ open, onOpenChange, campaignId }: Prop
         promo_discount: existingCampaign.promo_discount || 0,
         promo_expires_at: existingCampaign.promo_expires_at || "",
         scheduled_for: existingCampaign.scheduled_for || "",
+        custom_recipient_ids: existingCampaign.custom_recipient_ids || [],
+        custom_phone_numbers: existingCampaign.custom_phone_numbers || [],
       });
       setEnablePromo(!!existingCampaign.promo_code);
       setScheduleLater(!!existingCampaign.scheduled_for);
+      setSelectedClientIds(existingCampaign.custom_recipient_ids || []);
+      setManualPhoneNumbers(existingCampaign.custom_phone_numbers || []);
     }
   }, [existingCampaign, form]);
 
@@ -181,10 +190,22 @@ export function PromotionalCampaignForm({ open, onOpenChange, campaignId }: Prop
   const watchTargetAudience = form.watch('target_audience');
 
   useEffect(() => {
-    getRecipientCount(watchTargetAudience).then(count => {
-      setEstimatedRecipients(count);
-    });
-  }, [watchTargetAudience]);
+    if (watchTargetAudience === 'custom') {
+      setEstimatedRecipients(selectedClientIds.length + manualPhoneNumbers.length);
+    } else {
+      getRecipientCount(watchTargetAudience).then(count => {
+        setEstimatedRecipients(count);
+      });
+    }
+  }, [watchTargetAudience, selectedClientIds, manualPhoneNumbers]);
+
+  // Update form when manual recipients change
+  useEffect(() => {
+    if (watchTargetAudience === 'custom') {
+      form.setValue('custom_recipient_ids', selectedClientIds);
+      form.setValue('custom_phone_numbers', manualPhoneNumbers);
+    }
+  }, [selectedClientIds, manualPhoneNumbers, watchTargetAudience, form]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -332,9 +353,29 @@ export function PromotionalCampaignForm({ open, onOpenChange, campaignId }: Prop
                     <SelectItem value="vip_only">VIP Members Only</SelectItem>
                     <SelectItem value="recent_customers">Recent Customers (90 days)</SelectItem>
                     <SelectItem value="inactive_customers">Inactive Customers (6+ months)</SelectItem>
+                    <SelectItem value="custom">Custom Selection</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {form.watch('target_audience') === 'custom' && (
+                <Card className="border-accent/20">
+                  <CardHeader>
+                    <CardTitle className="text-sm">Select Recipients</CardTitle>
+                    <CardDescription>
+                      Choose specific customers or manually enter phone numbers
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ManualRecipientSelector
+                      selectedClientIds={selectedClientIds}
+                      onClientIdsChange={setSelectedClientIds}
+                      manualPhoneNumbers={manualPhoneNumbers}
+                      onManualPhoneNumbersChange={setManualPhoneNumbers}
+                    />
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <CardHeader>
@@ -345,7 +386,11 @@ export function PromotionalCampaignForm({ open, onOpenChange, campaignId }: Prop
                 </CardHeader>
                 <CardContent>
                   <p className="text-3xl font-bold">{estimatedRecipients.toLocaleString()}</p>
-                  <p className="text-sm text-muted-foreground mt-1">customers will receive this campaign</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {form.watch('target_audience') === 'custom' 
+                      ? 'recipients selected'
+                      : 'customers will receive this campaign'}
+                  </p>
                 </CardContent>
               </Card>
             </TabsContent>

@@ -867,6 +867,8 @@ export type Database = {
           created_at: string | null
           created_by: string
           custom_filters: Json | null
+          custom_phone_numbers: string[] | null
+          custom_recipient_ids: Json | null
           email_html: string | null
           failed_count: number | null
           id: string
@@ -892,6 +894,8 @@ export type Database = {
           created_at?: string | null
           created_by: string
           custom_filters?: Json | null
+          custom_phone_numbers?: string[] | null
+          custom_recipient_ids?: Json | null
           email_html?: string | null
           failed_count?: number | null
           id?: string
@@ -917,6 +921,8 @@ export type Database = {
           created_at?: string | null
           created_by?: string
           custom_filters?: Json | null
+          custom_phone_numbers?: string[] | null
+          custom_recipient_ids?: Json | null
           email_html?: string | null
           failed_count?: number | null
           id?: string

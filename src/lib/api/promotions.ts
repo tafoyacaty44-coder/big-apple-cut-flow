@@ -10,6 +10,8 @@ export interface PromotionalCampaign {
   email_html?: string;
   target_audience: 'all_customers' | 'vip_only' | 'recent_customers' | 'inactive_customers' | 'custom';
   custom_filters?: any;
+  custom_recipient_ids?: string[];
+  custom_phone_numbers?: string[];
   status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'paused' | 'canceled';
   scheduled_for?: string;
   sent_at?: string;
