@@ -279,28 +279,32 @@ const Index = () => {
         </motion.p>
 
         {/* Live Availability Teaser */}
-        {slots && slots.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.5, ease: "easeOut" }}
-            className="flex flex-col items-center gap-2"
-          >
-            <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">
-              Next available
-            </p>
-            <div className="flex gap-2 flex-wrap justify-center">
-              {slots.slice(0, 3).map((slot, i) => (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.5, ease: "easeOut" }}
+          className="flex flex-col items-center gap-2"
+        >
+          <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">
+            {slots && slots.length > 0 ? "Next available" : "Walk-ins welcome"}
+          </p>
+          <div className="flex gap-2 flex-wrap justify-center">
+            {slots && slots.length > 0 ? (
+              slots.slice(0, 3).map((slot, i) => (
                 <span
                   key={i}
                   className="px-3 py-1.5 rounded-full bg-accent/20 text-accent text-sm font-medium"
                 >
                   {slot}
                 </span>
-              ))}
-            </div>
-          </motion.div>
-        )}
+              ))
+            ) : (
+              <span className="px-3 py-1.5 rounded-full bg-accent/20 text-accent text-sm font-medium">
+                Call for times
+              </span>
+            )}
+          </div>
+        </motion.div>
 
         {/* Navigation Buttons */}
         <motion.div
