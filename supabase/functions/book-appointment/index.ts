@@ -219,6 +219,9 @@ Deno.serve(async (req) => {
       .insert({
         client_id: clientId,
         customer_id: booking.customer_id || null,
+        guest_name: booking.guest_name || null,
+        guest_email: booking.guest_email || null,
+        guest_phone: booking.guest_phone || null,
         barber_id: booking.barber_id,
         service_id: booking.service_id,
         appointment_date: booking.appointment_date,
