@@ -6,6 +6,7 @@ import { useNextAvailableSlots } from "@/hooks/useNextAvailableSlots";
 import { useQuery } from "@tanstack/react-query";
 import { getGalleryImages } from "@/lib/api/gallery";
 import { TodayAvailability } from "@/components/TodayAvailability";
+import { LiveAvailabilityBanner } from "@/components/home/LiveAvailabilityBanner";
 import React from "react";
 import haircut from "@/assets/services/haircut.jpg";
 import beardTrim from "@/assets/services/beard-trim.jpg";
@@ -302,6 +303,15 @@ const Index = () => {
           <span className="mr-1">⭐</span> 4.8 (<span className="tabular-nums">356</span> Google reviews) • East Village
         </motion.p>
 
+        {/* Live Availability Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+          className="w-full max-w-[720px]"
+        >
+          <LiveAvailabilityBanner />
+        </motion.div>
 
         {/* Navigation Buttons */}
         <motion.div
