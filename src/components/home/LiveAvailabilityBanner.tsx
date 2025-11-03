@@ -120,33 +120,15 @@ const BarberCard = ({ barber, index, onSlotClick, navigate }: BarberCardProps) =
       animate={{
         opacity: 1,
         x: 0,
-        ...(!prefersReducedMotion
-          ? {
-              boxShadow: [
-                "0 0 0 rgba(245,193,66,0)",
-                "0 0 12px rgba(245,193,66,0.55)",
-                "0 0 0 rgba(245,193,66,0)",
-              ],
-            }
-          : {}),
       }}
       transition={{
         delay: index * 0.1,
         duration: 0.4,
-        ...(!prefersReducedMotion
-          ? {
-              boxShadow: {
-                duration: 1.2,
-                repeat: Infinity,
-                repeatDelay: 2,
-              },
-            }
-          : {}),
       }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onSlotClick(barber, barber.nextAvailableSlot!)}
-      className="min-w-[220px] flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[hsl(var(--accent))]/40 transition-all duration-300 snap-start cursor-pointer"
+      className="min-w-[220px] flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[hsl(var(--accent))]/40 transition-all duration-300 snap-start cursor-pointer shadow-[0_0_12px_rgba(245,193,66,0.35)]"
     >
       <div className="flex items-start gap-3">
         <Avatar className="h-10 w-10 ring-2 ring-[hsl(var(--accent))]/20">
