@@ -14,7 +14,9 @@ export const LiveAvailabilityBanner = () => {
   const { data: barbers, isLoading } = useQuery({
     queryKey: ["barbers-next-slot"],
     queryFn: () => getBarbersWithRealAvailability(30, 1),
+    staleTime: 2 * 60 * 1000, // Data fresh for 2 minutes
     refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
   });
 
   const handleSlotClick = (barber: any, slot: { date: string; time: string }) => {
@@ -62,7 +64,7 @@ export const LiveAvailabilityBanner = () => {
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.2 }}
       className="w-full bg-black/40 backdrop-blur-xl border-y border-white/10 py-5 shadow-[0_0_30px_rgba(245,193,66,0.05)] relative"
     >
       <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 pointer-events-none" />
@@ -122,10 +124,9 @@ const BarberCard = ({ barber, index, onSlotClick, navigate }: BarberCardProps) =
         x: 0,
       }}
       transition={{
-        delay: index * 0.1,
-        duration: 0.4,
+        duration: 0.2,
       }}
-      whileHover={{ scale: 1.05 }}
+      whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onSlotClick(barber, barber.nextAvailableSlot!)}
       className="min-w-[220px] flex flex-col gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[hsl(var(--accent))]/40 transition-all duration-300 snap-start cursor-pointer shadow-[0_0_12px_rgba(245,193,66,0.35)]"
