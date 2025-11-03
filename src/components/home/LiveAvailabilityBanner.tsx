@@ -120,7 +120,7 @@ const BarberCard = ({ barber, index, onSlotClick, navigate }: BarberCardProps) =
       animate={{
         opacity: 1,
         x: 0,
-        ...(index === 0 && !prefersReducedMotion
+        ...(!prefersReducedMotion
           ? {
               boxShadow: [
                 "0 0 0 rgba(245,193,66,0)",
@@ -133,7 +133,7 @@ const BarberCard = ({ barber, index, onSlotClick, navigate }: BarberCardProps) =
       transition={{
         delay: index * 0.1,
         duration: 0.4,
-        ...(index === 0 && !prefersReducedMotion
+        ...(!prefersReducedMotion
           ? {
               boxShadow: {
                 duration: 1.2,
@@ -156,7 +156,7 @@ const BarberCard = ({ barber, index, onSlotClick, navigate }: BarberCardProps) =
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-foreground">{barber.full_name}</div>
+          <div className="font-semibold text-sm text-[hsl(var(--accent))]">{barber.full_name}</div>
           <div className="text-xs text-[hsl(var(--accent))] font-medium mt-0.5">
             {barber.nextAvailableSlot?.time}
           </div>
