@@ -1,20 +1,17 @@
 import { LoginForm } from '@/components/auth/LoginForm';
 import Logo from '@/components/Logo';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
 
 const Login = () => {
   const { user, userRole, loading } = useAuth();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!loading && user) {
-      if (userRole === 'admin') navigate('/admin');
-      else if (userRole === 'barber') navigate('/barber');
-      else navigate('/dashboard');
-    }
-  }, [user, userRole, loading, navigate]);
+  // Redirect authenticated users immediately
+  if (!loading && user) {
+    if (userRole === 'admin') return <Navigate to="/admin" replace />;
+    if (userRole === 'barber') return <Navigate to="/barber" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
 
   if (loading) {
     return (

@@ -104,9 +104,13 @@ export const useAuth = () => {
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    if (!error) {
-      navigate('/');
-    }
+    
+    // Always clear local state and redirect, even if session was already invalid
+    setUser(null);
+    setSession(null);
+    setUserRole(null);
+    navigate('/');
+    
     return { error };
   };
 
