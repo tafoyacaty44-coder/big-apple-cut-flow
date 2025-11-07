@@ -65,16 +65,28 @@ export function ManualRecipientSelector({
     }
   };
 
-  // Handle manual phone numbers input
+  // Handle manual phone numbers input (debounced)
   const handlePhoneInputChange = (value: string) => {
     setPhoneInput(value);
-    // Parse phone numbers (comma or newline separated)
-    const numbers = value
-      .split(/[,\n]/)
-      .map((num) => num.trim())
-      .filter((num) => num.length > 0);
-    onManualPhoneNumbersChange(numbers);
   };
+
+  // Debounce phone number parsing to prevent infinite re-renders
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Parse phone numbers (comma or newline separated)
+      const numbers = phoneInput
+        .split(/[,\n]/)
+        .map((num) => num.trim())
+        .filter((num) => num.length > 0);
+      
+      // Only update if different from current
+      if (JSON.stringify(numbers) !== JSON.stringify(manualPhoneNumbers)) {
+        onManualPhoneNumbersChange(numbers);
+      }
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [phoneInput]);
 
   const totalSelectedCount = selectedClientIds.length + manualPhoneNumbers.length;
 

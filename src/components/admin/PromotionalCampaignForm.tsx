@@ -202,8 +202,16 @@ export function PromotionalCampaignForm({ open, onOpenChange, campaignId }: Prop
   // Update form when manual recipients change
   useEffect(() => {
     if (watchTargetAudience === 'custom') {
-      form.setValue('custom_recipient_ids', selectedClientIds);
-      form.setValue('custom_phone_numbers', manualPhoneNumbers);
+      const currentRecipientIds = form.getValues('custom_recipient_ids') || [];
+      const currentPhoneNumbers = form.getValues('custom_phone_numbers') || [];
+      
+      // Only update if values actually changed
+      if (JSON.stringify(currentRecipientIds) !== JSON.stringify(selectedClientIds)) {
+        form.setValue('custom_recipient_ids', selectedClientIds);
+      }
+      if (JSON.stringify(currentPhoneNumbers) !== JSON.stringify(manualPhoneNumbers)) {
+        form.setValue('custom_phone_numbers', manualPhoneNumbers);
+      }
     }
   }, [selectedClientIds, manualPhoneNumbers, watchTargetAudience]);
 
