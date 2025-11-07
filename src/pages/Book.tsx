@@ -188,7 +188,7 @@ const Book = () => {
   };
 
   const canContinueStep = (step: number) => {
-    if (step === 1) return !!booking.customerInfo;
+    if (step === 1) return true; // Form validation handles this
     if (step === 2) {
       // Save add-ons to context when continuing from step 2
       if (selectedAddonIds.length > 0) {
@@ -445,7 +445,7 @@ const Book = () => {
                             </div>
 
                             {/* Add-ons for this service */}
-                            {!isLoadingAddons && addonServices.length > 0 && (
+                            {booking.selectedServiceId === service.id && !isLoadingAddons && addonServices.length > 0 && (
                               <div className="mb-3 pt-3 border-t space-y-2">
                                 <p className="text-xs font-semibold text-muted-foreground mb-2">Add enhancements:</p>
                                 {addonServices.map((addon) => {

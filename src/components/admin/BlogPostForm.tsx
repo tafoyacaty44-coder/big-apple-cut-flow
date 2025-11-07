@@ -110,14 +110,17 @@ const BlogPostForm = ({ post, onSuccess }: BlogPostFormProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const toastId = toast.loading("Uploading image...");
+    
     try {
-      toast.loading("Uploading image...");
       const url = await uploadBlogImage(file);
       form.setValue("featured_image_url", url);
       setFeaturedImagePreview(url);
+      toast.dismiss(toastId);
       toast.success("Image uploaded successfully");
     } catch (error) {
       console.error("Error uploading image:", error);
+      toast.dismiss(toastId);
       toast.error("Failed to upload image");
     }
   };

@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Camera } from 'lucide-react';
+import { Camera, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { uploadClientPhoto } from '@/lib/api/clients';
+import { Input } from '@/components/ui/input';
 
 interface PhotoCaptureProps {
   clientId: string;
@@ -13,10 +14,7 @@ interface PhotoCaptureProps {
 
 export const PhotoCapture = ({ clientId, onPhotoUploaded }: PhotoCaptureProps) => {
   const { toast } = useToast();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadMutation = useMutation({
     mutationFn: ({ file, clientId }: { file: File; clientId: string }) => 
@@ -27,8 +25,9 @@ export const PhotoCapture = ({ clientId, onPhotoUploaded }: PhotoCaptureProps) =
         title: 'Success',
         description: 'Photo uploaded successfully',
       });
-      stopCamera();
-      setCapturedImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     },
     onError: () => {
       toast({
@@ -39,61 +38,18 @@ export const PhotoCapture = ({ clientId, onPhotoUploaded }: PhotoCaptureProps) =
     },
   });
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment', // Always use rear camera
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setIsStreaming(true);
-      }
-    } catch (error) {
-      console.error('Camera error:', error);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: 'Camera Access Required',
-        description: 'Please allow camera access in your browser settings. Make sure you\'re using HTTPS and have granted camera permissions.',
+        title: 'Invalid File',
+        description: 'Please select an image file',
         variant: 'destructive',
       });
+      return;
     }
-  };
-
-  const stopCamera = () => {
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-      setIsStreaming(false);
-    }
-  };
-
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext('2d');
-      if (context) {
-        canvasRef.current.width = videoRef.current.videoWidth;
-        canvasRef.current.height = videoRef.current.videoHeight;
-        context.drawImage(videoRef.current, 0, 0);
-        
-        const imageData = canvasRef.current.toDataURL('image/jpeg');
-        setCapturedImage(imageData);
-        stopCamera();
-      }
-    }
-  };
-
-  const uploadCapturedPhoto = async () => {
-    if (!capturedImage) return;
-
-    // Convert data URL to File
-    const response = await fetch(capturedImage);
-    const blob = await response.blob();
-    const file = new File([blob], `client-photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
 
     uploadMutation.mutate({ file, clientId });
   };
@@ -101,45 +57,44 @@ export const PhotoCapture = ({ clientId, onPhotoUploaded }: PhotoCaptureProps) =
   return (
     <Card>
       <CardContent className="pt-6 space-y-4">
-        {!isStreaming && !capturedImage && (
-          <Button onClick={startCamera} variant="outline" className="w-full">
+        <Input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileSelect}
+          disabled={uploadMutation.isPending}
+          className="hidden"
+          id="photo-capture-input"
+        />
+        
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => fileInputRef.current?.click()} 
+            variant="outline" 
+            className="flex-1"
+            disabled={uploadMutation.isPending}
+          >
             <Camera className="mr-2 h-4 w-4" />
-            Take Photo
+            {uploadMutation.isPending ? 'Uploading...' : 'Take Photo'}
           </Button>
-        )}
-
-        {isStreaming && (
-          <div className="space-y-2">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="w-full rounded-lg border"
-            />
-            <div className="flex gap-2">
-              <Button onClick={capturePhoto}>Capture</Button>
-              <Button onClick={stopCamera} variant="outline">Cancel</Button>
-            </div>
-          </div>
-        )}
-
-        {capturedImage && (
-          <div className="space-y-2">
-            <img
-              src={capturedImage}
-              alt="Captured"
-              className="w-full rounded-lg border"
-            />
-            <div className="flex gap-2">
-              <Button onClick={uploadCapturedPhoto} disabled={uploadMutation.isPending}>
-                {uploadMutation.isPending ? 'Uploading...' : 'Upload Photo'}
-              </Button>
-              <Button onClick={() => setCapturedImage(null)} variant="outline">Retake</Button>
-            </div>
-          </div>
-        )}
-
-        <canvas ref={canvasRef} className="hidden" />
+          
+          <Button 
+            onClick={() => {
+              if (fileInputRef.current) {
+                fileInputRef.current.removeAttribute('capture');
+                fileInputRef.current.click();
+                setTimeout(() => fileInputRef.current?.setAttribute('capture', 'environment'), 100);
+              }
+            }} 
+            variant="outline" 
+            className="flex-1"
+            disabled={uploadMutation.isPending}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Upload Photo
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
