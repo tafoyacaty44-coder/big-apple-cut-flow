@@ -497,44 +497,6 @@ const Book = () => {
                   </div>
                 )}
 
-                {/* Add-ons section - only shows when a service is selected */}
-                {booking.selectedServiceId && !isLoadingAddons && addonServices.length > 0 && (
-                  <Card className="mt-6">
-                    <CardContent className="p-4">
-                      <p className="text-sm font-semibold mb-3">Add enhancements:</p>
-                      <div className="space-y-2">
-                        {addonServices.map((addon) => {
-                          const isSelected = selectedAddonIds.includes(addon.id);
-                          return (
-                            <button
-                              key={addon.id}
-                              type="button"
-                              onClick={() => handleAddonToggle(addon.id)}
-                              className={cn(
-                                "w-full text-left p-3 rounded-md border text-sm transition-all",
-                                isSelected 
-                                  ? "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10" 
-                                  : "border-border hover:border-[hsl(var(--accent))]/50"
-                              )}
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium truncate">{addon.name}</p>
-                                  <p className="text-muted-foreground text-xs">
-                                    +${addon.regular_price} • +{addon.duration_minutes}min
-                                  </p>
-                                </div>
-                                {isSelected && (
-                                  <CheckCircle className="h-4 w-4 text-[hsl(var(--accent))] flex-shrink-0" />
-                                )}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
 
                 {isMobile && (
                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
