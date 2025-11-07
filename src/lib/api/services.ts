@@ -38,14 +38,50 @@ export const getServiceById = async (id: string): Promise<Service | null> => {
 // Alias for getServices (for consistency)
 export const getActiveServices = getServices;
 
-export const getAddonServices = async (): Promise<Service[]> => {
+export const getAddonServices = async (serviceId?: string): Promise<Service[]> => {
+  if (!serviceId) {
+    // Return all add-ons if no service specified
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .eq('category', 'addon')
+      .eq('is_active', true)
+      .order('display_order');
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  // Get add-ons mapped to this specific service
+  const { data: mappings, error: mappingsError } = await supabase
+    .from('service_addons')
+    .select('addon_id')
+    .eq('service_id', serviceId);
+
+  if (mappingsError) throw mappingsError;
+
+  // If no mappings exist, return all add-ons (fallback)
+  if (!mappings || mappings.length === 0) {
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .eq('category', 'addon')
+      .eq('is_active', true)
+      .order('display_order');
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  // Get the actual add-on services
+  const addonIds = mappings.map(m => m.addon_id);
   const { data, error } = await supabase
     .from('services')
     .select('*')
+    .in('id', addonIds)
     .eq('is_active', true)
-    .eq('category', 'addon')
     .order('display_order');
-
+  
   if (error) throw error;
   return data || [];
 };
@@ -187,4 +223,36 @@ export const deleteServiceImage = async (url: string): Promise<void> => {
     .remove([filePath]);
 
   if (error) throw error;
+};
+
+export const getServiceAddons = async (serviceId: string): Promise<string[]> => {
+  const { data, error } = await supabase
+    .from('service_addons')
+    .select('addon_id')
+    .eq('service_id', serviceId);
+  
+  if (error) throw error;
+  return data?.map(d => d.addon_id) || [];
+};
+
+export const updateServiceAddons = async (serviceId: string, addonIds: string[]): Promise<void> => {
+  // Delete existing mappings
+  await supabase
+    .from('service_addons')
+    .delete()
+    .eq('service_id', serviceId);
+
+  // Insert new mappings
+  if (addonIds.length > 0) {
+    const mappings = addonIds.map(addonId => ({
+      service_id: serviceId,
+      addon_id: addonId
+    }));
+
+    const { error } = await supabase
+      .from('service_addons')
+      .insert(mappings);
+
+    if (error) throw error;
+  }
 };

@@ -93,8 +93,8 @@ const Book = () => {
   const selectedService = services.find((s) => s.id === booking.selectedServiceId);
 
   const { data: addonServices = [], isLoading: isLoadingAddons } = useQuery({
-    queryKey: ['services', 'addons'],
-    queryFn: getAddonServices,
+    queryKey: ['services', 'addons', booking.selectedServiceId],
+    queryFn: () => getAddonServices(booking.selectedServiceId),
     enabled: !!booking.selectedServiceId,
   });
 
@@ -444,13 +444,52 @@ const Book = () => {
                               </span>
                             </div>
 
-                            <GoldButton
-                              onClick={() => handleServiceSelect(service.id)}
-                              className="w-full"
-                              size="sm"
-                            >
-                              {booking.selectedServiceId === service.id ? 'Selected ✓' : 'Select Service'}
-                            </GoldButton>
+                        <GoldButton
+                          onClick={() => handleServiceSelect(service.id)}
+                          className="w-full"
+                          size="sm"
+                        >
+                          {booking.selectedServiceId === service.id ? 'Selected ✓' : 'Select Service'}
+                        </GoldButton>
+
+                        {/* Add-ons for THIS service only - show when selected */}
+                        {booking.selectedServiceId === service.id && !isLoadingAddons && addonServices.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-border">
+                            <p className="text-xs font-semibold mb-2 text-muted-foreground uppercase">
+                              Add Enhancements:
+                            </p>
+                            <div className="space-y-2">
+                              {addonServices.map((addon) => {
+                                const isSelected = selectedAddonIds.includes(addon.id);
+                                return (
+                                  <button
+                                    key={addon.id}
+                                    type="button"
+                                    onClick={() => handleAddonToggle(addon.id)}
+                                    className={cn(
+                                      "w-full text-left p-2 rounded-md border text-xs transition-all",
+                                      isSelected 
+                                        ? "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10" 
+                                        : "border-border hover:border-[hsl(var(--accent))]/50"
+                                    )}
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium truncate">{addon.name}</p>
+                                        <p className="text-muted-foreground text-[10px]">
+                                          +${addon.regular_price} • +{addon.duration_minutes}min
+                                        </p>
+                                      </div>
+                                      {isSelected && (
+                                        <CheckCircle className="h-3 w-3 text-[hsl(var(--accent))] flex-shrink-0 mt-0.5" />
+                                      )}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                           </CardContent>
                         </Card>
                       );

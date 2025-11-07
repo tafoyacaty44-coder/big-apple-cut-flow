@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { createService, uploadServiceImage, CreateServiceData } from "@/lib/api/services";
+import { createService, uploadServiceImage, CreateServiceData, getAddonServices, updateServiceAddons } from "@/lib/api/services";
 import { Loader2, Upload, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 const serviceSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
@@ -34,6 +36,12 @@ export function CreateServiceDialog({ open, onOpenChange, onSuccess }: CreateSer
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+
+  const { data: availableAddons = [] } = useQuery({
+    queryKey: ['services', 'addons'],
+    queryFn: () => getAddonServices(),
+  });
 
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
@@ -82,7 +90,12 @@ export function CreateServiceDialog({ open, onOpenChange, onSuccess }: CreateSer
         image_url: imageUrl,
       };
 
-      await createService(serviceData);
+      const createdService = await createService(serviceData);
+
+      // Save add-on mappings if any selected
+      if (selectedAddonIds.length > 0 && createdService?.id) {
+        await updateServiceAddons(createdService.id, selectedAddonIds);
+      }
 
       toast({
         title: "Service Created",
@@ -91,6 +104,7 @@ export function CreateServiceDialog({ open, onOpenChange, onSuccess }: CreateSer
 
       reset();
       removeImage();
+      setSelectedAddonIds([]);
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
@@ -238,6 +252,36 @@ export function CreateServiceDialog({ open, onOpenChange, onSuccess }: CreateSer
               </div>
             )}
           </div>
+
+          {/* Add-ons selector - only show if this is NOT an add-on itself */}
+          {category && category !== 'addon' && availableAddons.length > 0 && (
+            <div>
+              <Label>Available Enhancements (optional)</Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Select which add-ons customers can choose with this service. Leave empty to show all add-ons.
+              </p>
+              <div className="border rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
+                {availableAddons.map((addon) => (
+                  <label
+                    key={addon.id}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-accent/50 p-2 rounded"
+                  >
+                    <Checkbox
+                      checked={selectedAddonIds.includes(addon.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedAddonIds([...selectedAddonIds, addon.id]);
+                        } else {
+                          setSelectedAddonIds(selectedAddonIds.filter(id => id !== addon.id));
+                        }
+                      }}
+                    />
+                    <span className="text-sm">{addon.name} (+${addon.regular_price})</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

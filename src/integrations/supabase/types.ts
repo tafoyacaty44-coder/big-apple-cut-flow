@@ -1290,6 +1290,42 @@ export type Database = {
         }
         Relationships: []
       }
+      service_addons: {
+        Row: {
+          addon_id: string
+          created_at: string | null
+          id: string
+          service_id: string
+        }
+        Insert: {
+          addon_id: string
+          created_at?: string | null
+          id?: string
+          service_id: string
+        }
+        Update: {
+          addon_id?: string
+          created_at?: string | null
+          id?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_addons_addon_id_fkey"
+            columns: ["addon_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_addons_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_prices: {
         Row: {
           barber_id: string | null
