@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import twilio from 'https://esm.sh/twilio@5.3.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +9,33 @@ interface SendRequest {
   appointment_id: string;
   channel: 'email' | 'sms';
   template: string;
+}
+
+async function sendTwilioSMS(to: string, body: string, from: string, accountSid: string, authToken: string) {
+  const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+  
+  const auth = btoa(`${accountSid}:${authToken}`);
+  
+  const formData = new URLSearchParams();
+  formData.append('To', to);
+  formData.append('From', from);
+  formData.append('Body', body);
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${auth}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData.toString(),
+  });
+  
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Twilio API error: ${response.status} - ${error}`);
+  }
+  
+  return await response.json();
 }
 
 // Template rendering helpers
@@ -121,12 +147,10 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Initialize Twilio client
-    const twilioClient = twilio(
-      Deno.env.get('TWILIO_ACCOUNT_SID'),
-      Deno.env.get('TWILIO_AUTH_TOKEN')
-    );
-    const twilioPhone = Deno.env.get('TWILIO_PHONE_NUMBER');
+    // Initialize Twilio credentials
+    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID')!;
+    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN')!;
+    const twilioPhone = Deno.env.get('TWILIO_PHONE_NUMBER')!;
 
     const { appointment_id, channel, template }: SendRequest = await req.json();
     
@@ -217,11 +241,13 @@ Deno.serve(async (req) => {
                           cleaned.startsWith('1') ? `+${cleaned}` : `+1${cleaned}`;
         
         // Send SMS via Twilio
-        const message = await twilioClient.messages.create({
-          body: smsText,
-          to: e164Phone,
-          from: twilioPhone,
-        });
+        const message = await sendTwilioSMS(
+          e164Phone,
+          smsText,
+          twilioPhone,
+          twilioAccountSid,
+          twilioAuthToken
+        );
         
         providerMessageId = message.sid;
         console.log('✓ SMS sent:', message.sid);
