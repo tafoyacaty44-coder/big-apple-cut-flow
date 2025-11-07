@@ -128,6 +128,10 @@ Deno.serve(async (req) => {
 
       const availableSlots: string[] = [];
 
+      // Check if today to filter past times
+      const now = new Date();
+      const isToday = dateStr === now.toISOString().split('T')[0];
+
       for (const hours of dayHours) {
         const startTime = new Date(`${dateStr}T${hours.start_time}`);
         const endTime = new Date(`${dateStr}T${hours.end_time}`);
@@ -137,6 +141,11 @@ Deno.serve(async (req) => {
           const timeStr = time.toTimeString().slice(0, 5);
           const slotStart = new Date(time);
           const slotEnd = new Date(time.getTime() + serviceDuration * 60000);
+
+          // Skip past times for today
+          if (isToday && slotStart <= now) {
+            continue;
+          }
 
           // Check if slot conflicts with breaks
           const hasBreak = breaks?.some(br => {

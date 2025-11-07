@@ -52,10 +52,21 @@ const DateTimePicker = ({
     let currentMinutes = startHour * 60 + startMinute;
     const endMinutes = endHour * 60 + endMinute;
 
+    // Check if selected date is today
+    const now = new Date();
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    const currentTimeMinutes = isToday ? now.getHours() * 60 + now.getMinutes() : 0;
+
     // Generate slots with service duration + 10 min buffer
     const slotDuration = serviceDuration + 10;
 
     while (currentMinutes + serviceDuration <= endMinutes) {
+      // Skip past times for today
+      if (isToday && currentMinutes <= currentTimeMinutes) {
+        currentMinutes += slotDuration;
+        continue;
+      }
+
       const hours = Math.floor(currentMinutes / 60);
       const minutes = currentMinutes % 60;
       const displayHour = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;

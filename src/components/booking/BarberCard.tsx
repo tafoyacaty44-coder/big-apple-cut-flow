@@ -1,7 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { Check } from 'lucide-react';
-import { BarberWithDetails } from '@/lib/api/barbers';
-import RealTimeAvailabilityBadges from './RealTimeAvailabilityBadges';
+import { GoldButton } from '@/components/ui/gold-button';
 
 interface BarberCardProps {
   barber: any;
@@ -28,34 +26,12 @@ const BarberCard = ({
       .toUpperCase();
   };
 
-  const totalSlots = barber.totalSlotsThisWeek || 0;
-  const nextSlot = barber.nextAvailableSlot;
-  
-  const getStatusMessage = () => {
-    if (totalSlots === 0) return 'Fully booked this week';
-    if (nextSlot) {
-      const date = new Date(nextSlot.date);
-      const isToday = date.toDateString() === new Date().toDateString();
-      return isToday 
-        ? `Next: Today at ${nextSlot.time}`
-        : `Next: ${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at ${nextSlot.time}`;
-    }
-    return `${totalSlots} slots available`;
-  };
-
-  const getStatusColor = () => {
-    if (totalSlots === 0) return 'text-red-500';
-    if (totalSlots < 5) return 'text-yellow-500';
-    return 'text-green-500';
-  };
-
   return (
     <Card
-      onClick={onSelect}
-      className={`cursor-pointer transition-all duration-300 ${
+      className={`transition-all duration-300 ${
         isSelected
           ? 'border-[hsl(var(--accent))] border-2 shadow-[0_0_20px_rgba(212,175,55,0.3)]'
-          : 'border-border border-2 hover:border-[hsl(var(--accent))]/50'
+          : 'border-border border-2'
       }`}
     >
       <div className="p-6">
@@ -83,11 +59,6 @@ const BarberCard = ({
               </p>
             )}
           </div>
-          {isSelected && (
-            <div className="w-8 h-8 rounded-full bg-[hsl(var(--accent))] flex items-center justify-center">
-              <Check className="h-5 w-5 text-black" />
-            </div>
-          )}
         </div>
 
         {/* Service Info */}
@@ -98,24 +69,18 @@ const BarberCard = ({
           </p>
         </div>
 
-        {/* Real-Time Weekly Availability */}
-        {barber.realAvailability && barber.realAvailability.length > 0 && (
-          <div className="mb-4">
-            <p className="text-xs text-muted-foreground mb-2 text-center">Next 7 Days</p>
-            <RealTimeAvailabilityBadges availability={barber.realAvailability} />
-          </div>
-        )}
-
-        {/* Status Message */}
-        <div className="p-3 bg-background/50 rounded-lg border border-border">
-          <p className={`text-sm font-medium ${getStatusColor()}`}>
-            {getStatusMessage()}
-          </p>
-        </div>
-
         {barber.bio && (
-          <p className="text-xs text-muted-foreground mt-3">{barber.bio}</p>
+          <p className="text-xs text-muted-foreground mb-4">{barber.bio}</p>
         )}
+
+        {/* Select Button */}
+        <GoldButton 
+          onClick={onSelect}
+          className="w-full"
+          variant={isSelected ? "default" : "outline"}
+        >
+          {isSelected ? "Selected" : "Select Barber"}
+        </GoldButton>
       </div>
     </Card>
   );

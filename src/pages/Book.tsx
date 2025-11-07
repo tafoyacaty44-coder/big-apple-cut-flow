@@ -6,7 +6,7 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { Calendar, AlertCircle, CheckCircle, User as UserIcon, Scissors, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getServices, getAddonServices } from '@/lib/api/services';
-import { getBarbersWithRealAvailability } from '@/lib/api/barbers';
+import { getActiveBarbers } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
 import { SevenDayAvailability } from '@/components/booking/SevenDayAvailability';
@@ -101,8 +101,8 @@ const Book = () => {
   const selectedAddons = addonServices.filter(addon => selectedAddonIds.includes(addon.id));
 
   const { data: barbers = [], isLoading: isLoadingBarbers } = useQuery({
-    queryKey: ['barbers', 'real-availability', selectedService?.duration_minutes],
-    queryFn: () => getBarbersWithRealAvailability(selectedService?.duration_minutes || 30),
+    queryKey: ['barbers', 'active'],
+    queryFn: getActiveBarbers,
     enabled: currentStep === 3 && !!selectedService,
   });
 
