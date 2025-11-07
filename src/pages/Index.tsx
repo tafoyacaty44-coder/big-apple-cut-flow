@@ -6,6 +6,7 @@ import { useNextAvailableSlots } from "@/hooks/useNextAvailableSlots";
 import { useQuery } from "@tanstack/react-query";
 import { getGalleryImages } from "@/lib/api/gallery";
 import { TodayAvailability } from "@/components/TodayAvailability";
+import { SeoHead } from "@/components/SeoHead";
 import React from "react";
 import haircut from "@/assets/services/haircut.jpg";
 import beardTrim from "@/assets/services/beard-trim.jpg";
@@ -22,17 +23,6 @@ const navItems = [
     label: "Book your cut", 
     onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/book'),
     primary: true 
-  },
-  { 
-    label: "Our Services", 
-    onClick: (navigate: ReturnType<typeof useNavigate>) => {
-      const servicesSection = document.getElementById('services');
-      if (servicesSection) {
-        servicesSection.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        navigate('/book');
-      }
-    }
   },
   { 
     label: "Login & Reschedule", 
@@ -256,6 +246,7 @@ const Index = () => {
 
   return (
     <main className="min-h-[100dvh] bg-primary text-primary-foreground relative overflow-hidden">
+      <SeoHead pageSlug="home" />
       {/* Animated gradient background */}
       <motion.div
         aria-hidden="true"

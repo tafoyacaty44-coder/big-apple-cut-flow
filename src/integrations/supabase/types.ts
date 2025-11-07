@@ -1245,6 +1245,51 @@ export type Database = {
           },
         ]
       }
+      seo_settings: {
+        Row: {
+          canonical_url: string | null
+          id: string
+          keywords: string[] | null
+          meta_description: string | null
+          meta_title: string | null
+          og_description: string | null
+          og_image_url: string | null
+          og_title: string | null
+          page_slug: string
+          robots: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          canonical_url?: string | null
+          id?: string
+          keywords?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          page_slug: string
+          robots?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          canonical_url?: string | null
+          id?: string
+          keywords?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          page_slug?: string
+          robots?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       service_prices: {
         Row: {
           barber_id: string | null

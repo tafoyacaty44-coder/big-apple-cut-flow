@@ -6,6 +6,7 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { useQuery } from '@tanstack/react-query';
 import { getGalleryImages } from '@/lib/api/gallery';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SeoHead } from '@/components/SeoHead';
 
 const categories = ['All', 'Haircuts', 'Shaves', 'Beard Work', 'Transformations'];
 
@@ -21,6 +22,7 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen pt-20">
+      <SeoHead pageSlug="gallery" />
       <Navigation />
       
       <section className="py-24 bg-background">

@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 import SectionHeading from "@/components/ui/section-heading";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { SeoHead } from "@/components/SeoHead";
 
 const CATEGORIES = [
   "All",
@@ -58,6 +59,7 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen flex flex-col pt-20">
+      <SeoHead pageSlug="blog" />
       <Navigation />
       
       <main className="flex-1 container mx-auto px-4 py-12">

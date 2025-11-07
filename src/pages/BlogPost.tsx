@@ -9,6 +9,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ShareButtons from "@/components/blog/ShareButtons";
 import RelatedPosts from "@/components/blog/RelatedPosts";
+import { SeoHead } from "@/components/SeoHead";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -39,6 +40,7 @@ const BlogPost = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col pt-20">
+        <SeoHead pageSlug="blog-post" />
         <Navigation />
         <main className="flex-1 container mx-auto px-4 py-12">
           <div className="text-center">Loading...</div>
@@ -70,6 +72,12 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen flex flex-col pt-20">
+      <SeoHead 
+        pageSlug="blog-post" 
+        customTitle={post.meta_title || post.title}
+        customDescription={post.meta_description || post.excerpt}
+        customImage={post.featured_image_url}
+      />
       <Navigation />
       
       <main className="flex-1">

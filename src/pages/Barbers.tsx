@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getBarbersWithAvailability } from '@/lib/api/barbers';
 import BarberCard from '@/components/booking/BarberCard';
 import { Loader2 } from 'lucide-react';
+import { SeoHead } from '@/components/SeoHead';
 
 const Barbers = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const Barbers = () => {
 
   return (
     <div className="min-h-screen pt-20">
+      <SeoHead pageSlug="barbers" />
       <Navigation />
       
       <section className="py-24 bg-background">

@@ -20,6 +20,7 @@ import { BookingSidebar } from '@/components/booking/BookingSidebar';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { SeoHead } from '@/components/SeoHead';
 
 import haircutImg from '@/assets/services/haircut.jpg';
 import seniorImg from '@/assets/services/senior-haircut.jpg';
@@ -285,6 +286,7 @@ const Book = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col pt-20">
+      <SeoHead pageSlug="book" />
       <Navigation />
       
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">

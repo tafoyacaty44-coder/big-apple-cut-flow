@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import Logo from '@/components/Logo';
+import { SeoHead } from '@/components/SeoHead';
 
 const Rewards = () => {
   const { user, signOut } = useAuth();
@@ -61,6 +62,7 @@ const Rewards = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SeoHead pageSlug="rewards" />
       <header className="border-b-2 border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
