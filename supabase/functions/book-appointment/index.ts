@@ -245,6 +245,31 @@ Deno.serve(async (req) => {
 
     console.log('Appointment created:', appointment.id, 'Token:', appointment.token);
 
+    // Schedule appointment notifications (confirmation + reminders)
+    try {
+      const scheduleUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/schedule-appointment-messages`;
+      const scheduleResponse = await fetch(scheduleUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        },
+        body: JSON.stringify({
+          appointment_id: appointment.id,
+          event_type: 'created'
+        }),
+      });
+      
+      if (!scheduleResponse.ok) {
+        console.error('Failed to schedule notifications:', await scheduleResponse.text());
+      } else {
+        console.log('✓ Notifications scheduled for appointment:', appointment.id);
+      }
+    } catch (notifError) {
+      // Don't fail booking if notifications fail
+      console.error('Notification scheduling error:', notifError);
+    }
+
     // Track promo code usage
     if (booking.campaign_id && booking.promo_code) {
       const { data: campaign } = await supabase

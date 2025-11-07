@@ -199,9 +199,17 @@ Deno.serve(async (req) => {
             smsBody = smsBody.substring(0, 1597) + '...';
           }
 
+          // Normalize phone to E.164 format for Twilio
+          const normalizedPhone = client.phone!.replace(/\D/g, '');
+          const e164Phone = normalizedPhone.length === 10 
+            ? `+1${normalizedPhone}` 
+            : normalizedPhone.startsWith('1') 
+              ? `+${normalizedPhone}` 
+              : `+1${normalizedPhone}`;
+
           const message = await twilioClient.messages.create({
             body: smsBody,
-            to: client.phone!,
+            to: e164Phone,
             from: twilioPhone,
           });
 

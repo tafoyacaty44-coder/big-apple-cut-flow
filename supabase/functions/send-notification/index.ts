@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import twilio from 'https://esm.sh/twilio@5.3.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -120,6 +121,13 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Initialize Twilio client
+    const twilioClient = twilio(
+      Deno.env.get('TWILIO_ACCOUNT_SID'),
+      Deno.env.get('TWILIO_AUTH_TOKEN')
+    );
+    const twilioPhone = Deno.env.get('TWILIO_PHONE_NUMBER');
+
     const { appointment_id, channel, template }: SendRequest = await req.json();
     
     console.log('Sending notification:', { appointment_id, channel, template });
@@ -201,11 +209,22 @@ Deno.serve(async (req) => {
 
     try {
       if (channel === 'sms' && client.opt_in_sms && client.phone) {
-        // SMS sending (placeholder - requires provider setup)
         const smsText = renderTemplate(getSmsTemplate(template), templateData);
-        console.log('SMS would be sent:', { to: client.phone, text: smsText });
-        // Actual SMS sending would go here with Twilio/Vonage
-        providerMessageId = `sms_${Date.now()}`;
+        
+        // Normalize phone to E.164 format
+        const cleaned = client.phone.replace(/\D/g, '');
+        const e164Phone = cleaned.length === 10 ? `+1${cleaned}` : 
+                          cleaned.startsWith('1') ? `+${cleaned}` : `+1${cleaned}`;
+        
+        // Send SMS via Twilio
+        const message = await twilioClient.messages.create({
+          body: smsText,
+          to: e164Phone,
+          from: twilioPhone,
+        });
+        
+        providerMessageId = message.sid;
+        console.log('✓ SMS sent:', message.sid);
       } else if (channel === 'email' && client.opt_in_email && client.email) {
         // Email sending (placeholder - requires provider setup)
         const emailHtml = getEmailHtml(template, templateData);
