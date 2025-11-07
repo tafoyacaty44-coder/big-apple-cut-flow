@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export default function SeoManagement() {
   });
 
   // Update form when data loads
-  useState(() => {
+  useEffect(() => {
     if (seoData) {
       setFormData({
         meta_title: seoData.meta_title || '',
@@ -63,7 +63,7 @@ export default function SeoManagement() {
         robots: seoData.robots || 'index, follow',
       });
     }
-  });
+  }, [seoData]);
 
   const { mutate: saveSeo, isPending } = useMutation({
     mutationFn: async (values: typeof formData) => {
@@ -71,19 +71,22 @@ export default function SeoManagement() {
       
       const { error } = await supabase
         .from('seo_settings')
-        .upsert({
-          page_slug: selectedPage,
-          meta_title: values.meta_title,
-          meta_description: values.meta_description,
-          keywords: values.keywords.split(',').map(k => k.trim()).filter(k => k),
-          og_title: values.og_title || values.meta_title,
-          og_description: values.og_description || values.meta_description,
-          og_image_url: values.og_image_url,
-          canonical_url: values.canonical_url,
-          robots: values.robots,
-          updated_by: user?.id,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(
+          {
+            page_slug: selectedPage,
+            meta_title: values.meta_title,
+            meta_description: values.meta_description,
+            keywords: values.keywords.split(',').map(k => k.trim()).filter(k => k),
+            og_title: values.og_title || values.meta_title,
+            og_description: values.og_description || values.meta_description,
+            og_image_url: values.og_image_url,
+            canonical_url: values.canonical_url,
+            robots: values.robots,
+            updated_by: user?.id,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'page_slug' }
+        );
       
       if (error) throw error;
     },
