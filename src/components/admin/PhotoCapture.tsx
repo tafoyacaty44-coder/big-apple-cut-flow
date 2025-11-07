@@ -39,11 +39,13 @@ export const PhotoCapture = ({ clientId, onPhotoUploaded }: PhotoCaptureProps) =
     },
   });
 
-  const startCamera = async (useFrontCamera: boolean = false) => {
+  const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: useFrontCamera ? 'user' : 'environment'
+          facingMode: 'environment', // Always use rear camera
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         }
       });
       
@@ -52,9 +54,10 @@ export const PhotoCapture = ({ clientId, onPhotoUploaded }: PhotoCaptureProps) =
         setIsStreaming(true);
       }
     } catch (error) {
+      console.error('Camera error:', error);
       toast({
-        title: 'Error',
-        description: 'Could not access camera',
+        title: 'Camera Access Required',
+        description: 'Please allow camera access in your browser settings. Make sure you\'re using HTTPS and have granted camera permissions.',
         variant: 'destructive',
       });
     }
@@ -99,16 +102,10 @@ export const PhotoCapture = ({ clientId, onPhotoUploaded }: PhotoCaptureProps) =
     <Card>
       <CardContent className="pt-6 space-y-4">
         {!isStreaming && !capturedImage && (
-          <div className="flex gap-2">
-            <Button onClick={() => startCamera(false)} variant="outline">
-              <Camera className="mr-2 h-4 w-4" />
-              Take Photo
-            </Button>
-            <Button onClick={() => startCamera(true)} variant="outline">
-              <Camera className="mr-2 h-4 w-4" />
-              Front Camera
-            </Button>
-          </div>
+          <Button onClick={startCamera} variant="outline" className="w-full">
+            <Camera className="mr-2 h-4 w-4" />
+            Take Photo
+          </Button>
         )}
 
         {isStreaming && (
