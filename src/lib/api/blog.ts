@@ -115,26 +115,37 @@ export const createBlogPost = async (post: Partial<BlogPost>) => {
   const slug = post.slug || generateSlug(post.title || '');
   const reading_time = calculateReadingTime(post.content || '');
 
+  // Get current user for author_id
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const insertData: any = {
+    title: post.title!,
+    content: post.content!,
+    category: post.category!,
+    slug,
+    reading_time_minutes: reading_time,
+    excerpt: post.excerpt,
+    featured_image_url: post.featured_image_url,
+    is_published: post.is_published || false,
+    is_featured: post.is_featured || false,
+    is_pinned: post.is_pinned || false,
+    tags: post.tags || [],
+    meta_title: post.meta_title,
+    meta_description: post.meta_description,
+    scheduled_publish_at: post.scheduled_publish_at,
+    series_name: post.series_name,
+    series_order: post.series_order,
+    author_id: user?.id,
+  };
+
+  // Set published_at if publishing immediately
+  if (post.is_published && !post.scheduled_publish_at) {
+    insertData.published_at = new Date().toISOString();
+  }
+
   const { data, error } = await supabase
     .from('blog_posts')
-    .insert([{
-      title: post.title!,
-      content: post.content!,
-      category: post.category!,
-      slug,
-      reading_time_minutes: reading_time,
-      excerpt: post.excerpt,
-      featured_image_url: post.featured_image_url,
-      is_published: post.is_published || false,
-      is_featured: post.is_featured || false,
-      is_pinned: post.is_pinned || false,
-      tags: post.tags || [],
-      meta_title: post.meta_title,
-      meta_description: post.meta_description,
-      scheduled_publish_at: post.scheduled_publish_at,
-      series_name: post.series_name,
-      series_order: post.series_order,
-    }])
+    .insert([insertData])
     .select()
     .single();
 
@@ -151,6 +162,11 @@ export const updateBlogPost = async (id: string, post: Partial<BlogPost>) => {
   
   if (post.content) {
     updates.reading_time_minutes = calculateReadingTime(post.content);
+  }
+
+  // If publishing and published_at is not set, set it now
+  if (post.is_published && !post.scheduled_publish_at && !updates.published_at) {
+    updates.published_at = new Date().toISOString();
   }
 
   const { data, error } = await supabase
