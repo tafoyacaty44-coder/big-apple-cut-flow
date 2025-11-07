@@ -205,7 +205,7 @@ export function PromotionalCampaignForm({ open, onOpenChange, campaignId }: Prop
       form.setValue('custom_recipient_ids', selectedClientIds);
       form.setValue('custom_phone_numbers', manualPhoneNumbers);
     }
-  }, [selectedClientIds, manualPhoneNumbers, watchTargetAudience, form]);
+  }, [selectedClientIds, manualPhoneNumbers, watchTargetAudience]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
