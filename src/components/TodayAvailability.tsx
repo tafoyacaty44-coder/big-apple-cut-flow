@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Clock, RefreshCw } from 'lucide-react';
 import SectionHeading from '@/components/ui/section-heading';
-import { WeeklyAvailabilityIndicator } from '@/components/booking/WeeklyAvailabilityIndicator';
 import { formatDistance } from 'date-fns';
 
 export const TodayAvailability = () => {
@@ -106,18 +105,7 @@ export const TodayAvailability = () => {
                         ))}
                       </div>
                       
-                      {/* Weekly Availability Indicator */}
-                      <div className="mt-4 pt-4 border-t">
-                        <div className="text-xs text-muted-foreground mb-2 text-center">
-                          This week:
-                        </div>
-                        <WeeklyAvailabilityIndicator 
-                          barberId={barber.id}
-                          onDateClick={(date) => navigate(`/barbers/${barber.id}?date=${date}`)}
-                        />
-                      </div>
-                      
-                      <Button 
+                      <Button
                         className="w-full mt-4"
                         onClick={() => navigate(`/barbers/${barber.id}`)}
                       >

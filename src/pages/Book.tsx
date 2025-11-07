@@ -411,10 +411,9 @@ const Book = () => {
                         <Card
                           key={service.id}
                           className={cn(
-                            "cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
+                            "transition-all hover:shadow-lg",
                             booking.selectedServiceId === service.id && 'border-[hsl(var(--accent))] border-2 shadow-lg'
                           )}
-                          onClick={() => handleServiceSelect(service.id)}
                         >
                           <div className="aspect-[3/2] overflow-hidden rounded-t-lg">
                             <img
@@ -427,7 +426,7 @@ const Book = () => {
                           <CardContent className="p-4">
                             <h3 className="font-bold text-lg mb-1">{service.name}</h3>
                             <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{service.description}</p>
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center mb-3">
                               <div>
                                 <span className="text-lg font-bold text-[hsl(var(--accent))]">
                                   ${service.regular_price}
@@ -442,76 +441,56 @@ const Book = () => {
                                 {service.duration_minutes} min
                               </span>
                             </div>
+
+                            {/* Add-ons for this service */}
+                            {!isLoadingAddons && addonServices.length > 0 && (
+                              <div className="mb-3 pt-3 border-t space-y-2">
+                                <p className="text-xs font-semibold text-muted-foreground mb-2">Add enhancements:</p>
+                                {addonServices.map((addon) => {
+                                  const isSelected = selectedAddonIds.includes(addon.id);
+                                  return (
+                                    <button
+                                      key={addon.id}
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAddonToggle(addon.id);
+                                      }}
+                                      className={cn(
+                                        "w-full text-left p-2 rounded-md border text-xs transition-all",
+                                        isSelected 
+                                          ? "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10" 
+                                          : "border-border hover:border-[hsl(var(--accent))]/50"
+                                      )}
+                                    >
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-medium truncate">{addon.name}</p>
+                                          <p className="text-muted-foreground text-[10px]">
+                                            +${addon.regular_price} • +{addon.duration_minutes}min
+                                          </p>
+                                        </div>
+                                        {isSelected && (
+                                          <CheckCircle className="h-4 w-4 text-[hsl(var(--accent))] flex-shrink-0" />
+                                        )}
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            <GoldButton
+                              onClick={() => handleServiceSelect(service.id)}
+                              className="w-full"
+                              size="sm"
+                            >
+                              {booking.selectedServiceId === service.id ? 'Selected ✓' : 'Select Service'}
+                            </GoldButton>
                           </CardContent>
                         </Card>
                       );
                     })}
-                  </div>
-                )}
-
-                {/* Add-Ons Section */}
-                {booking.selectedServiceId && (
-                  <div className="mt-8 pt-8 border-t">
-                    <div className="mb-4">
-                      <h3 className="text-2xl font-bold mb-2">Enhance Your Service</h3>
-                      <p className="text-muted-foreground">
-                        Select optional add-ons to complete your experience
-                      </p>
-                    </div>
-                    
-                    {isLoadingAddons ? (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {[1, 2, 3].map((i) => (
-                          <Card key={i} className="animate-pulse">
-                            <CardContent className="p-4">
-                              <div className="h-20 bg-muted rounded" />
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    ) : addonServices.length > 0 ? (
-                      <>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {addonServices.map((addon) => {
-                            const isSelected = selectedAddonIds.includes(addon.id);
-                            
-                            return (
-                              <Card
-                                key={addon.id}
-                                className={cn(
-                                  "cursor-pointer transition-all hover:shadow-md active:scale-[0.98]",
-                                  isSelected && 'border-[hsl(var(--accent))] border-2 bg-[hsl(var(--accent))]/5'
-                                )}
-                                onClick={() => handleAddonToggle(addon.id)}
-                              >
-                                <CardContent className="p-4">
-                                  <div className="flex items-start justify-between mb-2">
-                                    <h4 className="font-bold">{addon.name}</h4>
-                                    {isSelected && (
-                                      <CheckCircle className="h-5 w-5 text-[hsl(var(--accent))] flex-shrink-0" />
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-muted-foreground mb-3">
-                                    {addon.description}
-                                  </p>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-sm font-bold text-[hsl(var(--accent))]">
-                                      +${addon.regular_price}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      +{addon.duration_minutes} min
-                                    </span>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            );
-                          })}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-3 text-center">
-                          💡 Add-ons can be selected or deselected at any time
-                        </p>
-                      </>
-                    ) : null}
                   </div>
                 )}
 

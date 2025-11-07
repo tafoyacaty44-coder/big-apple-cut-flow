@@ -13,8 +13,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Crown, Tag } from 'lucide-react';
 import { validatePromoCode } from '@/lib/api/promo-codes';
 
-const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-
 const customerInfoSchema = z.object({
   full_name: z.string()
     .trim()
@@ -26,7 +24,10 @@ const customerInfoSchema = z.object({
     .max(255, 'Email must be less than 255 characters'),
   phone: z.string()
     .trim()
-    .regex(phoneRegex, 'Please enter a valid phone number (e.g., 555-123-4567)'),
+    .refine(
+      (val) => val.replace(/\D/g, '').length === 10,
+      'Please enter a valid 10-digit phone number'
+    ),
   notes: z.string()
     .max(500, 'Notes must be less than 500 characters')
     .optional(),
