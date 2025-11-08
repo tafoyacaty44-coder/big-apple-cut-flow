@@ -166,7 +166,13 @@ const AdminDashboard = () => {
                   )}
                 </Button>
               </Link>
-              <Button 
+              <Link to="/admin/manual-schedule" className="w-full">
+                <Button variant="outline" className="w-full justify-start">
+                  <CalendarClock className="mr-2 h-4 w-4" />
+                  Manual Schedule Editor
+                </Button>
+              </Link>
+              <Button
                 variant="outline" 
                 onClick={handleSeedDemoData}
                 disabled={isSeedingData}
