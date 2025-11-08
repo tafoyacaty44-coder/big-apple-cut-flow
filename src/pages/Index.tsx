@@ -364,8 +364,8 @@ const Index = () => {
         <GalleryRow />
       </div>
 
-      {/* Today's Availability */}
-      <div className="relative z-10 py-6">
+      {/* Today's Availability - Hidden for now */}
+      {/* <div className="relative z-10 py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 mb-8">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-primary-foreground text-center">
             Live Availability
@@ -375,7 +375,7 @@ const Index = () => {
           </p>
         </div>
         <TodayAvailability />
-      </div>
+      </div> */}
     </main>
   );
 };

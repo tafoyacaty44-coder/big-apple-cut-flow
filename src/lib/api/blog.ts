@@ -50,7 +50,7 @@ export const calculateReadingTime = (content: string): number => {
 export const getBlogPosts = async (filters?: BlogPostFilters) => {
   let query = supabase
     .from('blog_posts')
-    .select('*, profiles(full_name)')
+    .select('*')
     .order('is_pinned', { ascending: false })
     .order('published_at', { ascending: false, nullsFirst: false });
 
@@ -88,7 +88,7 @@ export const getBlogPosts = async (filters?: BlogPostFilters) => {
 export const getBlogPost = async (slug: string) => {
   const { data, error } = await supabase
     .from('blog_posts')
-    .select('*, profiles(full_name)')
+    .select('*')
     .eq('slug', slug)
     .maybeSingle();
 
