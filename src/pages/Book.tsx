@@ -4,6 +4,9 @@ import Navigation from '@/components/Navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Calendar, AlertCircle, CheckCircle, User as UserIcon, Scissors, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAnimations } from '@/hooks/useAnimations';
+import { AnimatedCard } from '@/components/ui/animated-card';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getServices, getAddonServices } from '@/lib/api/services';
 import { getActiveBarbers } from '@/lib/api/barbers';
@@ -46,6 +49,7 @@ const Book = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileSummary, setShowMobileSummary] = useState(false);
+  const { pageTransition, cardEntrance } = useAnimations();
   const [vipCodeFromForm, setVipCodeFromForm] = useState('');
   const [vipCodeValid, setVipCodeValid] = useState(false);
   const [promoCode, setPromoCode] = useState('');
@@ -285,7 +289,13 @@ const Book = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pt-20">
+    <motion.div 
+      className="min-h-screen bg-background flex flex-col pt-20"
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <SeoHead pageSlug="book" />
       <Navigation />
       
@@ -360,37 +370,54 @@ const Book = () => {
             )}
 
             {/* Step 1: Customer Information */}
-            {currentStep === 1 && !booking.isBlacklisted && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-3xl font-bold mb-2">Your Information</h2>
-                  <p className="text-muted-foreground">Let's start with your contact details</p>
-                </div>
-                <CustomerInfoForm 
-                  onSubmit={handleCustomerInfoSubmit}
-                  selectedServiceId={booking.selectedServiceId}
-                />
-                {isMobile && (
-                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
-                    <GoldButton
-                      type="submit"
-                      form="customer-info-form"
-                      className="w-full min-h-[48px]"
-                    >
-                      Continue to Service Selection
-                    </GoldButton>
+            <AnimatePresence mode="wait">
+              {currentStep === 1 && !booking.isBlacklisted && (
+                <motion.div
+                  key="step1"
+                  initial={{ opacity: 0, x: isMobile ? 100 : 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <h2 className="text-3xl font-bold mb-2">Your Information</h2>
+                    <p className="text-muted-foreground">Let's start with your contact details</p>
                   </div>
-                )}
-              </div>
-            )}
+                  <CustomerInfoForm 
+                    onSubmit={handleCustomerInfoSubmit}
+                    selectedServiceId={booking.selectedServiceId}
+                  />
+                  {isMobile && (
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
+                      <GoldButton
+                        type="submit"
+                        form="customer-info-form"
+                        className="w-full min-h-[48px]"
+                      >
+                        Continue to Service Selection
+                      </GoldButton>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Step 2: Select Service */}
-            {currentStep === 2 && !booking.isBlacklisted && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-3xl font-bold mb-2">Select a Service</h2>
-                  <p className="text-muted-foreground">Choose the service you'd like to book</p>
-                </div>
+            <AnimatePresence mode="wait">
+              {currentStep === 2 && !booking.isBlacklisted && (
+                <motion.div
+                  key="step2"
+                  initial={{ opacity: 0, x: isMobile ? 100 : 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <h2 className="text-3xl font-bold mb-2">Select a Service</h2>
+                    <p className="text-muted-foreground">Choose the service you'd like to book</p>
+                  </div>
                 {isLoadingServices ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -406,16 +433,20 @@ const Book = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {services.filter(s => s.category !== 'addon').map((service) => {
+                    {services.filter(s => s.category !== 'addon').map((service, index) => {
                       const imageSrc = serviceImages[service.name] || serviceImages["Haircut"];
                       
                       return (
-                        <Card
+                        <AnimatedCard
                           key={service.id}
+                          index={index}
+                          enableHover={false}
+                          enablePress={false}
                           className={cn(
-                            "transition-all hover:shadow-lg",
+                            "transition-all cursor-pointer",
                             booking.selectedServiceId === service.id && 'border-[hsl(var(--accent))] border-2 shadow-lg'
                           )}
+                          onClick={() => handleServiceSelect(service.id)}
                         >
                           <div className="aspect-[3/2] overflow-hidden rounded-t-lg">
                             <img
@@ -489,9 +520,9 @@ const Book = () => {
                               })}
                             </div>
                           </div>
-                        )}
+                         )}
                           </CardContent>
-                        </Card>
+                        </AnimatedCard>
                       );
                     })}
                   </div>
@@ -509,8 +540,9 @@ const Book = () => {
                     </GoldButton>
                   </div>
                 )}
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Step 3: Select Barber + Date/Time */}
             {currentStep === 3 && !booking.isBlacklisted && (
@@ -726,7 +758,7 @@ const Book = () => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

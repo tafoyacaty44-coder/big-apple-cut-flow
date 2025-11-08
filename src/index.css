@@ -165,4 +165,50 @@ All colors MUST be HSL.
     min-height: 44px;
     min-width: 44px;
   }
+
+  /* Ripple effect container */
+  .ripple-container {
+    @apply relative overflow-hidden;
+  }
+
+  /* Pull to refresh indicator */
+  .pull-indicator {
+    @apply fixed top-0 left-1/2 transform -translate-x-1/2 z-50;
+    @apply bg-accent text-accent-foreground px-4 py-2 rounded-b-lg shadow-lg;
+    @apply transition-all duration-300;
+  }
+
+  /* Enhanced card animations */
+  .card-entrance {
+    animation: card-slide-up 0.4s ease-out;
+  }
+
+  @keyframes card-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Mobile-optimized animations */
+  @media (max-width: 768px) {
+    .page-transition {
+      animation: mobile-slide-in 0.3s ease-out;
+    }
+
+    @keyframes mobile-slide-in {
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  }
 }

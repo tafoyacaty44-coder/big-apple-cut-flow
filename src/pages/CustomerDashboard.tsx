@@ -1,157 +1,293 @@
-import { useAuth } from '@/hooks/useAuth';
-import { GoldButton } from '@/components/ui/gold-button';
-import Logo from '@/components/Logo';
-import { Calendar, Gift, Clock, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getCustomerAppointments } from '@/lib/api/appointments';
 import { getRewardsBalance } from '@/lib/api/rewards';
+import { useAuth } from '@/hooks/useAuth';
+import { Card, CardContent } from '@/components/ui/card';
+import { GoldButton } from '@/components/ui/gold-button';
+import { Calendar, Award, History, BookOpen, Scissors, Gift, LogOut } from 'lucide-react';
+import { format } from 'date-fns';
+import { Link } from 'react-router-dom';
+import Logo from '@/components/Logo';
+import { AnimatedCard, AnimatedCardContainer } from '@/components/ui/animated-card';
+import { motion } from 'framer-motion';
+import { useAnimations } from '@/hooks/useAnimations';
+import { usePullToRefresh } from '@/hooks/useGestures';
 
 const CustomerDashboard = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { pageTransition, fade } = useAnimations();
 
-  // Fetch user's appointments
-  const { data: appointments = [] } = useQuery({
-    queryKey: ['customer-appointments', user?.id],
-    queryFn: () => getCustomerAppointments(user!.id),
-    enabled: !!user
+  const { data: appointments = [], isLoading: isLoadingAppointments, refetch: refetchAppointments } = useQuery({
+    queryKey: ['appointments', 'customer', user?.id],
+    queryFn: () => getCustomerAppointments(user?.id || ''),
+    enabled: !!user?.id,
   });
 
-  // Fetch rewards balance
-  const { data: rewardsBalance } = useQuery({
-    queryKey: ['rewards-balance', user?.id],
-    queryFn: () => getRewardsBalance(user!.id),
-    enabled: !!user
+  const { data: rewardsData, isLoading: isLoadingRewards, refetch: refetchRewards } = useQuery({
+    queryKey: ['rewards', 'balance', user?.id],
+    queryFn: () => getRewardsBalance(user?.id || ''),
+    enabled: !!user?.id,
   });
 
-  // Calculate stats
+  // Pull to refresh
+  const { pullDistance, isRefreshing } = usePullToRefresh(async () => {
+    await Promise.all([refetchAppointments(), refetchRewards()]);
+  });
+
   const upcomingCount = appointments.filter(apt => 
     apt.status === 'confirmed' || apt.status === 'pending'
   ).length;
-  
-  const historyCount = appointments.filter(apt => 
-    apt.status === 'completed'
-  ).length;
+
+  const historyCount = appointments.filter(apt => apt.status === 'completed').length;
 
   const nextAppointment = appointments
     .filter(apt => apt.status === 'confirmed' || apt.status === 'pending')
     .sort((a, b) => new Date(a.appointment_date).getTime() - new Date(b.appointment_date).getTime())[0];
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      <header className="border-b-2 border-border bg-card">
-        <div className="max-w-full mx-auto px-4 py-3 md:py-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
-              <Logo size="md" variant="dark" />
-              <div className="min-w-0">
-                <h1 className="text-lg md:text-2xl font-bold truncate">My Dashboard</h1>
-                <p className="text-xs md:text-sm text-muted-foreground truncate">Big Apple Barbers</p>
-              </div>
+    <motion.div 
+      className="min-h-screen bg-gradient-to-b from-background to-background/95"
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      {/* Pull to refresh indicator */}
+      {pullDistance > 0 && (
+        <motion.div
+          className="fixed top-0 left-1/2 -translate-x-1/2 z-50 bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] px-4 py-2 rounded-b-lg shadow-lg"
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          style={{ y: pullDistance / 2 }}
+        >
+          {isRefreshing ? 'Refreshing...' : pullDistance >= 80 ? 'Release to refresh' : 'Pull to refresh'}
+        </motion.div>
+      )}
+
+      {/* Header */}
+      <div className="bg-card border-b sticky top-0 z-10 backdrop-blur-sm bg-card/95">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Logo />
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold hidden md:block">Customer Dashboard</h1>
+              <GoldButton
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                className="gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </GoldButton>
             </div>
-            <GoldButton onClick={signOut} variant="outline" className="w-full sm:w-auto touch-target">
-              Sign Out
-            </GoldButton>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-full mx-auto px-4 py-4 md:py-8 overflow-x-hidden">
-        <div className="mb-6 md:mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold mb-2">Welcome Back!</h2>
-          <p className="text-sm md:text-base text-muted-foreground">Manage your appointments and rewards</p>
-        </div>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Welcome Section */}
+        <motion.div 
+          className="text-center space-y-2"
+          variants={fade}
+          initial="hidden"
+          animate="visible"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold">
+            Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'Guest'}!
+          </h2>
+          <p className="text-muted-foreground">
+            Manage your appointments and track your rewards
+          </p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
-          <div className="bg-card border-2 border-border rounded-lg p-6 vintage-shadow">
-            <Calendar className="w-12 h-12 text-accent mb-4" />
-            <h3 className="text-xl font-bold mb-2">Upcoming</h3>
-            <p className="text-3xl font-bold text-accent mb-2">{upcomingCount}</p>
-            <p className="text-muted-foreground text-sm">Appointments</p>
-          </div>
+        {/* Summary Cards */}
+        <AnimatedCardContainer className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <AnimatedCard index={0} className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Upcoming</p>
+                  <p className="text-3xl font-bold text-[hsl(var(--accent))]">{upcomingCount}</p>
+                </div>
+                <Calendar className="h-12 w-12 text-[hsl(var(--accent))] opacity-20" />
+              </div>
+            </CardContent>
+          </AnimatedCard>
 
-          <div className="bg-card border-2 border-border rounded-lg p-6 vintage-shadow">
-            <Gift className="w-12 h-12 text-accent mb-4" />
-            <h3 className="text-xl font-bold mb-2">Rewards</h3>
-            <p className="text-3xl font-bold text-accent mb-2">{rewardsBalance?.total_points || 0}</p>
-            <p className="text-muted-foreground text-sm">Points</p>
-          </div>
+          <AnimatedCard index={1} className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Rewards Points</p>
+                  <p className="text-3xl font-bold text-[hsl(var(--accent))]">
+                    {isLoadingRewards ? '...' : rewardsData?.total_points || 0}
+                  </p>
+                </div>
+                <Award className="h-12 w-12 text-[hsl(var(--accent))] opacity-20" />
+              </div>
+            </CardContent>
+          </AnimatedCard>
 
-          <div className="bg-card border-2 border-border rounded-lg p-6 vintage-shadow">
-            <Clock className="w-12 h-12 text-accent mb-4" />
-            <h3 className="text-xl font-bold mb-2">History</h3>
-            <p className="text-3xl font-bold text-accent mb-2">{historyCount}</p>
-            <p className="text-muted-foreground text-sm">Visits</p>
-          </div>
-        </div>
+          <AnimatedCard index={2} className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Visits</p>
+                  <p className="text-3xl font-bold text-[hsl(var(--accent))]">{historyCount}</p>
+                </div>
+                <History className="h-12 w-12 text-[hsl(var(--accent))] opacity-20" />
+              </div>
+            </CardContent>
+          </AnimatedCard>
+        </AnimatedCardContainer>
 
-        <div className="grid lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-card border-2 border-border rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">Your Next Appointment</h3>
-            {nextAppointment ? (
-              <div className="space-y-4">
-                <div className="p-4 bg-accent/10 rounded-lg border-2 border-accent/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Date & Time</span>
-                    <span className="font-bold">
-                      {new Date(nextAppointment.appointment_date).toLocaleDateString()} at {nextAppointment.appointment_time}
-                    </span>
+        {/* Next Appointment */}
+        <AnimatedCard index={3}>
+          <CardContent className="p-6">
+            <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-[hsl(var(--accent))]" />
+              Your Next Appointment
+            </h3>
+            {isLoadingAppointments ? (
+              <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            ) : nextAppointment ? (
+              <motion.div 
+                className="space-y-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div className="space-y-1">
+                    <p className="font-medium text-lg">{(nextAppointment as any).services?.name || 'Appointment'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(`${nextAppointment.appointment_date}T${nextAppointment.appointment_time}`), 'EEEE, MMMM d, yyyy')} at {nextAppointment.appointment_time}
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Status</span>
-                    <span className="font-semibold capitalize">{nextAppointment.status}</span>
+                  <GoldButton onClick={() => navigate('/book')} className="w-full md:w-auto">
+                    Book Another
+                  </GoldButton>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div 
+                className="text-center py-8"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                <p className="text-muted-foreground mb-4">No upcoming appointments</p>
+                <GoldButton onClick={() => navigate('/book')}>Book Now</GoldButton>
+              </motion.div>
+            )}
+          </CardContent>
+        </AnimatedCard>
+
+        {/* Quick Actions */}
+        <AnimatedCard index={4}>
+          <CardContent className="p-6">
+            <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link to="/book" className="block">
+                <motion.div 
+                  className="p-4 border rounded-lg hover:bg-muted/50 hover:border-[hsl(var(--accent))] transition-all cursor-pointer group"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-8 w-8 text-[hsl(var(--accent))] group-hover:scale-110 transition-transform" />
+                    <div>
+                      <p className="font-medium">Book Appointment</p>
+                      <p className="text-sm text-muted-foreground">Schedule your next visit</p>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Confirmation</span>
-                    <span className="font-mono text-sm">{nextAppointment.confirmation_number}</span>
+                </motion.div>
+              </Link>
+
+              <motion.div 
+                className="p-4 border rounded-lg hover:bg-muted/50 hover:border-[hsl(var(--accent))] transition-all cursor-pointer group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="flex items-center gap-3">
+                  <History className="h-8 w-8 text-[hsl(var(--accent))] group-hover:scale-110 transition-transform" />
+                  <div>
+                    <p className="font-medium">View History</p>
+                    <p className="text-sm text-muted-foreground">{historyCount} completed visits</p>
                   </div>
                 </div>
-                <Link to="/book">
-                  <GoldButton className="w-full" variant="outline">Book Another</GoldButton>
-                </Link>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p className="mb-4">No upcoming appointments</p>
-                <Link to="/book">
-                  <GoldButton>Book Now</GoldButton>
-                </Link>
-              </div>
-            )}
-          </div>
+              </motion.div>
 
-          <div className="bg-card border-2 border-border rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
-            <div className="space-y-3">
-              <Link to="/book" className="block">
-                <GoldButton className="w-full">Book Appointment</GoldButton>
-              </Link>
-              <GoldButton className="w-full" variant="outline">View History</GoldButton>
               <Link to="/rewards" className="block">
-                <GoldButton className="w-full" variant="outline">Rewards & Offers</GoldButton>
+                <motion.div 
+                  className="p-4 border rounded-lg hover:bg-muted/50 hover:border-[hsl(var(--accent))] transition-all cursor-pointer group"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <Gift className="h-8 w-8 text-[hsl(var(--accent))] group-hover:scale-110 transition-transform" />
+                    <div>
+                      <p className="font-medium">Rewards Program</p>
+                      <p className="text-sm text-muted-foreground">Earn points & redeem</p>
+                    </div>
+                  </div>
+                </motion.div>
               </Link>
+
               <Link to="/" className="block">
-                <GoldButton className="w-full" variant="outline">Browse Services</GoldButton>
+                <motion.div 
+                  className="p-4 border rounded-lg hover:bg-muted/50 hover:border-[hsl(var(--accent))] transition-all cursor-pointer group"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <Scissors className="h-8 w-8 text-[hsl(var(--accent))] group-hover:scale-110 transition-transform" />
+                    <div>
+                      <p className="font-medium">Browse Services</p>
+                      <p className="text-sm text-muted-foreground">View all offerings</p>
+                    </div>
+                  </div>
+                </motion.div>
               </Link>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </AnimatedCard>
 
-        <div className="bg-card border-2 border-border rounded-lg p-6">
-          <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
-          <div className="text-center py-8 text-muted-foreground">
-            <p>No recent activity to display</p>
-          </div>
-        </div>
+        {/* Recent Activity */}
+        <AnimatedCard index={5}>
+          <CardContent className="p-6">
+            <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-[hsl(var(--accent))]" />
+              Recent Activity
+            </h3>
+            <div className="text-center py-8 text-muted-foreground">
+              No recent activity to display
+            </div>
+          </CardContent>
+        </AnimatedCard>
 
-        <div className="mt-6 text-center">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-accent">
+        {/* Back to Main Site */}
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Link to="/" className="text-[hsl(var(--accent))] hover:underline">
             ← Back to Main Site
           </Link>
-        </div>
-      </main>
-    </div>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 };
 
