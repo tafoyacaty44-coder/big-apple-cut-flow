@@ -189,6 +189,13 @@ export type Database = {
             foreignKeyName: "appointments_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "barber_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -562,6 +569,13 @@ export type Database = {
             foreignKeyName: "campaign_recipients_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "barber_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_recipients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -598,6 +612,13 @@ export type Database = {
             columns: ["barber_id"]
             isOneToOne: false
             referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "barber_clients"
             referencedColumns: ["id"]
           },
           {
@@ -1480,7 +1501,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      barber_clients: {
+        Row: {
+          appointment_count: number | null
+          barber_id: string | null
+          created_at: string | null
+          first_seen: string | null
+          full_name: string | null
+          id: string | null
+          last_appointment_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       generate_appointment_token: { Args: never; Returns: string }
