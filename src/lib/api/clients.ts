@@ -17,6 +17,16 @@ export interface ClientNote {
   created_at: string;
 }
 
+export interface BarberClient {
+  id: string;
+  full_name: string;
+  created_at: string;
+  first_seen: string;
+  barber_id: string;
+  appointment_count: number;
+  last_appointment_date: string;
+}
+
 export const getClients = async (): Promise<Client[]> => {
   const { data, error } = await supabase
     .from('clients')
@@ -89,4 +99,38 @@ export const uploadClientPhoto = async (
     .getPublicUrl(filePath);
 
   return data.publicUrl;
+};
+
+export const getBarberClients = async (barberId: string): Promise<BarberClient[]> => {
+  const { data, error } = await supabase
+    .from('barber_clients')
+    .select('*')
+    .eq('barber_id', barberId)
+    .order('last_appointment_date', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+export const getClientHistoryForBarber = async (
+  clientId: string, 
+  barberId: string
+): Promise<any[]> => {
+  const { data, error } = await supabase
+    .from('appointments')
+    .select(`
+      id,
+      appointment_date,
+      appointment_time,
+      status,
+      notes,
+      services(name, duration_minutes)
+    `)
+    .eq('client_id', clientId)
+    .eq('barber_id', barberId)
+    .order('appointment_date', { ascending: false })
+    .order('appointment_time', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 };

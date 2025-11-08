@@ -36,6 +36,7 @@ import Promotions from "./pages/admin/Promotions";
 import BlacklistManagement from "./pages/admin/BlacklistManagement";
 import SeoManagement from "./pages/admin/SeoManagement";
 import MySchedule from "./pages/barber/MySchedule";
+import MyClients from "./pages/barber/MyClients";
 import BarberDetail from "./pages/BarberDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -140,7 +141,15 @@ const App = () => (
               } 
             />
             <Route
-              path="/admin/schedule" 
+              path="/barber/my-clients" 
+              element={
+                <BarberRoute>
+                  <MyClients />
+                </BarberRoute>
+              } 
+            />
+            <Route
+              path="/admin/schedule"
               element={
                 <AdminRoute>
                   <ScheduleManagement />

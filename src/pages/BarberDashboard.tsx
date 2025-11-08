@@ -5,7 +5,7 @@ import { getBarberProfile } from '@/lib/api/barber';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, LayoutDashboard, Calendar, Coffee, CalendarClock } from 'lucide-react';
+import { LogOut, LayoutDashboard, Calendar, Coffee, CalendarClock, Users } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { DashboardStats } from '@/components/barber/DashboardStats';
 import { AppointmentsList } from '@/components/barber/AppointmentsList';
@@ -111,6 +111,12 @@ const BarberDashboard = () => {
                 <Button variant={location.pathname === '/barber/my-schedule' ? 'default' : 'outline'}>
                   <Calendar className="mr-2 h-4 w-4" />
                   My Schedule
+                </Button>
+              </Link>
+              <Link to="/barber/my-clients">
+                <Button variant={location.pathname === '/barber/my-clients' ? 'default' : 'outline'}>
+                  <Users className="mr-2 h-4 w-4" />
+                  My Clients
                 </Button>
               </Link>
             </div>
