@@ -8,17 +8,45 @@ import { getGalleryImages } from '@/lib/api/gallery';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SeoHead } from '@/components/SeoHead';
 
+// Import service images as fallbacks
+import haircutImg from '@/assets/services/haircut.jpg';
+import beardTrimImg from '@/assets/services/beard-trim.jpg';
+import royalShaveImg from '@/assets/services/royal-shave.jpg';
+import haircutWashImg from '@/assets/services/haircut-wash.jpg';
+import haircutBeardComboImg from '@/assets/services/haircut-beard-combo.jpg';
+import seniorHaircutImg from '@/assets/services/senior-haircut.jpg';
+import blackMaskImg from '@/assets/services/black-mask.jpg';
+import wisemanSpecialImg from '@/assets/services/wiseman-special.jpg';
+
 const categories = ['All', 'Haircuts', 'Shaves', 'Beard Work', 'Transformations'];
+
+// Fallback images when database is empty
+const fallbackImages = [
+  { id: '1', image_url: haircutImg, category: 'Haircuts', title: 'Classic Haircut', description: null, display_order: 0, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '2', image_url: beardTrimImg, category: 'Beard Work', title: 'Beard Trim', description: null, display_order: 1, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '3', image_url: royalShaveImg, category: 'Shaves', title: 'Royal Shave', description: null, display_order: 2, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '4', image_url: haircutWashImg, category: 'Haircuts', title: 'Haircut with Wash', description: null, display_order: 3, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '5', image_url: haircutBeardComboImg, category: 'Transformations', title: 'Complete Transformation', description: null, display_order: 4, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '6', image_url: seniorHaircutImg, category: 'Haircuts', title: 'Senior Haircut', description: null, display_order: 5, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '7', image_url: blackMaskImg, category: 'Transformations', title: 'Black Mask Treatment', description: null, display_order: 6, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '8', image_url: wisemanSpecialImg, category: 'Transformations', title: 'Wiseman Special', description: null, display_order: 7, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+];
 
 const Gallery = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const { data: images = [], isLoading } = useQuery({
+  const { data: dbImages = [], isLoading } = useQuery({
     queryKey: ['gallery-images', selectedCategory],
     queryFn: () => getGalleryImages(selectedCategory === 'All' ? undefined : selectedCategory),
   });
 
-  const filteredImages = images;
+  // Use database images if available, otherwise fallback images
+  const images = dbImages.length > 0 ? dbImages : fallbackImages;
+  
+  // Apply category filter to fallback images if needed
+  const filteredImages = selectedCategory === 'All' 
+    ? images 
+    : images.filter(img => img.category === selectedCategory);
 
   return (
     <div className="min-h-screen pt-20">
