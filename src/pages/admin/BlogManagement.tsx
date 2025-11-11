@@ -4,11 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, ArrowLeft, LogOut } from "lucide-react";
 import BlogPostsTable from "@/components/admin/BlogPostsTable";
 import BlogPostForm from "@/components/admin/BlogPostForm";
 import { getBlogPosts } from "@/lib/api/blog";
 import { toast } from "sonner";
+import Logo from "@/components/Logo";
+import { useAuth } from "@/hooks/useAuth";
 
 const CATEGORIES = [
   "All Categories",
@@ -21,6 +23,7 @@ const CATEGORIES = [
 ];
 
 const BlogManagement = () => {
+  const { signOut } = useAuth();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -76,17 +79,35 @@ const BlogManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Blog Management</h1>
-          <p className="text-muted-foreground mt-1">Create and manage blog posts</p>
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => window.location.href = '/admin'}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Logo variant="dark" />
+              <div>
+                <h1 className="text-xl font-bold">Blog Management</h1>
+                <p className="text-sm text-muted-foreground">Create and manage blog posts</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleCreate}>
+                <Plus className="h-4 w-4 mr-2" />
+                New Post
+              </Button>
+              <Button variant="outline" onClick={() => window.location.href = '/admin'}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Post
-        </Button>
-      </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
@@ -141,6 +162,7 @@ const BlogManagement = () => {
           <BlogPostForm post={editingPost} onSuccess={handleFormSuccess} />
         </DialogContent>
       </Dialog>
+      </main>
     </div>
   );
 };

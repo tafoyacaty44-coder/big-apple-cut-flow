@@ -13,17 +13,17 @@ interface ServicesTableProps {
 
 export function ServicesTable({ services, onEdit, onDelete, onToggleActive }: ServicesTableProps) {
   return (
-    <div className="rounded-md border bg-card">
+    <div className="rounded-md border bg-card overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-12"></TableHead>
             <TableHead>Image</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Regular Price</TableHead>
-            <TableHead>VIP Price</TableHead>
-            <TableHead>Duration</TableHead>
+            <TableHead className="hidden md:table-cell">Category</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead className="hidden lg:table-cell">VIP Price</TableHead>
+            <TableHead className="hidden sm:table-cell">Duration</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -50,17 +50,17 @@ export function ServicesTable({ services, onEdit, onDelete, onToggleActive }: Se
                     />
                   ) : (
                     <div className="w-12 h-12 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                      No image
+                      No img
                     </div>
                   )}
                 </TableCell>
-                <TableCell className="font-medium">{service.name}</TableCell>
-                <TableCell>
+                <TableCell className="font-medium whitespace-nowrap">{service.name}</TableCell>
+                <TableCell className="hidden md:table-cell">
                   <Badge variant="outline">{service.category}</Badge>
                 </TableCell>
-                <TableCell>${service.regular_price}</TableCell>
-                <TableCell>${service.vip_price}</TableCell>
-                <TableCell>{service.duration_minutes} min</TableCell>
+                <TableCell className="whitespace-nowrap">${service.regular_price}</TableCell>
+                <TableCell className="hidden lg:table-cell whitespace-nowrap">${service.vip_price}</TableCell>
+                <TableCell className="hidden sm:table-cell whitespace-nowrap">{service.duration_minutes} min</TableCell>
                 <TableCell>
                   {service.is_active ? (
                     <Badge variant="default">Active</Badge>
@@ -68,34 +68,38 @@ export function ServicesTable({ services, onEdit, onDelete, onToggleActive }: Se
                     <Badge variant="secondary">Inactive</Badge>
                   )}
                 </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onToggleActive(service)}
-                    title={service.is_active ? "Deactivate" : "Activate"}
-                  >
-                    {service.is_active ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(service)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(service)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onToggleActive(service)}
+                      title={service.is_active ? "Deactivate" : "Activate"}
+                    >
+                      {service.is_active ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onEdit(service)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => onDelete(service)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))

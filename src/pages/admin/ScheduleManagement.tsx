@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, ArrowLeft, LogOut } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 const ScheduleManagement = () => {
   const { toast } = useToast();
@@ -29,9 +30,29 @@ const ScheduleManagement = () => {
   const pendingRequests = requests?.filter(r => r.status === 'pending') || [];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Schedule Management</h1>
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => window.location.href = '/admin'}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Logo variant="dark" />
+              <div>
+                <h1 className="text-xl font-bold">Schedule Management</h1>
+                <p className="text-sm text-muted-foreground">Review and manage schedule requests</p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => window.location.href = '/admin'}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
+        </div>
+      </header>
 
+      <main className="max-w-7xl mx-auto px-4 py-8">
       <Card>
         <CardHeader>
           <CardTitle>Pending Schedule Requests ({pendingRequests.length})</CardTitle>
@@ -79,6 +100,7 @@ const ScheduleManagement = () => {
           </div>
         </CardContent>
       </Card>
+      </main>
     </div>
   );
 };

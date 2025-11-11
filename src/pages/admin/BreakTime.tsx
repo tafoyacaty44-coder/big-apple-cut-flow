@@ -3,11 +3,12 @@ import { BreakTimeDialog } from '@/components/admin/BreakTimeDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ArrowLeft, LogOut } from 'lucide-react';
 import { getBreaks, deleteBreak } from '@/lib/api/schedule';
 import { getBarbers } from '@/lib/api/barbers';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import Logo from '@/components/Logo';
 
 const BreakTime = () => {
   const { toast } = useToast();
@@ -55,17 +56,33 @@ const BreakTime = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Break Time Settings</h1>
-            <p className="text-muted-foreground">
-              Manage break schedules for all barbers
-            </p>
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => window.location.href = '/admin'}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Logo variant="dark" />
+              <div>
+                <h1 className="text-xl font-bold">Break Time Settings</h1>
+                <p className="text-sm text-muted-foreground">Manage break schedules for all barbers</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <BreakTimeDialog />
+              <Button variant="outline" onClick={() => window.location.href = '/admin'}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
           </div>
-          <BreakTimeDialog />
         </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="space-y-6">
 
         <div className="space-y-4">
           {Object.entries(groupedBreaks || {}).map(([barberName, barberBreaks]) => (
@@ -124,7 +141,8 @@ const BreakTime = () => {
             </Card>
           )}
         </div>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

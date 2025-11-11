@@ -1,26 +1,44 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
-import { Gift, Trophy, Receipt, Award } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Gift, Trophy, Receipt, Award, ArrowLeft, LogOut } from 'lucide-react';
 import { RewardActionsTable } from '@/components/admin/RewardActionsTable';
 import { RewardTiersTable } from '@/components/admin/RewardTiersTable';
 import { RewardTransactionsTable } from '@/components/admin/RewardTransactionsTable';
+import Logo from '@/components/Logo';
 
 const RewardsManagement = () => {
   const [activeTab, setActiveTab] = useState('actions');
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Gift className="w-8 h-8 text-accent" />
-            Rewards Management
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Manage reward actions, tiers, and view customer transactions
-          </p>
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => window.location.href = '/admin'}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Logo variant="dark" />
+              <div>
+                <h1 className="text-xl font-bold flex items-center gap-3">
+                  <Gift className="w-6 h-6 text-accent" />
+                  Rewards Management
+                </h1>
+                <p className="text-sm text-muted-foreground">Manage reward actions, tiers, and view customer transactions</p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => window.location.href = '/admin'}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="space-y-6">
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
@@ -56,7 +74,8 @@ const RewardsManagement = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Send, Users, BarChart3, Calendar } from "lucide-react";
+import { Plus, Send, Users, BarChart3, Calendar, ArrowLeft, LogOut } from "lucide-react";
 import { getCampaigns } from "@/lib/api/promotions";
 import { PromotionalCampaignForm } from "@/components/admin/PromotionalCampaignForm";
 import { CampaignsTable } from "@/components/admin/CampaignsTable";
 import { CampaignDetailsDialog } from "@/components/admin/CampaignDetailsDialog";
+import Logo from "@/components/Logo";
 
 export default function Promotions() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -52,22 +52,36 @@ export default function Promotions() {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-20 overflow-x-hidden">
-      <Navigation />
-      
-      <div className="max-w-full mx-auto px-4 py-4 md:py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
-          <div>
-            <h1 className="text-2xl md:text-4xl font-bold">Promotional Campaigns</h1>
-            <p className="text-sm md:text-base text-muted-foreground mt-2">
-              Send targeted email and SMS campaigns to your customers
-            </p>
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => window.location.href = '/admin'}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Logo variant="dark" />
+              <div>
+                <h1 className="text-xl font-bold">Promotional Campaigns</h1>
+                <p className="text-sm text-muted-foreground">Send targeted email and SMS campaigns to your customers</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleCreate}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Campaign
+              </Button>
+              <Button variant="outline" onClick={() => window.location.href = '/admin'}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
           </div>
-          <Button onClick={handleCreate} size="lg" className="w-full sm:w-auto touch-target">
-            <Plus className="mr-2 h-4 w-4 md:h-5 md:w-5" />
-            <span className="sm:inline">Create Campaign</span>
-          </Button>
         </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="space-y-6">
 
         {/* Quick Action Templates */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
@@ -124,7 +138,7 @@ export default function Promotions() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
@@ -235,7 +249,8 @@ export default function Promotions() {
             </Tabs>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </main>
 
       <PromotionalCampaignForm
         open={isFormOpen}

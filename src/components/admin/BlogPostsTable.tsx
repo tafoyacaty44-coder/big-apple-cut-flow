@@ -52,15 +52,15 @@ const BlogPostsTable = ({ posts, onEdit, onRefresh }: BlogPostsTableProps) => {
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Title</TableHead>
-            <TableHead>Category</TableHead>
+            <TableHead className="hidden md:table-cell">Category</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Views</TableHead>
-            <TableHead>Published</TableHead>
+            <TableHead className="hidden sm:table-cell">Views</TableHead>
+            <TableHead className="hidden lg:table-cell">Published</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -78,43 +78,45 @@ const BlogPostsTable = ({ posts, onEdit, onRefresh }: BlogPostsTableProps) => {
                   <div className="flex items-center gap-2">
                     {post.is_pinned && <Pin className="h-4 w-4 text-primary" />}
                     {post.is_featured && <Star className="h-4 w-4 text-yellow-500" />}
-                    <span className="font-medium">{post.title}</span>
+                    <span className="font-medium whitespace-nowrap">{post.title}</span>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   <Badge variant="outline">{post.category}</Badge>
                 </TableCell>
                 <TableCell>{getStatusBadge(post)}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
+                <TableCell className="hidden sm:table-cell">
+                  <div className="flex items-center gap-1 whitespace-nowrap">
                     <Eye className="h-4 w-4 text-muted-foreground" />
                     {post.views_count}
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden lg:table-cell whitespace-nowrap">
                   {post.published_at
                     ? format(new Date(post.published_at), "MMM d, yyyy")
                     : "-"}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <Switch
                       checked={post.is_published}
                       onCheckedChange={() => handleTogglePublish(post)}
                     />
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      className="h-8 w-8"
                       onClick={() => onEdit(post)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      className="h-8 w-8 text-destructive"
                       onClick={() => handleDelete(post.id)}
                     >
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>

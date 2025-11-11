@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Mail, MessageSquare, RefreshCw, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Mail, MessageSquare, RefreshCw, Clock, CheckCircle, XCircle, ArrowLeft, LogOut } from "lucide-react";
 import { getNotifications, getNotificationJobs, retryNotificationJob } from "@/lib/api/notifications";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import Logo from "@/components/Logo";
 
 export default function Notifications() {
   const [refreshing, setRefreshing] = useState<string | null>(null);
@@ -61,7 +62,29 @@ export default function Notifications() {
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => window.location.href = '/admin'}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Logo variant="dark" />
+              <div>
+                <h1 className="text-xl font-bold">Notification Management</h1>
+                <p className="text-sm text-muted-foreground">Monitor notification delivery and manage scheduled messages</p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => window.location.href = '/admin'}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
       <Card>
         <CardHeader>
           <CardTitle>Notification Management</CardTitle>
@@ -81,8 +104,8 @@ export default function Notifications() {
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
-              ) : (
-                <div className="border rounded-lg">
+               ) : (
+                <div className="border rounded-lg overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -150,8 +173,8 @@ export default function Notifications() {
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
-              ) : (
-                <div className="border rounded-lg">
+               ) : (
+                <div className="border rounded-lg overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -230,6 +253,7 @@ export default function Notifications() {
           </Tabs>
         </CardContent>
       </Card>
+      </main>
     </div>
   );
 }

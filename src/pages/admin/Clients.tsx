@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, ArrowLeft, LogOut } from 'lucide-react';
 import { getClients } from '@/lib/api/clients';
 import { useNavigate } from 'react-router-dom';
+import Logo from '@/components/Logo';
 
 const Clients = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,14 +31,30 @@ const Clients = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Client Database</h1>
-          <p className="text-muted-foreground">
-            View and manage client information
-          </p>
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => navigate('/admin')}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Logo variant="dark" />
+              <div>
+                <h1 className="text-xl font-bold">Client Database</h1>
+                <p className="text-sm text-muted-foreground">View and manage client information</p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => navigate('/admin')}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="space-y-6">
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -81,7 +99,8 @@ const Clients = () => {
             </Card>
           )}
         </div>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

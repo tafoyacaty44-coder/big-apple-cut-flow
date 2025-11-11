@@ -8,8 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, Search, LogOut } from "lucide-react";
 import Logo from "@/components/Logo";
 
 const pages = [
@@ -112,31 +111,32 @@ export default function SeoManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-4">
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Logo />
-            <Link to="/admin">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => window.location.href = '/admin'}>
+                <ArrowLeft className="h-5 w-5" />
               </Button>
-            </Link>
+              <Logo variant="dark" />
+              <div>
+                <h1 className="text-xl font-bold flex items-center gap-2">
+                  <Search className="h-6 w-6" />
+                  SEO Management
+                </h1>
+                <p className="text-sm text-muted-foreground">Control how your pages appear in search engines and social media</p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => window.location.href = '/admin'}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-            <Search className="h-8 w-8" />
-            SEO Management
-          </h1>
-          <p className="text-muted-foreground">
-            Control how your pages appear in search engines and social media
-          </p>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 py-8">
 
         <Card className="mb-6">
           <CardHeader>
@@ -318,16 +318,16 @@ export default function SeoManagement() {
             </Card>
 
             <div className="flex justify-end gap-4">
-              <Link to="/admin">
-                <Button type="button" variant="outline">Cancel</Button>
-              </Link>
+              <Button type="button" variant="outline" onClick={() => window.location.href = '/admin'}>
+                Cancel
+              </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </form>
         )}
-      </div>
+      </main>
     </div>
   );
 }

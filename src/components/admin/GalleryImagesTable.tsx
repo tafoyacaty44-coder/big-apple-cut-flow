@@ -13,14 +13,14 @@ interface GalleryImagesTableProps {
 
 export function GalleryImagesTable({ images, onEdit, onDelete, onToggleActive }: GalleryImagesTableProps) {
   return (
-    <div className="rounded-md border bg-card">
+    <div className="rounded-md border bg-card overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Image</TableHead>
-            <TableHead>Title</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Description</TableHead>
+            <TableHead className="hidden sm:table-cell">Title</TableHead>
+            <TableHead className="hidden md:table-cell">Category</TableHead>
+            <TableHead className="hidden lg:table-cell">Description</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -39,16 +39,16 @@ export function GalleryImagesTable({ images, onEdit, onDelete, onToggleActive }:
                   <img 
                     src={image.image_url} 
                     alt={image.title || "Gallery image"}
-                    className="w-20 h-20 object-cover rounded"
+                    className="w-16 h-16 object-cover rounded"
                   />
                 </TableCell>
-                <TableCell className="font-medium">
+                <TableCell className="hidden sm:table-cell font-medium whitespace-nowrap">
                   {image.title || <span className="text-muted-foreground italic">No title</span>}
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   <Badge variant="outline">{image.category}</Badge>
                 </TableCell>
-                <TableCell className="max-w-xs truncate">
+                <TableCell className="hidden lg:table-cell max-w-xs truncate">
                   {image.description || <span className="text-muted-foreground italic">No description</span>}
                 </TableCell>
                 <TableCell>
@@ -58,34 +58,38 @@ export function GalleryImagesTable({ images, onEdit, onDelete, onToggleActive }:
                     <Badge variant="secondary">Inactive</Badge>
                   )}
                 </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onToggleActive(image)}
-                    title={image.is_active ? "Deactivate" : "Activate"}
-                  >
-                    {image.is_active ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(image)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(image)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onToggleActive(image)}
+                      title={image.is_active ? "Deactivate" : "Activate"}
+                    >
+                      {image.is_active ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onEdit(image)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => onDelete(image)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))

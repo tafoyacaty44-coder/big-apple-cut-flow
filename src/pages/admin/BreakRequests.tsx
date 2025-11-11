@@ -8,10 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ArrowLeft, Check, X, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, Check, X, Clock, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
-import Navigation from '@/components/Navigation';
+import Logo from '@/components/Logo';
 
 const BreakRequests = () => {
   const [reviewingRequest, setReviewingRequest] = useState<any>(null);
@@ -74,11 +73,8 @@ const BreakRequests = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="container mx-auto p-8">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </div>
     );
@@ -88,24 +84,30 @@ const BreakRequests = () => {
   const reviewedRequests = requests?.filter((r: any) => r.status !== 'pending') || [];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className="container mx-auto p-4 md:p-8">
-        <div className="mb-6">
-          <Link to="/admin">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <header className="border-b bg-card">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => window.location.href = '/admin'}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Logo variant="dark" />
+              <div>
+                <h1 className="text-xl font-bold">Break Requests</h1>
+                <p className="text-sm text-muted-foreground">Review and approve barber break requests</p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => window.location.href = '/admin'}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
             </Button>
-          </Link>
-        </div>
-
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold">Break Requests</h1>
-            <p className="text-muted-foreground">Review and approve barber break requests</p>
           </div>
+        </div>
+      </header>
+      
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="space-y-6">
 
           {/* Pending Requests */}
           <div>
