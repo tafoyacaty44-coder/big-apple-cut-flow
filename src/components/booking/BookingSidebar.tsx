@@ -1,5 +1,5 @@
 import { Check, Calendar, Scissors, User, Clock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatTime12h } from "@/lib/utils";
 import { GoldButton } from "@/components/ui/gold-button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -58,7 +58,7 @@ export const BookingSidebar = ({
       icon: User,
       completed: !!selectedBarber && !!selectedDate && !!selectedTime,
       content: selectedBarber && selectedDate && selectedTime
-        ? `${selectedBarber.name} • ${new Date(selectedDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })} • ${selectedTime}`
+        ? `${selectedBarber.name} • ${new Date(selectedDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })} • ${formatTime12h(selectedTime)}`
         : "Choose barber & schedule",
     },
     {

@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { BookingSidebar } from '@/components/booking/BookingSidebar';
 import { Separator } from '@/components/ui/separator';
-import { cn, calculateBookingTotal } from '@/lib/utils';
+import { cn, calculateBookingTotal, formatTime12h } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SeoHead } from '@/components/SeoHead';
 
@@ -499,7 +499,10 @@ const Book = () => {
                                   <button
                                     key={addon.id}
                                     type="button"
-                                    onClick={() => handleAddonToggle(addon.id)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAddonToggle(addon.id);
+                                    }}
                                     className={cn(
                                       "w-full text-left p-2 rounded-md border text-xs transition-all",
                                       isSelected 
@@ -565,7 +568,11 @@ const Book = () => {
                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                     <GoldButton
                       className="w-full min-h-[48px]"
-                      onClick={() => booking.selectedServiceId && setCurrentStep(3)}
+                      onClick={() => {
+                        if (!booking.selectedServiceId) return;
+                        setSelectedAddons(selectedAddonIds);
+                        setCurrentStep(3);
+                      }}
                       disabled={!booking.selectedServiceId}
                     >
                       Continue to Barber Selection
@@ -694,7 +701,7 @@ const Book = () => {
                         <span className="text-muted-foreground">Date & Time:</span>
                         <span className="font-semibold">
                           {booking.selectedDate && booking.selectedTime 
-                            ? `${format(booking.selectedDate, "MMM d, yyyy")} at ${booking.selectedTime}`
+                            ? `${format(booking.selectedDate, "MMM d, yyyy")} at ${formatTime12h(booking.selectedTime)}`
                             : ""
                           }
                         </span>

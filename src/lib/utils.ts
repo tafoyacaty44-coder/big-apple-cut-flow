@@ -5,6 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function formatTime12h(time: string): string {
+  const [hStr, mStr] = time.split(':');
+  const h = Number(hStr);
+  const m = Number(mStr || '0');
+  const hour = ((h + 11) % 12) + 1;
+  const suffix = h >= 12 ? 'PM' : 'AM';
+  return `${hour}:${m.toString().padStart(2, '0')} ${suffix}`;
+}
+
 export interface BookingPriceCalculation {
   basePrice: number;
   baseRegularPrice: number;

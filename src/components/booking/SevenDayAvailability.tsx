@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { format, addDays } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, formatTime12h } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -33,7 +33,7 @@ export const SevenDayAvailability = ({
     onSelectTime?.(date, time);
     toast({
       title: '✓ Time Selected',
-      description: `${format(new Date(date), 'EEEE, MMM d')} at ${time}`,
+      description: `${format(new Date(date), 'EEEE, MMM d')} at ${formatTime12h(time)}`,
     });
   };
 
@@ -153,7 +153,7 @@ export const SevenDayAvailability = ({
                   className="min-h-[44px]"
                   onClick={() => handleTimeSelect(selectedDate, time)}
                 >
-                  {time}
+                  {formatTime12h(time)}
                 </Button>
               ))}
             </div>
@@ -177,7 +177,7 @@ export const SevenDayAvailability = ({
                 >
                   <span className="font-medium">{format(new Date(date), 'EEE, MMM d')}</span>
                   <span className="mx-2">•</span>
-                  <span>{time}</span>
+                  <span>{formatTime12h(time)}</span>
                 </Button>
               ))}
             </div>
