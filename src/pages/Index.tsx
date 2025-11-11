@@ -8,6 +8,7 @@ import { getGalleryImages } from "@/lib/api/gallery";
 import { TodayAvailability } from "@/components/TodayAvailability";
 import { SeoHead } from "@/components/SeoHead";
 import IntroReveal from "@/components/IntroReveal";
+import Footer from "@/components/Footer";
 import React, { useState } from "react";
 import logoWhite from "@/assets/big-apple-logo-white.png";
 import haircut from "@/assets/services/haircut.jpg";
@@ -399,6 +400,9 @@ const Index = () => {
         </div>
         <TodayAvailability />
       </div> */}
+
+      {/* Footer */}
+      <Footer />
     </main>
   );
 };
