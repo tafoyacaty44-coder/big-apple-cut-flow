@@ -352,7 +352,7 @@ const Book = () => {
                   </span>
                 )}
                 <span className="text-[hsl(var(--accent))] font-bold">
-                  ${calculateBookingTotal(selectedService, selectedAddons, vipCodeValid).subtotal.toFixed(2)}
+                  ${calculateBookingTotal(selectedService, selectedAddons, false).subtotal.toFixed(2)}
                 </span>
               </div>
             </button>
@@ -545,7 +545,7 @@ const Book = () => {
                         </h4>
                         <span className="text-sm font-semibold text-[hsl(var(--accent))]">
                           +${selectedAddons.reduce((sum, addon) => {
-                            return sum + (vipCodeValid && addon.vip_price ? addon.vip_price : addon.regular_price);
+                            return sum + addon.regular_price;
                           }, 0).toFixed(2)}
                         </span>
                       </div>
@@ -554,7 +554,7 @@ const Book = () => {
                           <div key={addon.id} className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">• {addon.name}</span>
                             <span className="font-medium">
-                              ${(vipCodeValid && addon.vip_price ? addon.vip_price : addon.regular_price).toFixed(2)}
+                              ${addon.regular_price.toFixed(2)}
                             </span>
                           </div>
                         ))}

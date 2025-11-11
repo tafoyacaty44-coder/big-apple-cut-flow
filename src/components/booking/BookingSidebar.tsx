@@ -72,9 +72,9 @@ export const BookingSidebar = ({
 
   const calculateTotal = () => {
     if (!selectedService) return 0;
-    const basePrice = isVip && selectedService.vip_price ? selectedService.vip_price : selectedService.price;
+    const basePrice = selectedService.price;
     const addonTotal = selectedAddons.reduce((sum, addon) => {
-      return sum + (isVip && addon.vip_price ? addon.vip_price : addon.regular_price);
+      return sum + addon.regular_price;
     }, 0);
     return basePrice + addonTotal;
   };
