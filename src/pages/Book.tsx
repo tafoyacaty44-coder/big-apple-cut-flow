@@ -387,10 +387,9 @@ const Book = () => {
                     <h2 className="text-3xl font-bold mb-2">Your Information</h2>
                     <p className="text-muted-foreground">Let's start with your contact details</p>
                   </div>
-                  <CustomerInfoForm 
-                    onSubmit={handleCustomerInfoSubmit}
-                    selectedServiceId={booking.selectedServiceId}
-                  />
+            <CustomerInfoForm 
+              onSubmit={handleCustomerInfoSubmit}
+            />
                   {isMobile && (
                     <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                       <GoldButton
