@@ -192,7 +192,7 @@ const Book = () => {
   };
 
   const canContinueStep = (step: number) => {
-    if (step === 1) return true; // Form validation handles this
+    if (step === 1) return !!booking.customerInfo;
     if (step === 2) {
       // Save add-ons to context when continuing from step 2
       if (selectedAddonIds.length > 0) {
@@ -317,7 +317,6 @@ const Book = () => {
               selectedAddons={selectedAddons}
               onEditStep={handleEditStep}
               onContinue={() => {
-                if (currentStep === 1 && canContinueStep(1)) setCurrentStep(2);
                 if (currentStep === 2 && canContinueStep(2)) setCurrentStep(3);
                 if (currentStep === 3 && canContinueStep(3)) setCurrentStep(4);
                 if (currentStep === 4) handleConfirmBooking();
