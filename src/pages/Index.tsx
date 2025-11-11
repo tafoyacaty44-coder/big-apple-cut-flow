@@ -7,7 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 import { getGalleryImages } from "@/lib/api/gallery";
 import { TodayAvailability } from "@/components/TodayAvailability";
 import { SeoHead } from "@/components/SeoHead";
-import React from "react";
+import IntroReveal from "@/components/IntroReveal";
+import React, { useState } from "react";
+import logoWhite from "@/assets/big-apple-logo-white.png";
 import haircut from "@/assets/services/haircut.jpg";
 import beardTrim from "@/assets/services/beard-trim.jpg";
 import combo from "@/assets/services/haircut-beard-combo.jpg";
@@ -243,10 +245,26 @@ const Index = () => {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
   const { data: slots } = useNextAvailableSlots(3);
+  const [showIntro, setShowIntro] = useState(true);
+  const [introComplete, setIntroComplete] = useState(false);
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+    setTimeout(() => setIntroComplete(true), 50);
+  };
 
   return (
     <main className="min-h-[100dvh] bg-primary text-primary-foreground relative overflow-hidden">
       <SeoHead pageSlug="home" />
+      
+      {/* Intro Reveal */}
+      {showIntro && (
+        <IntroReveal 
+          logoSrc={logoWhite}
+          onComplete={handleIntroComplete}
+          duration={1.8}
+        />
+      )}
       {/* Animated gradient background */}
       <motion.div
         aria-hidden="true"
@@ -270,8 +288,9 @@ const Index = () => {
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -24, scale: 0.92 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          animate={introComplete ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: -24, scale: 0.92 }}
           transition={{ 
+            delay: showIntro ? 1.5 : 0,
             duration: 1.4, 
             ease: [0.16, 1, 0.3, 1],
             opacity: { duration: 1.2 },
@@ -285,8 +304,8 @@ const Index = () => {
         {/* Credibility bar */}
         <motion.p
           initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5, ease: "easeOut" }}
+          animate={introComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
+          transition={{ delay: showIntro ? 1.75 : 0.25, duration: 0.5, ease: "easeOut" }}
           className="text-sm text-primary-foreground/80"
           aria-label="rating"
         >
@@ -298,7 +317,11 @@ const Index = () => {
           className="w-full max-w-[720px] flex flex-col gap-4"
           variants={container}
           initial="hidden"
-          animate="visible"
+          animate={introComplete ? "visible" : "hidden"}
+          transition={{
+            delayChildren: showIntro ? 1.5 : 0,
+            staggerChildren: 0.15
+          }}
         >
           {navItems.map((navItem) => (
             <CTAButton 
@@ -314,8 +337,8 @@ const Index = () => {
         <motion.div
           className="py-8 px-4 text-center space-y-6"
           initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
+          animate={introComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+          transition={{ delay: showIntro ? 2.3 : 0.8, duration: 0.6, ease: "easeOut" }}
         >
           <div className="flex items-center justify-center gap-2 text-accent text-xl font-semibold mb-2">
             <Phone className="h-5 w-5" />
