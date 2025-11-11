@@ -49,7 +49,7 @@ export const BookingSidebar = ({
       icon: Scissors,
       completed: !!selectedService,
       content: selectedService
-        ? `${selectedService.name}${selectedAddons.length > 0 ? ` +${selectedAddons.length} add-on${selectedAddons.length > 1 ? 's' : ''}` : ''}`
+        ? `${selectedService.name}${selectedAddons.length > 0 ? ` • ${selectedAddons.map(a => a.name).join(', ')}` : ''}`
         : "Select a service",
     },
     {

@@ -230,7 +230,7 @@ function GalleryRow() {
 
       {!reduce && (
         <p className="mt-4 px-4 text-center text-sm text-muted-foreground">
-          Drag to browse • Tap to enlarge
+          Swipe left to browse • Tap to enlarge
         </p>
       )}
 

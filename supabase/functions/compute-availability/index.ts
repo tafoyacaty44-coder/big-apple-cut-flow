@@ -142,8 +142,9 @@ Deno.serve(async (req) => {
           const slotStart = new Date(time);
           const slotEnd = new Date(time.getTime() + serviceDuration * 60000);
 
-          // Skip past times for today
-          if (isToday && slotStart <= now) {
+          // Skip past times and add 30-minute buffer to prevent last-minute bookings
+          const bufferTime = new Date(now.getTime() + 30 * 60000);
+          if (isToday && slotStart <= bufferTime) {
             continue;
           }
 

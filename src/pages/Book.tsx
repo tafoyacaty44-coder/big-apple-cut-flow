@@ -341,7 +341,7 @@ const Book = () => {
                 <div className="text-sm text-muted-foreground truncate">
                   {booking.customerInfo?.name}
                   {selectedService && ` • ${selectedService.name}`}
-                  {selectedAddons.length > 0 && ` +${selectedAddons.length}`}
+                  {selectedAddons.length > 0 && ` • ${selectedAddons.map(a => a.name).join(', ')}`}
                   {booking.selectedBarberName && ` • ${booking.selectedBarberName}`}
                 </div>
               </div>
@@ -529,6 +529,35 @@ const Book = () => {
                       );
                     })}
                   </div>
+                )}
+
+                {/* Selected Add-ons Summary */}
+                {selectedAddons.length > 0 && (
+                  <AnimatedCard className="bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]/30">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-bold text-sm flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-[hsl(var(--accent))]" />
+                          {selectedAddons.length} Add-on{selectedAddons.length > 1 ? 's' : ''} Selected
+                        </h4>
+                        <span className="text-sm font-semibold text-[hsl(var(--accent))]">
+                          +${selectedAddons.reduce((sum, addon) => {
+                            return sum + (vipCodeValid && addon.vip_price ? addon.vip_price : addon.regular_price);
+                          }, 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        {selectedAddons.map((addon) => (
+                          <div key={addon.id} className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">• {addon.name}</span>
+                            <span className="font-medium">
+                              ${(vipCodeValid && addon.vip_price ? addon.vip_price : addon.regular_price).toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </AnimatedCard>
                 )}
 
 
