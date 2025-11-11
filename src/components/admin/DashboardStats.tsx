@@ -5,7 +5,10 @@ import { Calendar, DollarSign, Users, Scissors, TrendingUp } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardStats() {
-  const today = new Date().toISOString().split('T')[0];
+  // Get timezone-safe local date string
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  const today = now.toISOString().split('T')[0];
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-stats', today],

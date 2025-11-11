@@ -20,14 +20,24 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { Eye, Plus, Search } from 'lucide-react';
+import { Eye, Plus, Search, RefreshCcw } from 'lucide-react';
 import { CreateAppointmentDialog } from './CreateAppointmentDialog';
 import { AppointmentDetailsDialog } from './AppointmentDetailsDialog';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
+
+// Helper to get local date string (timezone-safe)
+const getLocalDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export const AppointmentsTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'upcoming' | 'past'>('today');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<AdminAppointment | null>(null);
@@ -35,6 +45,10 @@ export const AppointmentsTable = () => {
   const { data: appointments, isLoading, refetch } = useQuery({
     queryKey: ['admin-appointments'],
     queryFn: getAllAppointments,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const filteredAppointments = appointments?.filter((apt) => {
@@ -45,7 +59,20 @@ export const AppointmentsTable = () => {
 
     const matchesStatus = statusFilter === 'all' || apt.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    // Date filtering with timezone-safe comparison
+    const todayStr = getLocalDateString();
+    const aptDateStr = apt.appointment_date; // Already in YYYY-MM-DD format
+    
+    let matchesDate = true;
+    if (dateFilter === 'today') {
+      matchesDate = aptDateStr === todayStr;
+    } else if (dateFilter === 'upcoming') {
+      matchesDate = aptDateStr >= todayStr;
+    } else if (dateFilter === 'past') {
+      matchesDate = aptDateStr < todayStr;
+    }
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   const getStatusBadge = (status: string) => {
@@ -103,11 +130,22 @@ export const AppointmentsTable = () => {
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <h2 className="text-xl md:text-2xl font-bold">Appointments</h2>
-            <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto touch-target">
-              <Plus className="mr-2 h-4 w-4" />
-              <span className="sm:inline">Add</span>
-              <span className="hidden sm:inline"> Appointment</span>
-            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => refetch()} 
+                className="touch-target"
+                title="Refresh appointments"
+              >
+                <RefreshCcw className="h-4 w-4" />
+              </Button>
+              <Button onClick={() => setCreateDialogOpen(true)} className="flex-1 sm:flex-none touch-target">
+                <Plus className="mr-2 h-4 w-4" />
+                <span className="sm:inline">Add</span>
+                <span className="hidden sm:inline"> Appointment</span>
+              </Button>
+            </div>
           </div>
 
           {/* Filters */}
@@ -121,8 +159,19 @@ export const AppointmentsTable = () => {
                 className="pl-9"
               />
             </div>
+            <Select value={dateFilter} onValueChange={(v) => setDateFilter(v as any)}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Filter by date" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Dates</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+                <SelectItem value="past">Past</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -170,7 +219,7 @@ export const AppointmentsTable = () => {
                       <TableCell className="hidden lg:table-cell whitespace-nowrap">{appointment.services?.name || 'N/A'}</TableCell>
                       <TableCell className="whitespace-nowrap">
                         <div className="text-xs md:text-sm">
-                          {format(new Date(appointment.appointment_date), 'MMM dd, yyyy')}
+                          {format(parse(appointment.appointment_date, 'yyyy-MM-dd', new Date()), 'MMM dd, yyyy')}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {appointment.appointment_time}
