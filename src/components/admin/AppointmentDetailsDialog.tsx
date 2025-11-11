@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,12 @@ export const AppointmentDetailsDialog = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(appointment.status);
   const [currentPaymentStatus, setCurrentPaymentStatus] = useState(appointment.payment_status);
+
+  // Sync local state when appointment prop changes (after refetch)
+  useEffect(() => {
+    setCurrentStatus(appointment.status);
+    setCurrentPaymentStatus(appointment.payment_status);
+  }, [appointment.status, appointment.payment_status]);
 
   const handleStatusUpdate = async (newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show') => {
     setIsUpdating(true);
