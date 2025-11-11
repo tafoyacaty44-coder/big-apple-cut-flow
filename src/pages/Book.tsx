@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { BookingSidebar } from '@/components/booking/BookingSidebar';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
+import { cn, calculateBookingTotal } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SeoHead } from '@/components/SeoHead';
 
@@ -345,12 +345,15 @@ const Book = () => {
                   {booking.selectedBarberName && ` • ${booking.selectedBarberName}`}
                 </div>
               </div>
-              <div className="text-[hsl(var(--accent))] font-bold">
-                ${(() => {
-                  const basePrice = selectedService?.regular_price || 0;
-                  const addonTotal = selectedAddons.reduce((sum, addon) => sum + addon.regular_price, 0);
-                  return (basePrice + addonTotal).toFixed(2);
-                })()}
+              <div className="flex items-center gap-2">
+                {vipCodeValid && (
+                  <span className="text-xs bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))] px-2 py-0.5 rounded-full font-semibold">
+                    VIP ✨
+                  </span>
+                )}
+                <span className="text-[hsl(var(--accent))] font-bold">
+                  ${calculateBookingTotal(selectedService, selectedAddons, vipCodeValid).subtotal.toFixed(2)}
+                </span>
               </div>
             </button>
           </div>
@@ -644,6 +647,16 @@ const Book = () => {
                         <span className="text-muted-foreground">Service:</span>
                         <span className="font-semibold">{selectedService.name}</span>
                       </div>
+                      {selectedAddons.length > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Add-ons:</span>
+                          <div className="text-right">
+                            {selectedAddons.map((addon) => (
+                              <div key={addon.id} className="font-medium">• {addon.name}</div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Barber:</span>
                         <span className="font-semibold">{booking.selectedBarberName}</span>
@@ -662,10 +675,70 @@ const Book = () => {
                         <span className="font-semibold">{selectedService.duration_minutes} minutes</span>
                       </div>
                       <Separator className="my-2" />
-                      <div className="flex justify-between text-lg">
-                        <span className="font-bold">Total:</span>
-                        <span className="font-bold text-[hsl(var(--accent))]">${selectedService.regular_price}</span>
-                      </div>
+                      
+                      {/* Price Breakdown */}
+                      {(() => {
+                        const pricing = calculateBookingTotal(selectedService, selectedAddons, vipCodeValid);
+                        return (
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">{selectedService.name}</span>
+                              <div className="flex items-center gap-2">
+                                {vipCodeValid && pricing.baseRegularPrice !== pricing.basePrice && (
+                                  <span className="line-through text-muted-foreground text-xs">
+                                    ${pricing.baseRegularPrice.toFixed(2)}
+                                  </span>
+                                )}
+                                <span className={vipCodeValid ? "text-[hsl(var(--accent))]" : ""}>
+                                  ${pricing.basePrice.toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {selectedAddons.map((addon) => {
+                              const addonPrice = vipCodeValid && addon.vip_price ? addon.vip_price : addon.regular_price;
+                              const showStrikethrough = vipCodeValid && addon.vip_price && addon.vip_price !== addon.regular_price;
+                              return (
+                                <div key={addon.id} className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">{addon.name}</span>
+                                  <div className="flex items-center gap-2">
+                                    {showStrikethrough && (
+                                      <span className="line-through text-muted-foreground text-xs">
+                                        ${addon.regular_price.toFixed(2)}
+                                      </span>
+                                    )}
+                                    <span className={vipCodeValid ? "text-[hsl(var(--accent))]" : ""}>
+                                      ${addonPrice.toFixed(2)}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            
+                            {vipCodeValid && pricing.vipSavings > 0 && (
+                              <>
+                                <Separator className="my-1" />
+                                <div className="flex justify-between text-sm">
+                                  <span className="flex items-center gap-1 text-[hsl(var(--accent))]">
+                                    VIP Savings ✨
+                                  </span>
+                                  <span className="font-semibold text-green-600">
+                                    -${pricing.vipSavings.toFixed(2)}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                            
+                            <Separator className="my-2" />
+                            <div className="flex justify-between text-lg">
+                              <span className="font-bold">Total:</span>
+                              <span className="font-bold text-[hsl(var(--accent))]">
+                                ${pricing.subtotal.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </CardContent>
                 </Card>
@@ -711,7 +784,7 @@ const Book = () => {
                     {selectedPaymentMethod && (
                       <Alert className="bg-[hsl(var(--accent))]/5 border-[hsl(var(--accent))]/20">
                         <AlertDescription className="text-sm">
-                          After completing your booking, send ${selectedService.regular_price} via {
+                          After completing your booking, send ${calculateBookingTotal(selectedService, selectedAddons, vipCodeValid).subtotal.toFixed(2)} via {
                             selectedPaymentMethod === 'zelle' ? 'Zelle' :
                             selectedPaymentMethod === 'apple_pay' ? 'Apple Pay' :
                             selectedPaymentMethod === 'venmo' ? 'Venmo' : 'Cash App'
