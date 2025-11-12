@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
+import { WeeklyAvailabilityIndicator } from './WeeklyAvailabilityIndicator';
 
 interface BarberCardProps {
   barber: any;
@@ -8,6 +9,7 @@ interface BarberCardProps {
   selectedServiceDuration: number;
   isSelected: boolean;
   onSelect: () => void;
+  compact?: boolean;
 }
 
 const BarberCard = ({
@@ -17,6 +19,7 @@ const BarberCard = ({
   selectedServiceDuration,
   isSelected,
   onSelect,
+  compact = false,
 }: BarberCardProps) => {
   const getInitials = (name: string) => {
     return name
@@ -26,6 +29,62 @@ const BarberCard = ({
       .toUpperCase();
   };
 
+  if (compact) {
+    // Compact horizontal row layout
+    return (
+      <div
+        className={`flex items-center gap-4 p-3 rounded-lg border-2 transition-all ${
+          isSelected
+            ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5'
+            : 'border-border hover:bg-muted/50'
+        }`}
+      >
+        {/* Avatar */}
+        <div className="w-12 h-12 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center text-lg font-bold text-[hsl(var(--accent))] flex-shrink-0">
+          {barber.profile_image_url ? (
+            <img
+              src={barber.profile_image_url}
+              alt={barber.full_name}
+              className="w-full h-full rounded-full object-cover"
+            />
+          ) : (
+            getInitials(barber.full_name)
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-base mb-0.5 truncate">{barber.full_name}</h3>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{barber.years_experience} yrs exp</span>
+            {barber.specialties && barber.specialties.length > 0 && (
+              <>
+                <span>•</span>
+                <span className="truncate">{barber.specialties.join(', ')}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Weekly Availability */}
+        <div className="flex-shrink-0">
+          <WeeklyAvailabilityIndicator barberId={barber.id} />
+        </div>
+
+        {/* Select Button */}
+        <GoldButton 
+          onClick={onSelect}
+          size="sm"
+          variant={isSelected ? "default" : "outline"}
+          className="flex-shrink-0"
+        >
+          {isSelected ? "Selected" : "Select"}
+        </GoldButton>
+      </div>
+    );
+  }
+
+  // Original vertical card layout (fallback)
   return (
     <Card
       className={`transition-all duration-300 ${

@@ -80,11 +80,11 @@ export const BookingSidebar = ({
   };
 
   return (
-    <Card className="h-full flex flex-col border-r rounded-none border-l-0 border-t-0 border-b-0 bg-muted/30 overflow-hidden">
-      <div className="p-6 flex-1 overflow-y-auto min-h-0">
-        <h2 className="text-lg font-bold mb-6">Booking Summary</h2>
+    <Card className="h-full flex flex-col border-r rounded-none border-l-0 border-t-0 border-b-0 bg-muted/30 overflow-hidden w-[280px]">
+      <div className="p-4 flex-1 overflow-y-auto min-h-0">
+        <h2 className="text-base font-bold mb-4">Booking Summary</h2>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {steps.map((step, index) => {
             const isActive = currentStep === step.number;
             const isClickable = step.completed && currentStep > step.number;
@@ -95,16 +95,16 @@ export const BookingSidebar = ({
                   onClick={() => isClickable && onEditStep(step.number)}
                   disabled={!isClickable}
                   className={cn(
-                    "w-full text-left p-3 rounded-lg transition-all",
+                    "w-full text-left p-2 rounded-lg transition-all",
                     isActive && "bg-primary/10 border border-primary/20",
                     isClickable && "hover:bg-muted cursor-pointer",
                     !isClickable && !isActive && "opacity-60"
                   )}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2">
                     <div
                       className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
+                        "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
                         step.completed
                           ? "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]"
                           : isActive
@@ -113,27 +113,27 @@ export const BookingSidebar = ({
                       )}
                     >
                       {step.completed ? (
-                        <Check className="h-4 w-4" />
+                        <Check className="h-3 w-3" />
                       ) : (
-                        <step.icon className="h-4 w-4" />
+                        <step.icon className="h-3 w-3" />
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-semibold">{step.label}</span>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="text-xs font-semibold">{step.label}</span>
                         {isClickable && (
-                          <span className="text-xs text-muted-foreground">(edit)</span>
+                          <span className="text-[10px] text-muted-foreground">(edit)</span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">
+                      <p className="text-xs text-muted-foreground truncate leading-tight">
                         {step.content}
                       </p>
                     </div>
                   </div>
                 </button>
                 {index < steps.length - 1 && (
-                  <div className="ml-[1.125rem] my-2 h-6 w-0.5 bg-border" />
+                  <div className="ml-[0.875rem] my-1.5 h-4 w-0.5 bg-border" />
                 )}
               </div>
             );
@@ -141,14 +141,14 @@ export const BookingSidebar = ({
         </div>
       </div>
 
-      <div className="p-6 border-t bg-background flex-shrink-0">
-        <div className="mb-4">
-          <div className="flex justify-between text-sm mb-2">
+      <div className="p-4 border-t bg-background flex-shrink-0">
+        <div className="mb-3">
+          <div className="flex justify-between text-xs mb-1.5">
             <span className="text-muted-foreground">Subtotal</span>
             <span>${calculateTotal().toFixed(2)}</span>
           </div>
-          <Separator className="my-2" />
-          <div className="flex justify-between font-bold">
+          <Separator className="my-1.5" />
+          <div className="flex justify-between font-bold text-sm">
             <span>Total</span>
             <span className="text-[hsl(var(--accent))]">${calculateTotal().toFixed(2)}</span>
           </div>
@@ -161,7 +161,7 @@ export const BookingSidebar = ({
           )}
           disabled={!canContinue}
           className="w-full"
-          size="lg"
+          size="default"
         >
           {currentStep === 4 ? "Complete Booking" : "Continue"}
         </GoldButton>

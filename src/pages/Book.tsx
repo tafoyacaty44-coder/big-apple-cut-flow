@@ -14,6 +14,7 @@ import { useBooking } from '@/contexts/BookingContext';
 import BarberCard from '@/components/booking/BarberCard';
 import { SevenDayAvailability } from '@/components/booking/SevenDayAvailability';
 import CustomerInfoForm from '@/components/booking/CustomerInfoForm';
+import { CompactServiceList } from '@/components/booking/CompactServiceList';
 import DiscountCodesForm from '@/components/booking/DiscountCodesForm';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -302,7 +303,7 @@ const Book = () => {
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Desktop Sidebar */}
         {!isMobile && (
-          <div className="w-80 flex-shrink-0">
+          <div className="flex-shrink-0">
             <BookingSidebar
               currentStep={currentStep}
               selectedService={selectedService ? {
@@ -359,7 +360,7 @@ const Book = () => {
         )}
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="max-w-5xl mx-auto">
             {/* Blacklist Warning */}
             {booking.isBlacklisted && (
@@ -380,11 +381,11 @@ const Book = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-6"
+                  className="space-y-4"
                 >
                   <div>
-                    <h2 className="text-3xl font-bold mb-2">Your Information</h2>
-                    <p className="text-muted-foreground">Let's start with your contact details</p>
+                    <h2 className="text-2xl font-bold mb-1">Your Information</h2>
+                    <p className="text-sm text-muted-foreground">Let's start with your contact details</p>
                   </div>
             <CustomerInfoForm 
               onSubmit={handleCustomerInfoSubmit}
@@ -413,152 +414,29 @@ const Book = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-6"
+                  className="space-y-4"
                 >
                   <div>
-                    <h2 className="text-3xl font-bold mb-2">Select a Service</h2>
-                    <p className="text-muted-foreground">Choose the service you'd like to book</p>
+                    <h2 className="text-2xl font-bold mb-1">Select a Service</h2>
+                    <p className="text-sm text-muted-foreground">Choose the service you'd like to book</p>
                   </div>
                 {isLoadingServices ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <Card key={i} className="animate-pulse">
-                        <div className="aspect-[3/2] bg-muted rounded-t-lg" />
-                        <CardContent className="p-4 space-y-2">
-                          <div className="h-6 bg-muted rounded w-3/4" />
-                          <div className="h-4 bg-muted rounded w-full" />
-                          <div className="h-4 bg-muted rounded w-1/2" />
-                        </CardContent>
-                      </Card>
+                      <div key={i} className="h-24 bg-muted rounded-lg animate-pulse" />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {services.filter(s => s.category !== 'addon').map((service, index) => {
-                      const imageSrc = serviceImages[service.name] || serviceImages["Haircut"];
-                      
-                      return (
-                        <AnimatedCard
-                          key={service.id}
-                          index={index}
-                          enableHover={false}
-                          enablePress={false}
-                          className={cn(
-                            "transition-all cursor-pointer",
-                            booking.selectedServiceId === service.id && 'border-[hsl(var(--accent))] border-2 shadow-lg'
-                          )}
-                          onClick={() => handleServiceSelect(service.id)}
-                        >
-                          <div className="aspect-[3/2] overflow-hidden rounded-t-lg">
-                            <img
-                              src={imageSrc}
-                              alt={service.name}
-                              loading="lazy"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <CardContent className="p-4">
-                            <h3 className="font-bold text-lg mb-1">{service.name}</h3>
-                            <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{service.description}</p>
-                            <div className="flex justify-between items-center mb-3">
-                              <div>
-                                <span className="text-lg font-bold text-[hsl(var(--accent))]">
-                                  ${service.regular_price}
-                                </span>
-                                {service.vip_price && (
-                                  <span className="text-xs text-muted-foreground ml-2">
-                                    VIP: ${service.vip_price}
-                                  </span>
-                                )}
-                              </div>
-                              <span className="text-xs text-muted-foreground">
-                                {service.duration_minutes} min
-                              </span>
-                            </div>
-
-                        <GoldButton
-                          onClick={() => handleServiceSelect(service.id)}
-                          className="w-full"
-                          size="sm"
-                        >
-                          {booking.selectedServiceId === service.id ? 'Selected ✓' : 'Select Service'}
-                        </GoldButton>
-
-                        {/* Add-ons for THIS service only - show when selected */}
-                        {booking.selectedServiceId === service.id && !isLoadingAddons && addonServices.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-border">
-                            <p className="text-xs font-semibold mb-2 text-muted-foreground uppercase">
-                              Add Enhancements:
-                            </p>
-                            <div className="space-y-2">
-                              {addonServices.map((addon) => {
-                                const isSelected = selectedAddonIds.includes(addon.id);
-                                return (
-                                  <button
-                                    key={addon.id}
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleAddonToggle(addon.id);
-                                    }}
-                                    className={cn(
-                                      "w-full text-left p-2 rounded-md border text-xs transition-all",
-                                      isSelected 
-                                        ? "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10" 
-                                        : "border-border hover:border-[hsl(var(--accent))]/50"
-                                    )}
-                                  >
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="flex-1 min-w-0">
-                                        <p className="font-medium truncate">{addon.name}</p>
-                                        <p className="text-muted-foreground text-[10px]">
-                                          +${addon.regular_price} • +{addon.duration_minutes}min
-                                        </p>
-                                      </div>
-                                      {isSelected && (
-                                        <CheckCircle className="h-3 w-3 text-[hsl(var(--accent))] flex-shrink-0 mt-0.5" />
-                                      )}
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                         )}
-                          </CardContent>
-                        </AnimatedCard>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Selected Add-ons Summary */}
-                {selectedAddons.length > 0 && (
-                  <AnimatedCard className="bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]/30">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-bold text-sm flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-[hsl(var(--accent))]" />
-                          {selectedAddons.length} Add-on{selectedAddons.length > 1 ? 's' : ''} Selected
-                        </h4>
-                        <span className="text-sm font-semibold text-[hsl(var(--accent))]">
-                          +${selectedAddons.reduce((sum, addon) => {
-                            return sum + addon.regular_price;
-                          }, 0).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        {selectedAddons.map((addon) => (
-                          <div key={addon.id} className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">• {addon.name}</span>
-                            <span className="font-medium">
-                              ${addon.regular_price.toFixed(2)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </AnimatedCard>
+                  <CompactServiceList
+                    services={services.filter(s => s.category !== 'addon')}
+                    addons={addonServices}
+                    selectedServiceId={booking.selectedServiceId}
+                    selectedAddonIds={selectedAddonIds}
+                    onServiceSelect={handleServiceSelect}
+                    onAddonToggle={handleAddonToggle}
+                    serviceImages={serviceImages}
+                    isVip={vipCodeValid}
+                  />
                 )}
 
 
@@ -583,51 +461,75 @@ const Book = () => {
 
             {/* Step 3: Select Barber + Date/Time */}
             {currentStep === 3 && !booking.isBlacklisted && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
-                  <h2 className="text-3xl font-bold mb-2">Choose Your Barber & Time</h2>
-                  <p className="text-muted-foreground">Select a barber and pick your preferred date and time</p>
+                  <h2 className="text-2xl font-bold mb-1">Choose Your Barber & Time</h2>
+                  <p className="text-sm text-muted-foreground">Select a barber and pick your preferred date and time</p>
                 </div>
                 {isLoadingBarbers ? (
-                  <div className="space-y-4">
-                    <Card className="animate-pulse">
-                      <CardContent className="p-6">
-                        <div className="h-32 bg-muted rounded" />
-                      </CardContent>
-                    </Card>
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-20 bg-muted rounded-lg animate-pulse" />
+                    ))}
                   </div>
                 ) : (
-                  <div className="space-y-6">
-                    <Card 
-                      className="border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 hover:bg-[hsl(var(--accent))]/10 transition-colors cursor-pointer"
-                      onClick={() => handleBarberSelect('any', 'Any Available Barber')}
-                    >
-                      <CardContent className="p-6 text-center">
-                        <Calendar className="h-12 w-12 mx-auto mb-3 text-[hsl(var(--accent))]" />
-                        <h3 className="font-bold text-lg mb-2">Any Available Barber</h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Get the first available time slot with any of our skilled barbers
-                        </p>
-                      </CardContent>
-                    </Card>
+                  <div className="space-y-4">
+                    {/* Barber Selection - Compact */}
+                    <div>
+                      <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
+                        <Scissors className="h-4 w-4" />
+                        Select Barber
+                      </h3>
+                      <div className="space-y-2">
+                        {/* Any Available Option */}
+                        <div 
+                          className={cn(
+                            "flex items-center gap-4 p-3 rounded-lg border-2 transition-all cursor-pointer",
+                            booking.selectedBarberId === 'any'
+                              ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5'
+                              : 'border-border hover:bg-muted/50'
+                          )}
+                          onClick={() => handleBarberSelect('any', 'Any Available Barber')}
+                        >
+                          <div className="w-12 h-12 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center flex-shrink-0">
+                            <Calendar className="h-6 w-6 text-[hsl(var(--accent))]" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-base">Any Available Barber</h4>
+                            <p className="text-xs text-muted-foreground">First available time slot</p>
+                          </div>
+                          <GoldButton 
+                            size="sm"
+                            variant={booking.selectedBarberId === 'any' ? "default" : "outline"}
+                            className="flex-shrink-0"
+                          >
+                            {booking.selectedBarberId === 'any' ? "Selected" : "Select"}
+                          </GoldButton>
+                        </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {barbers.map((barber) => (
-                        <BarberCard
-                          key={barber.id}
-                          barber={barber}
-                          selectedServiceName={selectedService?.name || ""}
-                          selectedServicePrice={selectedService?.regular_price || 0}
-                          selectedServiceDuration={selectedService?.duration_minutes || 0}
-                          isSelected={booking.selectedBarberId === barber.id}
-                          onSelect={() => handleBarberSelect(barber.id, barber.full_name)}
-                        />
-                      ))}
+                        {/* Individual Barbers - Compact */}
+                        {barbers.map((barber) => (
+                          <BarberCard
+                            key={barber.id}
+                            barber={barber}
+                            selectedServiceName={selectedService?.name || ""}
+                            selectedServicePrice={selectedService?.regular_price || 0}
+                            selectedServiceDuration={selectedService?.duration_minutes || 0}
+                            isSelected={booking.selectedBarberId === barber.id}
+                            onSelect={() => handleBarberSelect(barber.id, barber.full_name)}
+                            compact
+                          />
+                        ))}
+                      </div>
                     </div>
 
+                    {/* Date & Time Selection - Side by Side */}
                     {booking.selectedBarberId && selectedService && (
-                      <div className="mt-8 pt-8 border-t">
-                        <h3 className="text-2xl font-bold mb-4">Pick Your Date & Time</h3>
+                      <div className="pt-4 border-t">
+                        <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                          <CalendarIcon className="h-4 w-4" />
+                          Pick Your Date & Time
+                        </h3>
                         <SevenDayAvailability
                           barberId={booking.selectedBarberId}
                           serviceDuration={selectedService.duration_minutes}
@@ -653,10 +555,10 @@ const Book = () => {
 
             {/* Step 4: Review & Confirm */}
             {currentStep === 4 && selectedService && !booking.isBlacklisted && (
-              <div className="space-y-8">
+              <div className="space-y-4">
                 <div>
-                  <h2 className="text-3xl font-bold mb-2">Review Your Booking</h2>
-                  <p className="text-muted-foreground">Confirm your details and complete booking</p>
+                  <h2 className="text-2xl font-bold mb-1">Review Your Booking</h2>
+                  <p className="text-sm text-muted-foreground">Confirm your details and complete booking</p>
                 </div>
 
                 {/* Payment Verification Alert */}

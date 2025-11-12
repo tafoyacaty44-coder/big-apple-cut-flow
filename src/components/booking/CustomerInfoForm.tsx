@@ -88,33 +88,51 @@ const CustomerInfoForm = ({ onSubmit, initialData }: CustomerInfoFormProps) => {
 
 
   return (
-    <Card className="max-w-2xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-6">Your Information</h2>
-      
+    <Card className="max-w-2xl mx-auto p-4">      
       {user && (
-        <div className="mb-4 p-3 bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/30 rounded-md">
-          <p className="text-sm">
+        <div className="mb-3 p-2 bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/30 rounded-md">
+          <p className="text-xs">
             ✓ Logged in as <span className="font-semibold">{user.email}</span>
           </p>
         </div>
       )}
 
-      <form id="customer-info-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="full_name">Full Name *</Label>
-          <Input
-            id="full_name"
-            {...register('full_name')}
-            placeholder="John Doe"
-            className={errors.full_name ? 'border-destructive' : ''}
-          />
-          {errors.full_name && (
-            <p className="text-sm text-destructive">{errors.full_name.message}</p>
-          )}
+      <form id="customer-info-form" onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="full_name" className="text-sm">Full Name *</Label>
+            <Input
+              id="full_name"
+              {...register('full_name')}
+              placeholder="John Doe"
+              className={errors.full_name ? 'border-destructive' : ''}
+            />
+            {errors.full_name && (
+              <p className="text-xs text-destructive">{errors.full_name.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="phone" className="text-sm">Phone Number *</Label>
+            <Input
+              id="phone"
+              type="tel"
+              {...register('phone')}
+              placeholder="(555) 123-4567"
+              onChange={(e) => {
+                const formatted = formatPhoneNumber(e.target.value);
+                e.target.value = formatted;
+              }}
+              className={errors.phone ? 'border-destructive' : ''}
+            />
+            {errors.phone && (
+              <p className="text-xs text-destructive">{errors.phone.message}</p>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-sm">Email *</Label>
           <Input
             id="email"
             type="email"
@@ -124,39 +142,21 @@ const CustomerInfoForm = ({ onSubmit, initialData }: CustomerInfoFormProps) => {
             className={errors.email ? 'border-destructive' : ''}
           />
           {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
+            <p className="text-xs text-destructive">{errors.email.message}</p>
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number *</Label>
-          <Input
-            id="phone"
-            type="tel"
-            {...register('phone')}
-            placeholder="(555) 123-4567"
-            onChange={(e) => {
-              const formatted = formatPhoneNumber(e.target.value);
-              e.target.value = formatted;
-            }}
-            className={errors.phone ? 'border-destructive' : ''}
-          />
-          {errors.phone && (
-            <p className="text-sm text-destructive">{errors.phone.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="notes">Special Requests (Optional)</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="notes" className="text-sm">Special Requests (Optional)</Label>
           <Textarea
             id="notes"
             {...register('notes')}
             placeholder="Any special requests or notes for your barber..."
-            rows={4}
+            rows={3}
             className={errors.notes ? 'border-destructive' : ''}
           />
           {errors.notes && (
-            <p className="text-sm text-destructive">{errors.notes.message}</p>
+            <p className="text-xs text-destructive">{errors.notes.message}</p>
           )}
         </div>
 

@@ -87,112 +87,100 @@ export const SevenDayAvailability = ({
   const selectedDaySlots = availability?.find(day => day.date === selectedDate)?.time_slots || [];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
-          7-Day Availability
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Week Calendar */}
-        <div>
-          <h4 className="text-sm font-medium mb-3">Select a day</h4>
-          <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-2 px-2 md:grid md:grid-cols-7 md:overflow-visible">
-            {dates.map((date) => {
-              const dateStr = format(date, 'yyyy-MM-dd');
-              const dayAvailability = availability?.find(a => a.date === dateStr);
-              const hasSlots = (dayAvailability?.time_slots.length || 0) > 0;
-              const isSelected = selectedDate === dateStr;
-              const isToday = dateStr === fromDate;
+    <div className="grid grid-cols-1 md:grid-cols-[35%_65%] gap-4">
+      {/* Left: Compact 7-Day Calendar */}
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium flex items-center gap-2">
+          <Calendar className="h-4 w-4" />
+          Select Date
+        </h4>
+        <div className="grid grid-cols-1 gap-1.5">
+          {dates.map((date) => {
+            const dateStr = format(date, 'yyyy-MM-dd');
+            const dayAvailability = availability?.find(a => a.date === dateStr);
+            const hasSlots = (dayAvailability?.time_slots.length || 0) > 0;
+            const isSelected = selectedDate === dateStr;
+            const isToday = dateStr === fromDate;
 
-              return (
-                <Button
-                  key={dateStr}
-                  variant={isSelected ? 'default' : isToday ? 'secondary' : 'outline'}
-                  size="sm"
-                  className={cn(
-                    "flex flex-col h-auto py-2 flex-shrink-0 snap-center min-w-[70px] md:min-w-0 min-h-[48px]",
-                    isToday && !isSelected && "border-primary border-2"
-                  )}
-                  disabled={!hasSlots}
-                  onClick={() => setSelectedDate(dateStr)}
-                >
-                  {isToday && (
-                    <span className="text-xs font-bold text-primary">TODAY</span>
-                  )}
-                  <span className="text-xs font-medium">
+            return (
+              <Button
+                key={dateStr}
+                variant={isSelected ? 'default' : 'outline'}
+                size="sm"
+                className={cn(
+                  "flex items-center justify-between h-auto py-2 px-3",
+                  isToday && !isSelected && "border-[hsl(var(--accent))] border-2"
+                )}
+                disabled={!hasSlots}
+                onClick={() => setSelectedDate(dateStr)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold">
                     {format(date, 'EEE')}
                   </span>
                   <span className="text-lg font-bold">
                     {format(date, 'd')}
                   </span>
-                  {hasSlots && (
-                    <span className="text-xs text-muted-foreground mt-1">
-                      {dayAvailability.time_slots.length} slots
+                  {isToday && (
+                    <span className="text-xs bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))] px-1.5 py-0.5 rounded">
+                      TODAY
                     </span>
                   )}
-                </Button>
-              );
-            })}
-          </div>
+                </div>
+                {hasSlots && (
+                  <span className="text-xs text-muted-foreground">
+                    {dayAvailability.time_slots.length} slots
+                  </span>
+                )}
+              </Button>
+            );
+          })}
         </div>
+      </div>
 
-        {/* Time Slots for Selected Day */}
-        {selectedDate && selectedDaySlots.length > 0 && (
-          <div>
-            <h4 className="text-sm font-medium mb-3">
-              Available times for {format(new Date(selectedDate), 'EEEE, MMMM d')}
-            </h4>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-              {selectedDaySlots.map((time) => (
-                <Button
-                  key={time}
-                  variant={selectedTimeSlot === time ? 'default' : 'outline'}
-                  size="sm"
-                  className="min-h-[44px]"
-                  onClick={() => handleTimeSelect(selectedDate, time)}
-                >
-                  {formatTime12h(time)}
-                </Button>
-              ))}
+      {/* Right: Time Slots */}
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium flex items-center gap-2">
+          <Clock className="h-4 w-4" />
+          {selectedDate 
+            ? `Available Times - ${format(new Date(selectedDate), 'EEEE, MMM d')}`
+            : 'Select a date to see times'
+          }
+        </h4>
+        
+        {selectedDate && selectedDaySlots.length > 0 ? (
+          <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto pr-2">
+            {selectedDaySlots.map((time) => (
+              <Button
+                key={time}
+                variant={selectedTimeSlot === time ? 'default' : 'outline'}
+                size="sm"
+                className="h-10"
+                onClick={() => handleTimeSelect(selectedDate, time)}
+              >
+                {formatTime12h(time)}
+              </Button>
+            ))}
+          </div>
+        ) : selectedDate && selectedDaySlots.length === 0 ? (
+          <div className="flex items-center justify-center h-[200px] border-2 border-dashed border-border rounded-lg">
+            <div className="text-center space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                NO TIMESLOTS AVAILABLE
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Please select another date
+              </p>
             </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-[200px] border-2 border-dashed border-border rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              Select a date to view available times
+            </p>
           </div>
         )}
-
-        {/* Next Available Times */}
-        <div>
-          <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            Next Available Times
-          </h4>
-          {nextSlots.length > 0 ? (
-            <div className="space-y-2">
-              {nextSlots.map(({ date, time }, idx) => (
-                <Button
-                  key={`${date}-${time}-${idx}`}
-                  variant={selectedTimeSlot === time ? 'default' : 'outline'}
-                  className="w-full justify-start min-h-[44px]"
-                  onClick={() => handleTimeSelect(date, time)}
-                >
-                  <span className="font-medium">{format(new Date(date), 'EEE, MMM d')}</span>
-                  <span className="mx-2">•</span>
-                  <span>{formatTime12h(time)}</span>
-                </Button>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 space-y-3">
-              <p className="text-sm text-muted-foreground">
-                No availability in the next 7 days
-              </p>
-              <Button variant="outline" size="sm" className="min-h-[44px]">
-                Notify Me When Available
-              </Button>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
