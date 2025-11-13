@@ -154,6 +154,22 @@ export function PromotionalCampaignForm({ open, onOpenChange, campaignId }: Prop
         };
         const newCampaign = await createCampaign(payload);
         id = newCampaign.id;
+      } else {
+        // Update existing campaign with current form data before sending
+        await updateCampaign(id, {
+          title: data.title,
+          type: data.type,
+          channel: data.channel,
+          subject: data.subject,
+          message_body: data.message_body,
+          email_html: data.email_html,
+          target_audience: data.target_audience,
+          custom_recipient_ids: data.custom_recipient_ids || [],
+          custom_phone_numbers: data.custom_phone_numbers || [],
+          promo_code: data.promo_code,
+          promo_discount: data.promo_discount,
+          promo_expires_at: data.promo_expires_at,
+        });
       }
 
       if (scheduleLater && data.scheduled_for) {
