@@ -13,7 +13,6 @@ import { getActiveBarbers } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
 import { SimplifiedBarberCard } from '@/components/booking/SimplifiedBarberCard';
 import { MonthlyCalendarPicker } from '@/components/booking/MonthlyCalendarPicker';
-import { SevenDayAvailability } from '@/components/booking/SevenDayAvailability';
 import CustomerInfoForm from '@/components/booking/CustomerInfoForm';
 import { CompactServiceList } from '@/components/booking/CompactServiceList';
 import DiscountCodesForm from '@/components/booking/DiscountCodesForm';
@@ -132,6 +131,14 @@ const Book = () => {
 
   const handleBarberSelect = (barberId: string, barberName: string) => {
     setSelectedBarber(barberId, barberName, []);
+  };
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  const handleTimeSelect = (time: string) => {
+    setSelectedTime(time);
   };
 
   const handleDateTimeSelect = (date: string, time: string) => {
@@ -535,10 +542,14 @@ const Book = () => {
                           <CalendarIcon className="h-4 w-4" />
                           Pick Your Date & Time
                         </h3>
-                        <SevenDayAvailability
+                        <MonthlyCalendarPicker
                           barberId={booking.selectedBarberId}
                           serviceDuration={selectedService.duration_minutes}
-                          onSelectTime={handleDateTimeSelect}
+                          selectedDate={booking.selectedDate}
+                          selectedTime={booking.selectedTime}
+                          onDateSelect={handleDateSelect}
+                          onTimeSelect={handleTimeSelect}
+                          availabilityData={barberAvailabilityData}
                         />
                       </div>
                     )}
