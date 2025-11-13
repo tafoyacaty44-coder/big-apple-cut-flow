@@ -1,12 +1,12 @@
 import { Check, Calendar, Scissors, User, Clock } from "lucide-react";
-import { cn, formatTime12h } from "@/lib/utils";
+import { cn, formatTime12h, calculateBookingTotal } from "@/lib/utils";
 import { GoldButton } from "@/components/ui/gold-button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 interface BookingSidebarProps {
   currentStep: number;
-  selectedService?: { name: string; price: number; vip_price?: number } | null;
+  selectedService?: { name: string; regular_price: number; vip_price?: number | null } | null;
   selectedBarber?: { name: string } | null;
   selectedDate?: Date | null;
   selectedTime?: string | null;
@@ -79,14 +79,7 @@ export const BookingSidebar = ({
     },
   ];
 
-  const calculateTotal = () => {
-    if (!selectedService) return 0;
-    const basePrice = selectedService.price;
-    const addonTotal = selectedAddons.reduce((sum, addon) => {
-      return sum + addon.regular_price;
-    }, 0);
-    return basePrice + addonTotal;
-  };
+  const priceCalc = calculateBookingTotal(selectedService, selectedAddons, isVip);
 
   return (
     <Card className="h-full flex flex-col border-r rounded-none border-l-0 border-t-0 border-b-0 bg-muted/30 overflow-hidden w-64">
@@ -154,12 +147,18 @@ export const BookingSidebar = ({
         <div className="mb-3">
           <div className="flex justify-between text-xs mb-1.5">
             <span className="text-muted-foreground">Subtotal</span>
-            <span>${calculateTotal().toFixed(2)}</span>
+            <span>${priceCalc.subtotal.toFixed(2)}</span>
           </div>
+          {isVip && priceCalc.vipSavings > 0 && (
+            <div className="flex justify-between text-xs mb-1.5 text-green-600">
+              <span>VIP Savings</span>
+              <span>-${priceCalc.vipSavings.toFixed(2)}</span>
+            </div>
+          )}
           <Separator className="my-1.5" />
           <div className="flex justify-between font-bold text-sm">
             <span>Total</span>
-            <span className="text-[hsl(var(--accent))]">${calculateTotal().toFixed(2)}</span>
+            <span className="text-[hsl(var(--accent))]">${priceCalc.subtotal.toFixed(2)}</span>
           </div>
         </div>
 

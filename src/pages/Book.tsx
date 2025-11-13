@@ -331,7 +331,7 @@ const Book = () => {
               currentStep={currentStep}
               selectedService={selectedService ? {
                 name: selectedService.name,
-                price: selectedService.regular_price,
+                regular_price: selectedService.regular_price,
                 vip_price: selectedService.vip_price
               } : null}
               selectedBarber={booking.selectedBarberName ? { name: booking.selectedBarberName } : null}
@@ -699,8 +699,8 @@ const Book = () => {
 
                   {/* VIP/Promo Codes */}
                   <DiscountCodesForm 
-                    onVipCodeChange={(code) => setVipCodeFromForm(code)}
-                    onPromoCodeChange={setPromoCode}
+                    onVipCodeChange={handleVipCodeChange}
+                    onPromoCodeChange={handlePromoCodeChange}
                     selectedServiceId={booking.selectedServiceId}
                     promoDiscount={promoDiscount}
                   />
