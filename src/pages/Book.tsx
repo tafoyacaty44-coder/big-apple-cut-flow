@@ -484,96 +484,124 @@ const Book = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-3"
+                  className="space-y-3 pb-20"
                 >
                   <div>
                     <h2 className="text-xl font-bold mb-1">Select Your Barber</h2>
                     <p className="text-sm text-muted-foreground">Choose your preferred barber</p>
                   </div>
-                {isLoadingBarbers ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-20 bg-muted rounded-lg animate-pulse" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {/* Barber Selection */}
-                    <div className="space-y-2">
-                        {/* Any Available Option */}
-                        <div 
-                          className={cn(
-                            "flex items-center gap-4 p-3 rounded-lg border-2 transition-all cursor-pointer",
-                            booking.selectedBarberId === 'any'
-                              ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5'
-                              : 'border-border hover:bg-muted/50'
-                          )}
-                          onClick={() => handleBarberSelect('any', 'Any Available Barber')}
-                        >
-                          <div className="w-12 h-12 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center flex-shrink-0">
-                            <Calendar className="h-6 w-6 text-[hsl(var(--accent))]" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-base">Any Available Barber</h4>
-                            <p className="text-xs text-muted-foreground">First available time slot</p>
-                          </div>
-                          <GoldButton 
-                            size="sm"
-                            variant={booking.selectedBarberId === 'any' ? "default" : "outline"}
-                            className="flex-shrink-0"
-                          >
-                            {booking.selectedBarberId === 'any' ? "Selected" : "Select"}
-                          </GoldButton>
-                        </div>
-
-                        {/* Individual Barbers - Simplified Cards */}
-                        {barbers.map((barber) => (
-                          <SimplifiedBarberCard
-                            key={barber.id}
-                            barber={barber}
-                            selectedServiceName={selectedService?.name || ""}
-                            selectedServicePrice={selectedService?.regular_price || 0}
-                            isSelected={booking.selectedBarberId === barber.id}
-                            onSelect={() => handleBarberSelect(barber.id, barber.full_name)}
-                            onVipCodeChange={(code) => setVipCodeFromForm(code)}
-                          />
-                        ))}
-                      </div>
+                  {isLoadingBarbers ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-20 bg-muted rounded-lg animate-pulse" />
+                      ))}
                     </div>
-
-                    {/* Date & Time Selection - Side by Side */}
-                    {booking.selectedBarberId && selectedService && (
-                      <div className="pt-4 border-t">
-                        <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4" />
-                          Pick Your Date & Time
-                        </h3>
-                        <MonthlyCalendarPicker
-                          barberId={booking.selectedBarberId}
-                          serviceDuration={selectedService.duration_minutes}
-                          selectedDate={booking.selectedDate}
-                          selectedTime={booking.selectedTime}
-                          onDateSelect={handleDateSelect}
-                          onTimeSelect={handleTimeSelect}
-                          availabilityData={barberAvailabilityData}
-                        />
+                  ) : (
+                    <div className="space-y-2">
+                      <div 
+                        className={cn(
+                          "flex items-center gap-4 p-3 rounded-lg border-2 transition-all cursor-pointer",
+                          booking.selectedBarberId === 'any'
+                            ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5'
+                            : 'border-border hover:bg-muted/50'
+                        )}
+                        onClick={() => handleBarberSelect('any', 'Any Available Barber')}
+                      >
+                        <div className="w-12 h-12 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center flex-shrink-0">
+                          <Calendar className="h-6 w-6 text-[hsl(var(--accent))]" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-base">Any Available Barber</h4>
+                          <p className="text-xs text-muted-foreground">First available time slot</p>
+                        </div>
+                        <GoldButton 
+                          size="sm"
+                          variant={booking.selectedBarberId === 'any' ? "default" : "outline"}
+                          className="flex-shrink-0"
+                        >
+                          {booking.selectedBarberId === 'any' ? "Selected" : "Select"}
+                        </GoldButton>
                       </div>
-                    )}
+
+                      {barbers.map((barber) => (
+                        <SimplifiedBarberCard
+                          key={barber.id}
+                          barber={barber}
+                          selectedServiceName={selectedService?.name || ""}
+                          selectedServicePrice={selectedService?.regular_price || 0}
+                          isSelected={booking.selectedBarberId === barber.id}
+                          onSelect={() => handleBarberSelect(barber.id, barber.full_name)}
+                          onVipCodeChange={(code) => setVipCodeFromForm(code)}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {isMobile && (
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
+                      <GoldButton
+                        className="w-full min-h-[48px]"
+                        onClick={() => canContinueStep(3) && setCurrentStep(4)}
+                        disabled={!canContinueStep(3)}
+                      >
+                        Continue to Date & Time
+                      </GoldButton>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Step 4: Select Date & Time ONLY */}
+            <AnimatePresence mode="wait">
+              {currentStep === 4 && !booking.isBlacklisted && selectedService && (
+                <motion.div
+                  key="step4"
+                  initial={{ opacity: 0, x: isMobile ? 100 : 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-3 pb-20"
+                >
+                  <div>
+                    <h2 className="text-xl font-bold mb-1">Choose Date & Time</h2>
+                    <p className="text-sm text-muted-foreground">Select your preferred appointment slot</p>
                   </div>
-                )}
-                {isMobile && (
-                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
-                    <GoldButton
-                      className="w-full min-h-[48px]"
-                      onClick={() => canContinueStep(3) && setCurrentStep(4)}
-                      disabled={!canContinueStep(3)}
-                    >
-                      Continue to Confirmation
-                    </GoldButton>
-                  </div>
-                )}
-              </div>
-            )}
+
+                  {booking.selectedBarberName && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/30 rounded-lg text-sm">
+                      <Scissors className="h-4 w-4 text-[hsl(var(--accent))]" />
+                      <span className="text-muted-foreground">Barber:</span>
+                      <span className="font-semibold">{booking.selectedBarberName}</span>
+                      <span className="text-muted-foreground">•</span>
+                      <span className="font-semibold">{selectedService.name}</span>
+                    </div>
+                  )}
+
+                  <MonthlyCalendarPicker
+                    barberId={booking.selectedBarberId}
+                    serviceDuration={selectedService.duration_minutes}
+                    selectedDate={booking.selectedDate}
+                    selectedTime={booking.selectedTime}
+                    onDateSelect={handleDateSelect}
+                    onTimeSelect={handleTimeSelect}
+                    availabilityData={barberAvailabilityData}
+                  />
+
+                  {isMobile && (
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
+                      <GoldButton
+                        className="w-full min-h-[48px]"
+                        onClick={() => canContinueStep(4) && setCurrentStep(5)}
+                        disabled={!canContinueStep(4)}
+                      >
+                        Continue to Confirmation
+                      </GoldButton>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Step 5: Review & Confirm - ULTRA COMPACT */}
             <AnimatePresence mode="wait">
