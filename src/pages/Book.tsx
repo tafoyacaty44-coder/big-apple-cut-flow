@@ -123,12 +123,8 @@ const Book = () => {
     setSelectedAddonIds([]); // Reset add-ons when service changes
   };
 
-  const handleAddonToggle = (addonId: string) => {
-    setSelectedAddonIds(prev => 
-      prev.includes(addonId) 
-        ? prev.filter(id => id !== addonId)
-        : [...prev, addonId]
-    );
+  const handleAddonToggle = (addonIds: string[]) => {
+    setSelectedAddonIds(addonIds);
   };
 
   const handleBarberSelect = (barberId: string, barberName: string) => {
@@ -216,8 +212,8 @@ const Book = () => {
       }
       return !!booking.selectedServiceId;
     }
-    if (step === 3) return !!booking.selectedBarberId && !!booking.selectedDate && !!booking.selectedTime;
-    if (step === 4) return !!(booking.selectedServiceId && booking.selectedBarberId && booking.selectedDate && booking.selectedTime && booking.customerInfo && selectedPaymentMethod);
+    if (step === 3) return !!booking.selectedBarberId;
+    if (step === 4) return !!(booking.selectedDate && booking.selectedTime);
     return false;
   };
 
@@ -299,9 +295,8 @@ const Book = () => {
     },
   });
 
-  const handleConfirmBooking = (vipCode?: string) => {
-    const finalVipCode = vipCodeValid ? vipCodeFromForm : vipCode;
-    bookingMutation.mutate(finalVipCode);
+  const handleConfirmBooking = () => {
+    bookingMutation.mutate(vipCodeValid ? vipCodeFromForm : undefined);
   };
 
   return (
@@ -680,32 +675,31 @@ const Book = () => {
                         </AlertDescription>
                       </Alert>
                     )}
-                  </CardContent>
-                </Card>
-
-                {/* VIP/Promo Codes */}
-                <DiscountCodesForm 
-                  onVipCodeChange={handleVipCodeChange}
-                  onPromoCodeChange={handlePromoCodeChange}
-                  selectedServiceId={booking.selectedServiceId}
-                  promoDiscount={promoDiscount}
-                />
-
-                {/* Mobile Complete Booking Button */}
-                {isMobile && (
-                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
-                    <GoldButton
-                      onClick={() => handleConfirmBooking()}
-                      disabled={!canContinueStep(4) || !policyAgreed || bookingMutation.isPending}
-                      className="w-full min-h-[48px]"
-                      size="lg"
-                    >
-                      {bookingMutation.isPending ? "Processing..." : "Complete Booking"}
-                    </GoldButton>
                   </div>
-                )}
-              </div>
-            )}
+
+                  {/* VIP/Promo Codes */}
+                  <DiscountCodesForm 
+                    onVipCodeChange={(code) => setVipCodeFromForm(code)}
+                    onPromoCodeChange={setPromoCode}
+                    selectedServiceId={booking.selectedServiceId}
+                    promoDiscount={promoDiscount}
+                  />
+
+                  {/* Mobile Complete Booking Button */}
+                  {isMobile && (
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
+                      <GoldButton
+                        onClick={handleConfirmBooking}
+                        disabled={!policyAgreed || !selectedPaymentMethod || bookingMutation.isPending}
+                        className="w-full min-h-[48px]"
+                      >
+                        {bookingMutation.isPending ? "Booking..." : "Complete Booking"}
+                      </GoldButton>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Blacklisted - Show Dead End */}
             {booking.isBlacklisted && currentStep > 1 && (
