@@ -68,6 +68,8 @@ const Book = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  
+  const TOTAL_STEPS = 5;
 
   // Sync selected add-ons with booking context
   useEffect(() => {
@@ -333,7 +335,8 @@ const Book = () => {
               onContinue={() => {
                 if (currentStep === 2 && canContinueStep(2)) setCurrentStep(3);
                 if (currentStep === 3 && canContinueStep(3)) setCurrentStep(4);
-                if (currentStep === 4) handleConfirmBooking();
+                if (currentStep === 4 && canContinueStep(4)) setCurrentStep(5);
+                if (currentStep === 5) handleConfirmBooking();
               }}
               canContinue={canContinueStep(currentStep)}
               customerInfoFormId="customer-info-form"
@@ -350,7 +353,7 @@ const Book = () => {
               className="w-full flex items-center justify-between p-4 active:bg-muted/50 transition-colors"
             >
               <div className="text-left">
-                <div className="font-semibold">Step {currentStep} of 4</div>
+                <div className="font-semibold">Step {currentStep} of {TOTAL_STEPS}</div>
                 <div className="text-sm text-muted-foreground truncate">
                   {booking.customerInfo?.name}
                   {selectedService && ` • ${selectedService.name}`}
@@ -397,7 +400,7 @@ const Book = () => {
                   className="space-y-4"
                 >
                   <div>
-                    <h2 className="text-2xl font-bold mb-1">Your Information</h2>
+                    <h2 className="text-xl font-bold mb-1">Your Information</h2>
                     <p className="text-sm text-muted-foreground">Let's start with your contact details</p>
                   </div>
             <CustomerInfoForm 
@@ -430,7 +433,7 @@ const Book = () => {
                   className="space-y-4"
                 >
                   <div>
-                    <h2 className="text-2xl font-bold mb-1">Select a Service</h2>
+                    <h2 className="text-xl font-bold mb-1">Select a Service</h2>
                     <p className="text-sm text-muted-foreground">Choose the service you'd like to book</p>
                   </div>
                 {isLoadingServices ? (
@@ -472,13 +475,21 @@ const Book = () => {
               )}
             </AnimatePresence>
 
-            {/* Step 3: Select Barber + Date/Time */}
-            {currentStep === 3 && !booking.isBlacklisted && (
-              <div className="space-y-4">
-                <div>
-                  <h2 className="text-2xl font-bold mb-1">Choose Your Barber & Time</h2>
-                  <p className="text-sm text-muted-foreground">Select a barber and pick your preferred date and time</p>
-                </div>
+            {/* Step 3: Select Barber ONLY */}
+            <AnimatePresence mode="wait">
+              {currentStep === 3 && !booking.isBlacklisted && (
+                <motion.div
+                  key="step3"
+                  initial={{ opacity: 0, x: isMobile ? 100 : 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-3"
+                >
+                  <div>
+                    <h2 className="text-xl font-bold mb-1">Select Your Barber</h2>
+                    <p className="text-sm text-muted-foreground">Choose your preferred barber</p>
+                  </div>
                 {isLoadingBarbers ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
@@ -486,14 +497,9 @@ const Book = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {/* Barber Selection - Compact */}
-                    <div>
-                      <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                        <Scissors className="h-4 w-4" />
-                        Select Barber
-                      </h3>
-                      <div className="space-y-2">
+                  <div className="space-y-2">
+                    {/* Barber Selection */}
+                    <div className="space-y-2">
                         {/* Any Available Option */}
                         <div 
                           className={cn(
@@ -569,147 +575,43 @@ const Book = () => {
               </div>
             )}
 
-            {/* Step 4: Review & Confirm */}
-            {currentStep === 4 && selectedService && !booking.isBlacklisted && (
-              <div className="space-y-4">
-                <div>
-                  <h2 className="text-2xl font-bold mb-1">Review Your Booking</h2>
-                  <p className="text-sm text-muted-foreground">Confirm your details and complete booking</p>
-                </div>
+            {/* Step 5: Review & Confirm - ULTRA COMPACT */}
+            <AnimatePresence mode="wait">
+              {currentStep === 5 && selectedService && !booking.isBlacklisted && (
+                <motion.div
+                  key="step5"
+                  initial={{ opacity: 0, x: isMobile ? 100 : 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-3"
+                >
+                  <div>
+                    <h2 className="text-lg font-bold mb-1">Review Your Booking</h2>
+                    <p className="text-xs text-muted-foreground">Confirm details and complete booking</p>
+                  </div>
 
-                {/* Payment Verification Alert */}
-                <Alert className="bg-[hsl(var(--accent))]/10 border-[hsl(var(--accent))]/30">
-                  <AlertCircle className="h-4 w-4 text-[hsl(var(--accent))]" />
-                  <AlertTitle className="text-[hsl(var(--accent))]">📋 Payment Verification Required</AlertTitle>
-                  <AlertDescription>
-                    Your appointment will be pending until we verify your payment. Once payment is confirmed, we'll send you a confirmation email (typically within 2-4 hours).
-                  </AlertDescription>
-                </Alert>
-
-                {/* Booking Summary Card */}
-                <Card className="border-[hsl(var(--accent))]/20 bg-muted/50">
-                  <CardContent className="p-6">
-                    <h3 className="font-bold text-xl mb-4">Booking Details</h3>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Customer:</span>
-                        <span className="font-semibold">{booking.customerInfo?.name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Service:</span>
-                        <span className="font-semibold">{selectedService.name}</span>
-                      </div>
-                      {selectedAddons.length > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Add-ons:</span>
-                          <div className="text-right">
-                            {selectedAddons.map((addon) => (
-                              <div key={addon.id} className="font-medium">• {addon.name}</div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Barber:</span>
-                        <span className="font-semibold">{booking.selectedBarberName}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Date & Time:</span>
-                        <span className="font-semibold">
-                          {booking.selectedDate && booking.selectedTime 
-                            ? `${format(booking.selectedDate, "MMM d, yyyy")} at ${formatTime12h(booking.selectedTime)}`
-                            : ""
-                          }
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Duration:</span>
-                        <span className="font-semibold">{selectedService.duration_minutes} minutes</span>
-                      </div>
-                      <Separator className="my-2" />
-                      
-                      {/* Price Breakdown */}
-                      {(() => {
-                        const pricing = calculateBookingTotal(selectedService, selectedAddons, vipCodeValid);
-                        return (
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">{selectedService.name}</span>
-                              <div className="flex items-center gap-2">
-                                {vipCodeValid && pricing.baseRegularPrice !== pricing.basePrice && (
-                                  <span className="line-through text-muted-foreground text-xs">
-                                    ${pricing.baseRegularPrice.toFixed(2)}
-                                  </span>
-                                )}
-                                <span className={vipCodeValid ? "text-[hsl(var(--accent))]" : ""}>
-                                  ${pricing.basePrice.toFixed(2)}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            {selectedAddons.map((addon) => {
-                              const addonPrice = vipCodeValid && addon.vip_price ? addon.vip_price : addon.regular_price;
-                              const showStrikethrough = vipCodeValid && addon.vip_price && addon.vip_price !== addon.regular_price;
-                              return (
-                                <div key={addon.id} className="flex justify-between text-sm">
-                                  <span className="text-muted-foreground">{addon.name}</span>
-                                  <div className="flex items-center gap-2">
-                                    {showStrikethrough && (
-                                      <span className="line-through text-muted-foreground text-xs">
-                                        ${addon.regular_price.toFixed(2)}
-                                      </span>
-                                    )}
-                                    <span className={vipCodeValid ? "text-[hsl(var(--accent))]" : ""}>
-                                      ${addonPrice.toFixed(2)}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                            
-                            {vipCodeValid && pricing.vipSavings > 0 && (
-                              <>
-                                <Separator className="my-1" />
-                                <div className="flex justify-between text-sm">
-                                  <span className="flex items-center gap-1 text-[hsl(var(--accent))]">
-                                    VIP Savings ✨
-                                  </span>
-                                  <span className="font-semibold text-green-600">
-                                    -${pricing.vipSavings.toFixed(2)}
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                            
-                            <Separator className="my-2" />
-                            <div className="flex justify-between text-lg">
-                              <span className="font-bold">Total:</span>
-                              <span className="font-bold text-[hsl(var(--accent))]">
-                                ${pricing.subtotal.toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })()}
+                  {/* Compact Summary - No Card */}
+                  <div className="border rounded-lg p-3 space-y-2 text-sm bg-muted/30">
+                    <h3 className="font-bold text-base mb-2">Appointment Summary</h3>
+                    <div className="text-xs space-y-1">
+                      <div><span className="text-muted-foreground">Customer:</span> <span className="font-semibold">{booking.customerInfo?.name}</span></div>
+                      <div><span className="text-muted-foreground">Service:</span> <span className="font-semibold">{selectedService.name}</span>{selectedAddons.length > 0 && ` • ${selectedAddons.map(a => a.name).join(', ')}`}</div>
+                      <div><span className="text-muted-foreground">Barber:</span> <span className="font-semibold">{booking.selectedBarberName}</span></div>
+                      <div><span className="text-muted-foreground">Date & Time:</span> <span className="font-semibold">{booking.selectedDate && booking.selectedTime ? `${format(booking.selectedDate, "EEE, MMM d")} • ${formatTime12h(booking.selectedTime)}` : ""}</span></div>
+                      <div><span className="text-muted-foreground">Duration:</span> <span className="font-semibold">{selectedService.duration_minutes + selectedAddons.reduce((sum, a) => sum + a.duration_minutes, 0)} min</span> • <span className="font-bold text-[hsl(var(--accent))]">Total: ${calculateBookingTotal(selectedService, selectedAddons, vipCodeValid).subtotal.toFixed(2)}</span></div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  {/* Cancellation Policy - Compact */}
+                  <CancellationPolicy 
+                    agreed={policyAgreed}
+                    onAgreeChange={setPolicyAgreed}
+                  />
 
-                {/* Cancellation Policy */}
-                <CancellationPolicy 
-                  agreed={policyAgreed}
-                  onAgreeChange={setPolicyAgreed}
-                />
-
-                {/* Payment Method Selection */}
-                <Card>
-                  <CardContent className="p-4">
-                    <h3 className="text-base font-bold mb-2">Select Payment Method</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Choose how you'll send your payment. You'll need to complete payment after booking.
-                    </p>
-                    
-                    <div className="grid grid-cols-2 gap-2 mb-3">
+                  {/* Payment Method - Compact */}
+                  <div className="border rounded-lg p-3">
+                    <h3 className="text-sm font-bold mb-2">Payment Method</h3>
+                    <div className="grid grid-cols-4 gap-2">
                       {[
                         { id: 'zelle' as const, name: 'Zelle', info: 'info@bigapplebarbershop.com' },
                         { id: 'apple_pay' as const, name: 'Apple Pay', info: '(555) 123-4567' },
