@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, startOfWeek, endOfWeek, isBefore, startOfDay } from 'date-fns';
 import { GoldButton } from '@/components/ui/gold-button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -26,6 +26,7 @@ export const MonthlyCalendarPicker = ({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [now, setNow] = useState(new Date());
+  const timeSlotsRef = useRef<HTMLDivElement>(null);
 
   // Auto-refresh current time every minute for accurate past time filtering
   useEffect(() => {
@@ -94,6 +95,19 @@ export const MonthlyCalendarPicker = ({
       setAvailableTimeSlots([]);
     }
   }, [selectedDate, availabilityData, now]);
+
+  // Auto-scroll to time slots when date is selected
+  useEffect(() => {
+    if (selectedDate && timeSlotsRef.current) {
+      setTimeout(() => {
+        timeSlotsRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 100);
+    }
+  }, [selectedDate]);
 
   const getDayClassName = (date: Date) => {
     const past = isPastDate(date);
@@ -192,7 +206,7 @@ export const MonthlyCalendarPicker = ({
 
       {/* Time Slots - Compact */}
       {selectedDate && availableTimeSlots.length > 0 && (
-        <div className="mt-3 pt-3 border-t">
+        <div ref={timeSlotsRef} className="mt-3 pt-3 border-t">
           <h4 className="text-xs font-semibold mb-2 text-muted-foreground uppercase">
             {format(selectedDate, 'MMM d, yyyy')}
           </h4>
