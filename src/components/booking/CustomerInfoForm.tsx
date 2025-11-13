@@ -64,6 +64,7 @@ const CustomerInfoForm = ({ onSubmit, initialData }: CustomerInfoFormProps) => {
   } = useForm<CustomerInfoFormData>({
     resolver: zodResolver(customerInfoSchema),
     defaultValues: initialData || undefined,
+    mode: 'onSubmit',
   });
 
   useEffect(() => {
