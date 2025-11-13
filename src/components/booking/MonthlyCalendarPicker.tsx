@@ -96,9 +96,9 @@ export const MonthlyCalendarPicker = ({
     }
   }, [selectedDate, availabilityData, now]);
 
-  // Auto-scroll to time slots when date is selected
+  // Auto-scroll to time slots when date is selected and slots are available
   useEffect(() => {
-    if (selectedDate && timeSlotsRef.current) {
+    if (selectedDate && availableTimeSlots.length > 0 && timeSlotsRef.current) {
       setTimeout(() => {
         timeSlotsRef.current?.scrollIntoView({
           behavior: 'smooth',
@@ -107,7 +107,7 @@ export const MonthlyCalendarPicker = ({
         });
       }, 100);
     }
-  }, [selectedDate]);
+  }, [selectedDate, availableTimeSlots]);
 
   const getDayClassName = (date: Date) => {
     const past = isPastDate(date);
