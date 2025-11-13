@@ -36,6 +36,7 @@ interface Barber {
   years_experience: number | null;
   profile_image_url: string | null;
   is_active: boolean;
+  status_message?: string | null;
 }
 
 interface EditBarberDialogProps {
@@ -56,6 +57,7 @@ export const EditBarberDialog = ({
     yearsExperience: barber.years_experience?.toString() || '',
     isActive: barber.is_active,
     profileImageUrl: barber.profile_image_url || '',
+    statusMessage: barber.status_message || '',
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -69,6 +71,7 @@ export const EditBarberDialog = ({
       yearsExperience: barber.years_experience?.toString() || '',
       isActive: barber.is_active,
       profileImageUrl: barber.profile_image_url || '',
+      statusMessage: barber.status_message || '',
     });
   }, [barber]);
 
@@ -85,6 +88,7 @@ export const EditBarberDialog = ({
           : null,
         is_active: formData.isActive,
         profile_image_url: formData.profileImageUrl || null,
+        status_message: formData.statusMessage || null,
       }),
     onSuccess: () => {
       toast.success('Barber profile updated successfully');
@@ -187,6 +191,22 @@ export const EditBarberDialog = ({
             />
             <p className="text-xs text-muted-foreground">
               Enter multiple specialties separated by commas
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="statusMessage">Status Message</Label>
+            <Input
+              id="statusMessage"
+              value={formData.statusMessage}
+              onChange={(e) =>
+                setFormData({ ...formData, statusMessage: e.target.value })
+              }
+              placeholder="e.g., 'Working evenings this week', 'Back from vacation!'"
+              maxLength={100}
+            />
+            <p className="text-xs text-muted-foreground">
+              Optional message displayed on barber's booking card (max 100 characters)
             </p>
           </div>
 

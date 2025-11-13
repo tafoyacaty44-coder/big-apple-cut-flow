@@ -257,6 +257,7 @@ export const updateBarberProfile = async (
     years_experience?: number;
     profile_image_url?: string;
     is_active?: boolean;
+    status_message?: string | null;
   }
 ) => {
   const { error } = await supabase

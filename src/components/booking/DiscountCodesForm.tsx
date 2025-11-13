@@ -24,6 +24,7 @@ const DiscountCodesForm = ({
   const [vipCode, setVipCode] = useState('');
   const [vipCodeValid, setVipCodeValid] = useState(false);
   const [vipCodeChecking, setVipCodeChecking] = useState(false);
+  const [vipCodeAttempted, setVipCodeAttempted] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [promoCodeValid, setPromoCodeValid] = useState(false);
   const [promoCodeChecking, setPromoCodeChecking] = useState(false);
@@ -48,6 +49,7 @@ const DiscountCodesForm = ({
     if (!vipCode.trim()) return;
     
     setVipCodeChecking(true);
+    setVipCodeAttempted(true);
     try {
       const { data: settings, error } = await supabase
         .from('vip_settings')
@@ -124,6 +126,7 @@ const DiscountCodesForm = ({
               onChange={(e) => {
                 setVipCode(e.target.value);
                 setVipCodeValid(false);
+                setVipCodeAttempted(false);
                 if (onVipCodeChange) {
                   onVipCodeChange('', false);
                 }
@@ -146,7 +149,7 @@ const DiscountCodesForm = ({
               </p>
             </div>
           )}
-          {vipCode.trim() && !vipCodeValid && !vipCodeChecking && (
+          {vipCode.trim() && !vipCodeValid && vipCodeAttempted && !vipCodeChecking && (
             <p className="text-sm text-destructive mt-2">Invalid VIP code</p>
           )}
         </div>
