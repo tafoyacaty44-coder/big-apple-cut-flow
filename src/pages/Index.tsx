@@ -8,14 +8,17 @@ import { getGalleryImages } from "@/lib/api/gallery";
 import { TodayAvailability } from "@/components/TodayAvailability";
 import { SeoHead } from "@/components/SeoHead";
 import React from "react";
-import haircut from "@/assets/services/haircut.jpg";
-import beardTrim from "@/assets/services/beard-trim.jpg";
-import combo from "@/assets/services/haircut-beard-combo.jpg";
-import royalShave from "@/assets/services/royal-shave.jpg";
-import haircutWash from "@/assets/services/haircut-wash.jpg";
-import seniorCut from "@/assets/services/senior-haircut.jpg";
-import blackMask from "@/assets/services/black-mask.jpg";
-import wisemanSpecial from "@/assets/services/wiseman-special.jpg";
+import fadeOne from '@/assets/gallery/fade-one.jpg';
+import fadeTwo from '@/assets/gallery/fade-two.jpg';
+import taperOne from '@/assets/gallery/taper-one.jpg';
+import taperTwo from '@/assets/gallery/taper-two.jpg';
+import taperThree from '@/assets/gallery/taper-three.jpg';
+import cleanFadeOne from '@/assets/gallery/clean-fade-one.jpg';
+import designOne from '@/assets/gallery/design-one.jpg';
+import beardFadeOne from '@/assets/gallery/beard-fade-one.jpg';
+import skinFadeOne from '@/assets/gallery/skin-fade-one.jpg';
+import classicOne from '@/assets/gallery/classic-one.jpg';
+import pompadourOne from '@/assets/gallery/pompadour-one.jpg';
 
 
 const navItems = [
@@ -141,14 +144,17 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
 
 // Fallback gallery images
 const fallbackImages = [
-  { id: '1', image_url: haircut, title: 'Classic Cuts', category: 'Haircuts' },
-  { id: '2', image_url: beardTrim, title: 'Beard Work', category: 'Beard Styling' },
-  { id: '3', image_url: combo, title: 'Full Service', category: 'Combo' },
-  { id: '4', image_url: royalShave, title: 'Royal Shave', category: 'Shaving' },
-  { id: '5', image_url: haircutWash, title: 'Premium Experience', category: 'Full Service' },
-  { id: '6', image_url: seniorCut, title: 'Senior Care', category: 'Haircuts' },
-  { id: '7', image_url: blackMask, title: 'Treatments', category: 'Spa' },
-  { id: '8', image_url: wisemanSpecial, title: 'Signature Looks', category: 'Transformations' }
+  { id: '1', image_url: fadeOne, category: 'Fades', title: 'High Fade with Hard Part' },
+  { id: '2', image_url: fadeTwo, category: 'Fades', title: 'Skin Fade with Design' },
+  { id: '3', image_url: taperOne, category: 'Tapers', title: 'Classic Taper' },
+  { id: '4', image_url: taperTwo, category: 'Tapers', title: 'Mid Taper Fade' },
+  { id: '5', image_url: taperThree, category: 'Tapers', title: 'Low Taper with Beard' },
+  { id: '6', image_url: cleanFadeOne, category: 'Fades', title: 'Clean Fade' },
+  { id: '7', image_url: designOne, category: 'Designs', title: 'Hair Design Art' },
+  { id: '8', image_url: beardFadeOne, category: 'Beard Work', title: 'Beard Fade Blend' },
+  { id: '9', image_url: skinFadeOne, category: 'Fades', title: 'Bald Fade' },
+  { id: '10', image_url: classicOne, category: 'Classic Cuts', title: 'Traditional Side Part' },
+  { id: '11', image_url: pompadourOne, category: 'Pompadours', title: 'Modern Pompadour' },
 ];
 
 function GalleryRow() {
