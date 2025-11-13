@@ -3,24 +3,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import logoIntroVideo from "@/assets/logo-intro.mp4";
 
-const STORAGE_KEY = "big-apple-barbers-intro-shown";
-
 export const VideoIntro = () => {
   const [showIntro, setShowIntro] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
 
   useEffect(() => {
-    // Check if intro has been shown this session
-    const hasShown = sessionStorage.getItem(STORAGE_KEY);
-    
     // Check if user prefers reduced motion
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
-    if (!hasShown && !prefersReducedMotion) {
+    // Show intro every time unless user prefers reduced motion
+    if (!prefersReducedMotion) {
       setShowIntro(true);
-      sessionStorage.setItem(STORAGE_KEY, "true");
     }
   }, []);
 
