@@ -51,7 +51,20 @@ export const MonthlyCalendarPicker = ({
   useEffect(() => {
     if (selectedDate) {
       const avail = getDateAvailability(selectedDate);
-      setAvailableTimeSlots(avail?.slots || []);
+      let slots = avail?.slots || [];
+      
+      // Filter out past times if selected date is today
+      if (isSameDay(selectedDate, new Date())) {
+        const now = new Date();
+        slots = slots.filter(timeSlot => {
+          const [hours, minutes] = timeSlot.split(':');
+          const slotTime = new Date();
+          slotTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+          return slotTime > now;
+        });
+      }
+      
+      setAvailableTimeSlots(slots);
     } else {
       setAvailableTimeSlots([]);
     }

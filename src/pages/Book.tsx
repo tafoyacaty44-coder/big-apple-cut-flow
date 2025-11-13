@@ -42,7 +42,6 @@ const Book = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'zelle' | 'apple_pay' | 'venmo' | 'cash_app' | null>(null);
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [policyAgreed, setPolicyAgreed] = useState(false);
-  const [barberAvailabilityData, setBarberAvailabilityData] = useState<any[]>([]);
   const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, setBlacklisted, setSelectedAddons, resetBooking } = useBooking();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -114,6 +113,21 @@ const Book = () => {
     enabled: currentStep === 3 && !!selectedService,
   });
 
+  // Fetch barber availability when barber and service are selected
+  const { data: barberAvailabilityData = [] } = useQuery({
+    queryKey: ['barber-availability', booking.selectedBarberId, selectedService?.duration_minutes],
+    queryFn: () => {
+      if (!booking.selectedBarberId || !selectedService?.duration_minutes) return [];
+      return getBarberAvailability(
+        booking.selectedBarberId,
+        format(new Date(), 'yyyy-MM-dd'),
+        format(addDays(new Date(), 30), 'yyyy-MM-dd'),
+        selectedService.duration_minutes
+      );
+    },
+    enabled: currentStep === 4 && !!booking.selectedBarberId && !!selectedService?.duration_minutes,
+  });
+
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
     setSelectedAddonIds([]); // Reset add-ons when service changes
@@ -125,6 +139,9 @@ const Book = () => {
 
   const handleBarberSelect = (barberId: string, barberName: string) => {
     setSelectedBarber(barberId, barberName, []);
+    // Clear date/time selections when changing barbers
+    setSelectedDate(null);
+    setSelectedTime(null);
   };
 
   const handleDateSelect = (date: Date) => {

@@ -107,7 +107,7 @@ export const SimplifiedBarberCard = ({
                 variant={isSelected ? 'default' : 'outline'}
                 className="flex-shrink-0 px-6"
               >
-                Continue →
+                {isSelected ? 'Selected' : 'Select'}
               </GoldButton>
             </div>
           </div>
