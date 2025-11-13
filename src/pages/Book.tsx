@@ -11,11 +11,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getServices, getAddonServices } from '@/lib/api/services';
 import { getActiveBarbers } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
-import BarberCard from '@/components/booking/BarberCard';
+import { SimplifiedBarberCard } from '@/components/booking/SimplifiedBarberCard';
+import { MonthlyCalendarPicker } from '@/components/booking/MonthlyCalendarPicker';
 import { SevenDayAvailability } from '@/components/booking/SevenDayAvailability';
 import CustomerInfoForm from '@/components/booking/CustomerInfoForm';
 import { CompactServiceList } from '@/components/booking/CompactServiceList';
 import DiscountCodesForm from '@/components/booking/DiscountCodesForm';
+import { CancellationPolicy } from '@/components/booking/CancellationPolicy';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +27,8 @@ import { Separator } from '@/components/ui/separator';
 import { cn, calculateBookingTotal, formatTime12h } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SeoHead } from '@/components/SeoHead';
+import { getBarberAvailability } from '@/lib/api/availability';
+import { addDays } from 'date-fns';
 
 import haircutImg from '@/assets/services/haircut.jpg';
 import seniorImg from '@/assets/services/senior-haircut.jpg';
@@ -58,6 +62,8 @@ const Book = () => {
   const [promoCampaignId, setPromoCampaignId] = useState<string | undefined>();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'zelle' | 'apple_pay' | 'venmo' | 'cash_app' | null>(null);
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+  const [policyAgreed, setPolicyAgreed] = useState(false);
+  const [barberAvailabilityData, setBarberAvailabilityData] = useState<any[]>([]);
   const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, setBlacklisted, setSelectedAddons, resetBooking } = useBooking();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -507,17 +513,16 @@ const Book = () => {
                           </GoldButton>
                         </div>
 
-                        {/* Individual Barbers - Compact */}
+                        {/* Individual Barbers - Simplified Cards */}
                         {barbers.map((barber) => (
-                          <BarberCard
+                          <SimplifiedBarberCard
                             key={barber.id}
                             barber={barber}
                             selectedServiceName={selectedService?.name || ""}
                             selectedServicePrice={selectedService?.regular_price || 0}
-                            selectedServiceDuration={selectedService?.duration_minutes || 0}
                             isSelected={booking.selectedBarberId === barber.id}
                             onSelect={() => handleBarberSelect(barber.id, barber.full_name)}
-                            compact
+                            onVipCodeChange={(code) => setVipCodeFromForm(code)}
                           />
                         ))}
                       </div>
@@ -679,15 +684,21 @@ const Book = () => {
                   </CardContent>
                 </Card>
 
+                {/* Cancellation Policy */}
+                <CancellationPolicy 
+                  agreed={policyAgreed}
+                  onAgreeChange={setPolicyAgreed}
+                />
+
                 {/* Payment Method Selection */}
                 <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2">Select Payment Method</h3>
+                  <CardContent className="p-4">
+                    <h3 className="text-base font-bold mb-2">Select Payment Method</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Choose how you'll send your payment. You'll need to complete payment after booking.
                     </p>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <div className="grid grid-cols-2 gap-2 mb-3">
                       {[
                         { id: 'zelle' as const, name: 'Zelle', info: 'info@bigapplebarbershop.com' },
                         { id: 'apple_pay' as const, name: 'Apple Pay', info: '(555) 123-4567' },
@@ -744,7 +755,7 @@ const Book = () => {
                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                     <GoldButton
                       onClick={() => handleConfirmBooking()}
-                      disabled={!canContinueStep(4) || bookingMutation.isPending}
+                      disabled={!canContinueStep(4) || !policyAgreed || bookingMutation.isPending}
                       className="w-full min-h-[48px]"
                       size="lg"
                     >

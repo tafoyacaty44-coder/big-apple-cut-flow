@@ -80,11 +80,11 @@ export const BookingSidebar = ({
   };
 
   return (
-    <Card className="h-full flex flex-col border-r rounded-none border-l-0 border-t-0 border-b-0 bg-muted/30 overflow-hidden w-[280px]">
-      <div className="p-4 flex-1 overflow-y-auto min-h-0">
-        <h2 className="text-base font-bold mb-4">Booking Summary</h2>
+    <Card className="h-full flex flex-col border-r rounded-none border-l-0 border-t-0 border-b-0 bg-muted/30 overflow-hidden w-64">
+      <div className="p-3 flex-1 overflow-y-auto min-h-0">
+        <h2 className="text-sm font-bold mb-3 uppercase">Booking Summary</h2>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {steps.map((step, index) => {
             const isActive = currentStep === step.number;
             const isClickable = step.completed && currentStep > step.number;
@@ -104,7 +104,7 @@ export const BookingSidebar = ({
                   <div className="flex items-start gap-2">
                     <div
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
+                        "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-colors text-xs font-bold",
                         step.completed
                           ? "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]"
                           : isActive
