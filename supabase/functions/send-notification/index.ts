@@ -11,28 +11,73 @@ interface SendRequest {
   template: string;
 }
 
-async function sendTwilioSMS(to: string, body: string, from: string, accountSid: string, authToken: string) {
-  const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+async function sendClickSendSMS(to: string, body: string, from: string, username: string, apiKey: string) {
+  const url = 'https://rest.clicksend.com/v3/sms/send';
   
-  const auth = btoa(`${accountSid}:${authToken}`);
+  // Basic Auth: username:apiKey encoded in base64
+  const auth = btoa(`${username}:${apiKey}`);
   
-  const formData = new URLSearchParams();
-  formData.append('To', to);
-  formData.append('From', from);
-  formData.append('Body', body);
+  const payload = {
+    messages: [
+      {
+        source: "big-apple-barbers",
+        from: from, // Sender ID (alphanumeric or number)
+        body: body,
+        to: to.replace(/\D/g, ''), // ClickSend expects digits only
+      }
+    ]
+  };
   
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
-    body: formData.toString(),
+    body: JSON.stringify(payload),
   });
   
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Twilio API error: ${response.status} - ${error}`);
+    throw new Error(`ClickSend API error: ${response.status} - ${error}`);
+  }
+  
+  const result = await response.json();
+  return result;
+}
+
+async function sendClickSendEmail(
+  to: string, 
+  subject: string, 
+  htmlBody: string, 
+  fromEmail: string,
+  fromName: string,
+  username: string, 
+  apiKey: string
+) {
+  const url = 'https://rest.clicksend.com/v3/email/send';
+  
+  const auth = btoa(`${username}:${apiKey}`);
+  
+  const payload = {
+    to: [{ email: to, name: to.split('@')[0] }],
+    from: { email_address_id: fromEmail, name: fromName },
+    subject: subject,
+    body: htmlBody,
+  };
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${auth}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`ClickSend Email error: ${response.status} - ${error}`);
   }
   
   return await response.json();
@@ -147,10 +192,13 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Initialize Twilio credentials
-    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID')!;
-    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN')!;
-    const twilioPhone = Deno.env.get('TWILIO_PHONE_NUMBER')!;
+    // Initialize ClickSend credentials
+    const clicksendUsername = Deno.env.get('CLICKSEND_USERNAME')!;
+    const clicksendApiKey = Deno.env.get('CLICKSEND_API_KEY')!;
+    const clicksendSenderId = Deno.env.get('CLICKSEND_SENDER_ID') || 'BigApple';
+    const clicksendFromEmail = Deno.env.get('CLICKSEND_FROM_EMAIL') || '';
+    
+    console.log('ClickSend configured - Sender ID:', clicksendSenderId);
 
     const { appointment_id, channel, template }: SendRequest = await req.json();
     
@@ -230,61 +278,79 @@ Deno.serve(async (req) => {
 
     let providerMessageId = null;
     let error = null;
+    let notificationSent = false;
 
     try {
+      // Send SMS via ClickSend
       if (channel === 'sms' && client.opt_in_sms && client.phone) {
         const smsText = renderTemplate(getSmsTemplate(template), templateData);
         
-        // Normalize phone to E.164 format
-        const cleaned = client.phone.replace(/\D/g, '');
-        const e164Phone = cleaned.length === 10 ? `+1${cleaned}` : 
-                          cleaned.startsWith('1') ? `+${cleaned}` : `+1${cleaned}`;
+        console.log('Sending SMS to:', client.phone);
         
-        // Send SMS via Twilio
-        const message = await sendTwilioSMS(
-          e164Phone,
+        const smsResult = await sendClickSendSMS(
+          client.phone,
           smsText,
-          twilioPhone,
-          twilioAccountSid,
-          twilioAuthToken
+          clicksendSenderId,
+          clicksendUsername,
+          clicksendApiKey
         );
         
-        providerMessageId = message.sid;
-        console.log('✓ SMS sent:', message.sid);
-      } else if (channel === 'email' && client.opt_in_email && client.email) {
-        // Email sending (placeholder - requires provider setup)
+        console.log('ClickSend SMS result:', smsResult);
+        providerMessageId = smsResult.data?.messages?.[0]?.message_id || null;
+        notificationSent = true;
+      }
+      
+      // Send email via ClickSend
+      if (channel === 'email' && client.opt_in_email && client.email) {
+        console.log('Sending email to:', client.email);
+        
         const emailHtml = getEmailHtml(template, templateData);
-        console.log('Email would be sent:', { to: client.email, subject: `Big Apple Barbers - ${template}` });
-        // Actual email sending would go here with Resend
-        providerMessageId = `email_${Date.now()}`;
+        const subject = `Big Apple Barbers - ${template.includes('confirmation') ? 'Appointment Confirmed' : 
+                         template.includes('reminder') ? 'Appointment Reminder' : 'Appointment Update'}`;
+        
+        const emailResult = await sendClickSendEmail(
+          client.email,
+          subject,
+          emailHtml,
+          clicksendFromEmail,
+          'Big Apple Barbers',
+          clicksendUsername,
+          clicksendApiKey
+        );
+        
+        console.log('ClickSend Email result:', emailResult);
+        providerMessageId = emailResult.data?.message_id || null;
+        notificationSent = true;
+      }
+
+      if (!notificationSent) {
+        console.log('No notification sent - client not opted in or missing contact info');
       }
     } catch (sendError) {
       error = sendError instanceof Error ? sendError.message : 'Send failed';
       console.error('Send error:', error);
     }
 
-    // Log to notifications table
-    await supabase
-      .from('notifications')
-      .insert({
-        appointment_id,
-        channel,
-        template,
-        provider_message_id: providerMessageId,
-        sent_at: error ? null : new Date().toISOString(),
-        error,
-      });
-
-    if (error) {
-      throw new Error(error);
-    }
+    // Log notification attempt
+    await supabase.from('notifications').insert({
+      appointment_id,
+      channel,
+      template,
+      provider_message_id: providerMessageId,
+      sent_at: notificationSent ? new Date().toISOString() : null,
+      error,
+    });
 
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        provider_message_id: providerMessageId 
+        success: notificationSent,
+        message: notificationSent ? 'Notification sent' : 'Notification not sent',
+        error 
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: notificationSent ? 200 : 400,
+      }
     );
 
   } catch (error) {

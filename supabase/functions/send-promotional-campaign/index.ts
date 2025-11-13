@@ -9,31 +9,39 @@ interface SendCampaignRequest {
   campaign_id: string;
 }
 
-async function sendTwilioSMS(to: string, body: string, from: string, accountSid: string, authToken: string) {
-  const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+async function sendClickSendSMS(to: string, body: string, from: string, username: string, apiKey: string) {
+  const url = 'https://rest.clicksend.com/v3/sms/send';
   
-  const auth = btoa(`${accountSid}:${authToken}`);
+  // Basic Auth: username:apiKey encoded in base64
+  const auth = btoa(`${username}:${apiKey}`);
   
-  const formData = new URLSearchParams();
-  formData.append('To', to);
-  formData.append('From', from);
-  formData.append('Body', body);
+  const payload = {
+    messages: [
+      {
+        source: "big-apple-barbers",
+        from: from, // Sender ID (alphanumeric or number)
+        body: body,
+        to: to.replace(/\D/g, ''), // ClickSend expects digits only
+      }
+    ]
+  };
   
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
-    body: formData.toString(),
+    body: JSON.stringify(payload),
   });
   
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Twilio API error: ${response.status} - ${error}`);
+    throw new Error(`ClickSend API error: ${response.status} - ${error}`);
   }
   
-  return await response.json();
+  const result = await response.json();
+  return result;
 }
 
 Deno.serve(async (req) => {
@@ -47,12 +55,12 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Initialize Twilio credentials
-    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID')!;
-    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN')!;
-    const twilioPhone = Deno.env.get('TWILIO_PHONE_NUMBER')!;
+    // Initialize ClickSend credentials
+    const clicksendUsername = Deno.env.get('CLICKSEND_USERNAME')!;
+    const clicksendApiKey = Deno.env.get('CLICKSEND_API_KEY')!;
+    const clicksendSenderId = Deno.env.get('CLICKSEND_SENDER_ID') || 'BigApple';
     
-    console.log('Twilio configured - Phone:', twilioPhone);
+    console.log('ClickSend configured - Sender ID:', clicksendSenderId);
 
     const { campaign_id }: SendCampaignRequest = await req.json();
     
@@ -212,7 +220,7 @@ Deno.serve(async (req) => {
               status: 'queued',
             });
 
-          // Send SMS via Twilio
+          // Send SMS via ClickSend
           let smsBody = campaign.message_body;
           if (campaign.promo_code) {
             smsBody += `\n\nPromo Code: ${campaign.promo_code}`;
@@ -223,23 +231,15 @@ Deno.serve(async (req) => {
             smsBody = smsBody.substring(0, 1597) + '...';
           }
 
-          // Normalize phone to E.164 format for Twilio
-          const normalizedPhone = client.phone!.replace(/\D/g, '');
-          const e164Phone = normalizedPhone.length === 10 
-            ? `+1${normalizedPhone}` 
-            : normalizedPhone.startsWith('1') 
-              ? `+${normalizedPhone}` 
-              : `+1${normalizedPhone}`;
-
-          const message = await sendTwilioSMS(
-            e164Phone,
+          await sendClickSendSMS(
+            client.phone!,
             smsBody,
-            twilioPhone,
-            twilioAccountSid,
-            twilioAuthToken
+            clicksendSenderId,
+            clicksendUsername,
+            clicksendApiKey
           );
 
-          console.log(`✓ SMS sent to ${client.full_name} at ${client.phone}, SID: ${message.sid}`);
+          console.log(`✓ SMS sent to ${client.full_name} at ${client.phone}`);
 
           // Mark as sent
           await supabase
