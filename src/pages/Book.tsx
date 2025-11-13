@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimations } from '@/hooks/useAnimations';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Progress } from '@/components/ui/progress';
 import { getServices, getAddonServices } from '@/lib/api/services';
 import { getActiveBarbers } from '@/lib/api/barbers';
 import { useBooking } from '@/contexts/BookingContext';
@@ -361,8 +362,14 @@ const Book = () => {
               className="w-full flex items-center justify-between p-4 active:bg-muted/50 transition-colors"
             >
               <div className="text-left flex-1">
-                <div className="font-semibold">Step {currentStep} of {TOTAL_STEPS}</div>
-                <div className="text-sm text-muted-foreground truncate">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">Step {currentStep} of {TOTAL_STEPS}</span>
+                    <span>{Math.round((currentStep / TOTAL_STEPS) * 100)}%</span>
+                  </div>
+                  <Progress value={(currentStep / TOTAL_STEPS) * 100} className="h-1.5" />
+                </div>
+                <div className="text-sm text-muted-foreground truncate mt-1">
                   {booking.customerInfo?.name}
                   {selectedService && ` • ${selectedService.name}`}
                   {selectedAddons.length > 0 && ` • ${selectedAddons.map(a => a.name).join(', ')}`}
@@ -655,7 +662,7 @@ const Book = () => {
                     <h3 className="text-sm font-bold mb-2">Payment Method</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
-                        { id: 'zelle' as const, name: 'Zelle', info: 'info@bigapplebarbershop.com' },
+                        { id: 'zelle' as const, name: 'Zelle', info: '(555) 123-4567' },
                         { id: 'apple_pay' as const, name: 'Apple Pay', info: '(555) 123-4567' },
                         { id: 'venmo' as const, name: 'Venmo', info: '@BigAppleBarberShop' },
                         { id: 'cash_app' as const, name: 'Cash App', info: '$BigAppleBarbers' },
