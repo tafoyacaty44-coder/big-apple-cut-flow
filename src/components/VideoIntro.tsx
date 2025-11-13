@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import logoIntroVideo from "@/assets/logo-intro.mp4";
 
 export const VideoIntro = () => {
@@ -62,17 +63,19 @@ export const VideoIntro = () => {
         onClick={handleSkip}
       >
         <div className="relative w-full h-full flex items-center justify-center">
-          <motion.video
-            initial={{ opacity: 0 }}
-            animate={{ opacity: videoEnded ? 0 : 1 }}
-            transition={{ duration: 0.3 }}
+          <video
             src={logoIntroVideo}
             autoPlay
             muted
             playsInline
+            preload="auto"
             onEnded={handleVideoEnd}
             onError={handleVideoError}
-            className="max-w-full max-h-full object-contain"
+            className={cn(
+              "max-w-full max-h-full object-contain transition-opacity duration-300",
+              videoEnded && "opacity-0"
+            )}
+            style={{ willChange: 'auto' }}
             aria-label="Big Apple Barbers logo introduction"
           />
 
