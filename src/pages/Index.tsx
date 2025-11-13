@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getGalleryImages } from "@/lib/api/gallery";
 import { TodayAvailability } from "@/components/TodayAvailability";
 import { SeoHead } from "@/components/SeoHead";
+import { VideoIntro } from "@/components/VideoIntro";
 import React from "react";
 import fadeOne from '@/assets/gallery/fade-one.jpg';
 import fadeTwo from '@/assets/gallery/fade-two.jpg';
@@ -251,8 +252,10 @@ const Index = () => {
   const { data: slots } = useNextAvailableSlots(3);
 
   return (
-    <main className="min-h-[100dvh] bg-primary text-primary-foreground relative overflow-hidden">
-      <SeoHead pageSlug="home" />
+    <>
+      <VideoIntro />
+      <main className="min-h-[100dvh] bg-primary text-primary-foreground relative overflow-hidden">
+        <SeoHead pageSlug="home" />
       {/* Animated gradient background */}
       <motion.div
         aria-hidden="true"
@@ -382,7 +385,8 @@ const Index = () => {
         </div>
         <TodayAvailability />
       </div> */}
-    </main>
+      </main>
+    </>
   );
 };
 
