@@ -54,15 +54,24 @@ export const BookingSidebar = ({
     },
     {
       number: 3,
-      label: "Barber & Time",
+      label: "Barber",
       icon: User,
-      completed: !!selectedBarber && !!selectedDate && !!selectedTime,
-      content: selectedBarber && selectedDate && selectedTime
-        ? `${selectedBarber.name} • ${new Date(selectedDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })} • ${formatTime12h(selectedTime)}`
-        : "Choose barber & schedule",
+      completed: !!selectedBarber,
+      content: selectedBarber
+        ? selectedBarber.name
+        : "Choose your barber",
     },
     {
       number: 4,
+      label: "Date & Time",
+      icon: Clock,
+      completed: !!selectedDate && !!selectedTime,
+      content: selectedDate && selectedTime
+        ? `${new Date(selectedDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })} • ${formatTime12h(selectedTime)}`
+        : "Pick date & time",
+    },
+    {
+      number: 5,
       label: "Confirm",
       icon: Calendar,
       completed: false,
@@ -163,7 +172,7 @@ export const BookingSidebar = ({
           className="w-full"
           size="default"
         >
-          {currentStep === 4 ? "Complete Booking" : "Continue"}
+          {currentStep === 5 ? "Complete Booking" : "Continue"}
         </GoldButton>
       </div>
     </Card>
