@@ -119,7 +119,10 @@ const CustomerInfoForm = ({ onSubmit, initialData }: CustomerInfoFormProps) => {
               placeholder="(555) 123-4567"
               onChange={(e) => {
                 const formatted = formatPhoneNumber(e.target.value);
+                // Reflect formatted value in the input element
                 e.target.value = formatted;
+                // Update react-hook-form state so validation clears immediately
+                setValue('phone', formatted, { shouldDirty: true, shouldValidate: true });
               }}
               className={errors.phone ? 'border-destructive' : ''}
             />
