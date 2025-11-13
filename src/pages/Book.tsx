@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
-import { Calendar, AlertCircle, CheckCircle, User as UserIcon, Scissors, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { Calendar, AlertCircle, CheckCircle, User as UserIcon, Scissors, Calendar as CalendarIcon, Clock, ChevronLeft, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimations } from '@/hooks/useAnimations';
 import { AnimatedCard } from '@/components/ui/animated-card';
@@ -373,6 +373,21 @@ const Book = () => {
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="max-w-5xl mx-auto">
+            {/* Back Button for steps 2+ */}
+            {currentStep > 1 && !booking.isBlacklisted && (
+              <div className="mb-3 flex items-center justify-between">
+                <button
+                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                  className="flex items-center gap-1 text-sm font-medium hover:text-[hsl(var(--accent))] transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Back
+                </button>
+                <span className="text-xs text-muted-foreground font-medium">
+                  Step {currentStep} of {TOTAL_STEPS}
+                </span>
+              </div>
+            )}
             {/* Blacklist Warning */}
             {booking.isBlacklisted && (
               <Alert variant="destructive" className="mb-6">
@@ -442,12 +457,11 @@ const Book = () => {
                     services={services.filter(s => s.category !== 'addon')}
                     addons={addonServices}
                     selectedServiceId={booking.selectedServiceId}
-                    selectedAddonIds={selectedAddonIds}
-                    onServiceSelect={handleServiceSelect}
-                    onAddonToggle={handleAddonToggle}
-                    serviceImages={serviceImages}
-                    isVip={vipCodeValid}
-                  />
+                  selectedAddonIds={selectedAddonIds}
+                  onServiceSelect={handleServiceSelect}
+                  onAddonToggle={handleAddonToggle}
+                  isVip={vipCodeValid}
+                />
                 )}
 
 
@@ -492,31 +506,7 @@ const Book = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <div 
-                        className={cn(
-                          "flex items-center gap-4 p-3 rounded-lg border-2 transition-all cursor-pointer",
-                          booking.selectedBarberId === 'any'
-                            ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5'
-                            : 'border-border hover:bg-muted/50'
-                        )}
-                        onClick={() => handleBarberSelect('any', 'Any Available Barber')}
-                      >
-                        <div className="w-12 h-12 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center flex-shrink-0">
-                          <Calendar className="h-6 w-6 text-[hsl(var(--accent))]" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-bold text-base">Any Available Barber</h4>
-                          <p className="text-xs text-muted-foreground">First available time slot</p>
-                        </div>
-                        <GoldButton 
-                          size="sm"
-                          variant={booking.selectedBarberId === 'any' ? "default" : "outline"}
-                          className="flex-shrink-0"
-                        >
-                          {booking.selectedBarberId === 'any' ? "Selected" : "Select"}
-                        </GoldButton>
-                      </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{/* Removed "Any Available Barber" option */}
 
                       {barbers.map((barber) => (
                         <SimplifiedBarberCard

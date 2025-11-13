@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, startOfWeek, endOfWeek, isBefore, startOfDay } from 'date-fns';
 import { GoldButton } from '@/components/ui/gold-button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface MonthlyCalendarPickerProps {
   barberId: string;
@@ -86,17 +87,17 @@ export const MonthlyCalendarPicker = ({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Calendar Header */}
-      <div className="flex items-center justify-between mb-3">
+    <div className="space-y-3">
+      {/* Calendar Header - Compact */}
+      <div className="flex items-center justify-between mb-2">
         <button
           onClick={handlePreviousMonth}
           className="p-1 hover:bg-muted rounded-md transition-colors"
           aria-label="Previous month"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
-        <h3 className="text-lg font-bold uppercase">
+        <h3 className="text-sm font-bold uppercase">
           {format(currentMonth, 'MMMM yyyy')}
         </h3>
         <button
@@ -104,20 +105,20 @@ export const MonthlyCalendarPicker = ({
           className="p-1 hover:bg-muted rounded-md transition-colors"
           aria-label="Next month"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Day Labels */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      {/* Day Labels - Compact */}
+      <div className="grid grid-cols-7 gap-1 mb-1">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-          <div key={i} className="text-center text-xs font-semibold text-muted-foreground">
+          <div key={i} className="text-center text-[10px] font-semibold text-muted-foreground">
             {day}
           </div>
         ))}
       </div>
 
-      {/* Calendar Grid */}
+      {/* Calendar Grid - Compact */}
       <div className="grid grid-cols-7 gap-1">
         {calendarDays.map((date, i) => {
           const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
@@ -133,11 +134,11 @@ export const MonthlyCalendarPicker = ({
                 }
               }}
               disabled={past || !available}
-              className={`
-                aspect-square rounded-md text-sm transition-all
-                ${getDayClassName(date)}
-                ${!isCurrentMonth ? 'opacity-30' : ''}
-              `}
+              className={cn(
+                'aspect-square rounded-md text-xs font-medium transition-all',
+                getDayClassName(date),
+                !isCurrentMonth && 'opacity-30'
+              )}
             >
               {format(date, 'd')}
             </button>
@@ -145,33 +146,42 @@ export const MonthlyCalendarPicker = ({
         })}
       </div>
 
-      {/* Time Slots */}
-      <div className="pt-3 border-t">
-        <p className="text-sm font-semibold mb-3">
-          Select from available time *
-        </p>
-        {availableTimeSlots.length > 0 ? (
-          <div className="grid grid-cols-2 gap-2 max-h-[250px] overflow-y-auto">
-            {availableTimeSlots.map((time) => (
-              <GoldButton
-                key={time}
-                onClick={() => onTimeSelect(time)}
-                variant={selectedTime === time ? 'default' : 'outline'}
-                size="sm"
-                className="w-full"
-              >
-                {time}
-              </GoldButton>
-            ))}
+      {/* Time Slots - Compact */}
+      {selectedDate && availableTimeSlots.length > 0 && (
+        <div className="mt-3 pt-3 border-t">
+          <h4 className="text-xs font-semibold mb-2 text-muted-foreground uppercase">
+            {format(selectedDate, 'MMM d, yyyy')}
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5">
+            {availableTimeSlots.map((time) => {
+              const isSelected = selectedTime === time;
+              return (
+                <GoldButton
+                  key={time}
+                  onClick={() => onTimeSelect(time)}
+                  variant={isSelected ? 'default' : 'outline'}
+                  size="sm"
+                  className="min-h-[32px] text-xs"
+                >
+                  {time}
+                </GoldButton>
+              );
+            })}
           </div>
-        ) : (
-          <p className="text-sm text-destructive font-medium">
-            {selectedDate
-              ? 'NO TIMESLOTS AVAILABLE - Please select another date'
-              : 'Please select a date to view available times'}
-          </p>
-        )}
-      </div>
+        </div>
+      )}
+
+      {selectedDate && availableTimeSlots.length === 0 && (
+        <div className="mt-3 pt-3 border-t text-center text-xs text-muted-foreground">
+          No times available. Select another date.
+        </div>
+      )}
+
+      {!selectedDate && (
+        <div className="mt-3 pt-3 border-t text-center text-xs text-muted-foreground">
+          Select a date to see available times
+        </div>
+      )}
     </div>
   );
 };
