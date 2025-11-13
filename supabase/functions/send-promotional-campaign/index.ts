@@ -9,6 +9,21 @@ interface SendCampaignRequest {
   campaign_id: string;
 }
 
+function formatToE164(phoneNumber: string): string {
+  // Remove all non-digit characters
+  let cleaned = phoneNumber.replace(/\D/g, '');
+  
+  // If the number doesn't start with a country code, assume US (+1)
+  if (cleaned.length === 10) {
+    cleaned = '1' + cleaned; // Prepend US country code
+  } else if (cleaned.length === 11 && cleaned.startsWith('1')) {
+    // Already has US country code, keep as is
+  }
+  
+  // Add the + prefix for E.164 format
+  return '+' + cleaned;
+}
+
 async function sendClickSendSMS(to: string, body: string, from: string, username: string, apiKey: string) {
   const url = 'https://rest.clicksend.com/v3/sms/send';
   
@@ -21,7 +36,7 @@ async function sendClickSendSMS(to: string, body: string, from: string, username
         source: "big-apple-barbers",
         from: from, // Sender ID (alphanumeric or number)
         body: body,
-        to: to.replace(/\D/g, ''), // ClickSend expects digits only
+        to: formatToE164(to), // ClickSend requires E.164 format with country code
       }
     ]
   };
