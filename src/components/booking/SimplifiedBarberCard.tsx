@@ -1,8 +1,8 @@
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { WeeklyAvailabilityIndicator } from './WeeklyAvailabilityIndicator';
-import { Input } from '@/components/ui/input';
 import { useState } from 'react';
+import { BarberDetailsDialog } from './BarberDetailsDialog';
 
 interface SimplifiedBarberCardProps {
   barber: any;
@@ -10,7 +10,6 @@ interface SimplifiedBarberCardProps {
   selectedServicePrice: number;
   isSelected: boolean;
   onSelect: () => void;
-  onVipCodeChange?: (code: string) => void;
 }
 
 export const SimplifiedBarberCard = ({
@@ -19,9 +18,8 @@ export const SimplifiedBarberCard = ({
   selectedServicePrice,
   isSelected,
   onSelect,
-  onVipCodeChange,
 }: SimplifiedBarberCardProps) => {
-  const [vipCode, setVipCode] = useState('');
+  const [showDetails, setShowDetails] = useState(false);
 
   const getInitials = (name: string) => {
     return name
@@ -31,11 +29,6 @@ export const SimplifiedBarberCard = ({
       .toUpperCase();
   };
 
-  const handleVipCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const code = e.target.value;
-    setVipCode(code);
-    onVipCodeChange?.(code);
-  };
 
   return (
     <Card
@@ -48,7 +41,12 @@ export const SimplifiedBarberCard = ({
       <div className="p-4">
         <div className="flex items-start gap-4">
           {/* Circular Profile Photo */}
-          <div className="w-20 h-20 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center text-2xl font-bold text-[hsl(var(--accent))] flex-shrink-0 overflow-hidden">
+          <div 
+            className="w-20 h-20 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center text-2xl font-bold text-[hsl(var(--accent))] flex-shrink-0 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[hsl(var(--accent))] transition-all"
+            onClick={() => setShowDetails(true)}
+            role="button"
+            aria-label="View barber details"
+          >
             {barber.profile_image_url ? (
               <img
                 src={barber.profile_image_url}
@@ -90,17 +88,15 @@ export const SimplifiedBarberCard = ({
               </p>
             )}
 
-            {/* VIP Code + Continue Button */}
+            {/* Status Message + Continue Button */}
             <div className="flex items-center gap-2 pt-1">
-              <div className="flex-1">
-                <Input
-                  type="text"
-                  placeholder="VIP Code (Optional)"
-                  value={vipCode}
-                  onChange={handleVipCodeChange}
-                  className="h-9 text-sm"
-                />
-              </div>
+              {barber.status_message && (
+                <div className="flex-1 px-3 py-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md">
+                  <p className="text-xs text-amber-700 dark:text-amber-400 italic leading-tight">
+                    {barber.status_message}
+                  </p>
+                </div>
+              )}
               <GoldButton
                 onClick={onSelect}
                 size="sm"
@@ -113,6 +109,19 @@ export const SimplifiedBarberCard = ({
           </div>
         </div>
       </div>
+
+      {/* Barber Details Dialog */}
+      <BarberDetailsDialog 
+        barber={{
+          id: barber.id,
+          full_name: barber.full_name,
+          profile_image_url: barber.profile_image_url,
+          years_experience: barber.years_experience,
+          specialties: barber.specialties
+        }}
+        open={showDetails}
+        onOpenChange={setShowDetails}
+      />
     </Card>
   );
 };

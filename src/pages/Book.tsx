@@ -546,7 +546,6 @@ const Book = () => {
                           selectedServicePrice={selectedService?.regular_price || 0}
                           isSelected={booking.selectedBarberId === barber.id}
                           onSelect={() => handleBarberSelect(barber.id, barber.full_name)}
-                          onVipCodeChange={(code) => setVipCodeFromForm(code)}
                         />
                       ))}
                     </div>
@@ -654,7 +653,7 @@ const Book = () => {
                   {/* Payment Method - Compact */}
                   <div className="border rounded-lg p-3">
                     <h3 className="text-sm font-bold mb-2">Payment Method</h3>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
                         { id: 'zelle' as const, name: 'Zelle', info: 'info@bigapplebarbershop.com' },
                         { id: 'apple_pay' as const, name: 'Apple Pay', info: '(555) 123-4567' },
@@ -665,7 +664,7 @@ const Book = () => {
                           key={method.id}
                           type="button"
                           onClick={() => setSelectedPaymentMethod(method.id)}
-                          className={`p-4 border-2 rounded-lg text-left transition-all ${
+                          className={`p-2 sm:p-4 border-2 rounded-lg text-left transition-all ${
                             selectedPaymentMethod === method.id
                               ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10'
                               : 'border-border hover:border-[hsl(var(--accent))]/50'
@@ -673,11 +672,11 @@ const Book = () => {
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <p className="font-semibold mb-1">{method.name}</p>
-                              <p className="text-xs text-muted-foreground">{method.info}</p>
+                              <p className="text-xs sm:text-sm font-semibold mb-0.5 leading-tight">{method.name}</p>
+                              <p className="text-[10px] sm:text-xs text-muted-foreground break-words leading-tight">{method.info}</p>
                             </div>
                             {selectedPaymentMethod === method.id && (
-                              <CheckCircle className="h-5 w-5 text-[hsl(var(--accent))] flex-shrink-0" />
+                              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-[hsl(var(--accent))] flex-shrink-0" />
                             )}
                           </div>
                         </button>

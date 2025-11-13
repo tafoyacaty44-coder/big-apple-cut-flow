@@ -147,18 +147,27 @@ export const BookingSidebar = ({
         <div className="mb-3">
           <div className="flex justify-between text-xs mb-1.5">
             <span className="text-muted-foreground">Subtotal</span>
-            <span>${priceCalc.subtotal.toFixed(2)}</span>
+            <span className="transition-all duration-300 ease-in-out">
+              ${priceCalc.subtotal.toFixed(2)}
+            </span>
           </div>
           {isVip && priceCalc.vipSavings > 0 && (
-            <div className="flex justify-between text-xs mb-1.5 text-green-600">
+            <div className="flex justify-between text-xs mb-1.5 text-green-600 animate-in slide-in-from-top-2 duration-300">
               <span>VIP Savings</span>
-              <span>-${priceCalc.vipSavings.toFixed(2)}</span>
+              <span className="font-semibold transition-all duration-300 ease-in-out">
+                -${priceCalc.vipSavings.toFixed(2)}
+              </span>
             </div>
           )}
           <Separator className="my-1.5" />
           <div className="flex justify-between font-bold text-sm">
             <span>Total</span>
-            <span className="text-[hsl(var(--accent))]">${priceCalc.subtotal.toFixed(2)}</span>
+            <span className={cn(
+              "text-[hsl(var(--accent))] transition-all duration-300 ease-in-out",
+              isVip && "animate-pulse-subtle"
+            )}>
+              ${priceCalc.subtotal.toFixed(2)}
+            </span>
           </div>
         </div>
 
