@@ -86,7 +86,9 @@ export function ManualRecipientSelector({
     }, 500); // Wait 500ms after user stops typing
 
     return () => clearTimeout(timer);
-  }, [phoneInput, manualPhoneNumbers, onManualPhoneNumbersChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phoneInput, manualPhoneNumbers]);
+  // onManualPhoneNumbersChange is a stable setState function and doesn't need to be in deps
 
   const totalSelectedCount = selectedClientIds.length + manualPhoneNumbers.length;
 
