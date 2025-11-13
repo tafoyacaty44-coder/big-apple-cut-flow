@@ -29,26 +29,6 @@ import { SeoHead } from '@/components/SeoHead';
 import { getBarberAvailability } from '@/lib/api/availability';
 import { addDays } from 'date-fns';
 
-import haircutImg from '@/assets/services/haircut.jpg';
-import seniorImg from '@/assets/services/senior-haircut.jpg';
-import washImg from '@/assets/services/haircut-wash.jpg';
-import shaveImg from '@/assets/services/royal-shave.jpg';
-import maskImg from '@/assets/services/black-mask.jpg';
-import beardImg from '@/assets/services/beard-trim.jpg';
-import wisemanImg from '@/assets/services/wiseman-special.jpg';
-import comboImg from '@/assets/services/haircut-beard-combo.jpg';
-
-const serviceImages: Record<string, string> = {
-  'Haircut': haircutImg,
-  'Senior Haircut': seniorImg,
-  'Haircut and Wash': washImg,
-  'Royal Shave': shaveImg,
-  'Black Mask Facial': maskImg,
-  'Beard Trim': beardImg,
-  'Wiseman Special': wisemanImg,
-  'Haircut and Beard Trim': comboImg,
-};
-
 const Book = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
@@ -70,6 +50,22 @@ const Book = () => {
   const queryClient = useQueryClient();
   
   const TOTAL_STEPS = 5;
+
+  // Reset booking context when component mounts (fresh start)
+  useEffect(() => {
+    // Only reset if we're on step 1 and there's no customer info
+    // This allows returning to booking page to continue, but fresh starts are clean
+    if (currentStep === 1 && !booking.customerInfo) {
+      resetBooking();
+      setSelectedAddonIds([]);
+      setPolicyAgreed(false);
+      setSelectedPaymentMethod(null);
+      setVipCodeFromForm('');
+      setVipCodeValid(false);
+      setPromoCode('');
+      setPromoDiscount(0);
+    }
+  }, []); // Only run on mount
 
   // Sync selected add-ons with booking context
   useEffect(() => {
@@ -347,7 +343,7 @@ const Book = () => {
               onClick={() => setShowMobileSummary(!showMobileSummary)}
               className="w-full flex items-center justify-between p-4 active:bg-muted/50 transition-colors"
             >
-              <div className="text-left">
+              <div className="text-left flex-1">
                 <div className="font-semibold">Step {currentStep} of {TOTAL_STEPS}</div>
                 <div className="text-sm text-muted-foreground truncate">
                   {booking.customerInfo?.name}
@@ -357,6 +353,23 @@ const Book = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {currentStep > 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm('Start over? This will clear all your booking information.')) {
+                        resetBooking();
+                        setCurrentStep(1);
+                        setSelectedAddonIds([]);
+                        setPolicyAgreed(false);
+                        setSelectedPaymentMethod(null);
+                      }
+                    }}
+                    className="text-xs text-destructive hover:underline mr-2"
+                  >
+                    Reset
+                  </button>
+                )}
                 {vipCodeValid && (
                   <span className="text-xs bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))] px-2 py-0.5 rounded-full font-semibold">
                     VIP ✨
@@ -407,7 +420,7 @@ const Book = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-4"
+                  className={cn("space-y-4", isMobile && "pb-20")}
                 >
                   <div>
                     <h2 className="text-xl font-bold mb-1">Your Information</h2>
@@ -440,7 +453,7 @@ const Book = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-4"
+                  className={cn("space-y-4", isMobile && "pb-20")}
                 >
                   <div>
                     <h2 className="text-xl font-bold mb-1">Select a Service</h2>
@@ -493,7 +506,7 @@ const Book = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-3 pb-20"
+                  className={cn("space-y-3", isMobile && "pb-20")}
                 >
                   <div>
                     <h2 className="text-xl font-bold mb-1">Select Your Barber</h2>
@@ -546,7 +559,7 @@ const Book = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-3 pb-20"
+                  className={cn("space-y-3", isMobile && "pb-20")}
                 >
                   <div>
                     <h2 className="text-xl font-bold mb-1">Choose Date & Time</h2>
@@ -597,7 +610,7 @@ const Book = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-3"
+                  className={cn("space-y-3", isMobile && "pb-20")}
                 >
                   <div>
                     <h2 className="text-lg font-bold mb-1">Review Your Booking</h2>
