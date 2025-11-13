@@ -25,12 +25,26 @@ export const MonthlyCalendarPicker = ({
 }: MonthlyCalendarPickerProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+  const [now, setNow] = useState(new Date());
+
+  // Auto-refresh current time every minute for accurate past time filtering
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setNow(new Date());
+    }, 60000); // Update every minute
+    return () => clearInterval(intervalId);
+  }, []);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const calendarStart = startOfWeek(monthStart);
   const calendarEnd = endOfWeek(monthEnd);
   const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+  // Normalize slot field names (backend uses time_slots, fallback to slots)
+  const getSlots = (avail: any): string[] => {
+    return avail?.time_slots ?? avail?.slots ?? [];
+  };
 
   // Get availability for a specific date
   const getDateAvailability = (date: Date) => {
@@ -40,7 +54,19 @@ export const MonthlyCalendarPicker = ({
 
   const hasAvailability = (date: Date) => {
     const avail = getDateAvailability(date);
-    return avail && avail.slots && avail.slots.length > 0;
+    let slots = getSlots(avail);
+    
+    // Filter out past times if checking today
+    if (isSameDay(date, now)) {
+      slots = slots.filter(timeSlot => {
+        const [hours, minutes] = timeSlot.split(':');
+        const slotTime = new Date();
+        slotTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        return slotTime > now;
+      });
+    }
+    
+    return slots.length > 0;
   };
 
   const isPastDate = (date: Date) => {
@@ -51,11 +77,10 @@ export const MonthlyCalendarPicker = ({
   useEffect(() => {
     if (selectedDate) {
       const avail = getDateAvailability(selectedDate);
-      let slots = avail?.slots || [];
+      let slots = getSlots(avail);
       
       // Filter out past times if selected date is today
-      if (isSameDay(selectedDate, new Date())) {
-        const now = new Date();
+      if (isSameDay(selectedDate, now)) {
         slots = slots.filter(timeSlot => {
           const [hours, minutes] = timeSlot.split(':');
           const slotTime = new Date();
@@ -68,12 +93,14 @@ export const MonthlyCalendarPicker = ({
     } else {
       setAvailableTimeSlots([]);
     }
-  }, [selectedDate, availabilityData]);
+  }, [selectedDate, availabilityData, now]);
 
   const getDayClassName = (date: Date) => {
     const past = isPastDate(date);
     const today = isToday(date);
     const selected = selectedDate && isSameDay(date, selectedDate);
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const hasData = availabilityData.some((av) => av.date === dateStr);
     const available = hasAvailability(date);
 
     if (past) {
@@ -84,6 +111,10 @@ export const MonthlyCalendarPicker = ({
     }
     if (today) {
       return 'bg-foreground text-background font-bold border-2 border-[hsl(var(--accent))]';
+    }
+    if (!hasData) {
+      // Neutral style for days where availability hasn't loaded yet
+      return 'bg-muted/50 text-muted-foreground cursor-wait';
     }
     if (available) {
       return 'bg-green-500 text-white hover:bg-green-600 cursor-pointer';
