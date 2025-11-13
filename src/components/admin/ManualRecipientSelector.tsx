@@ -86,7 +86,7 @@ export function ManualRecipientSelector({
     }, 500); // Wait 500ms after user stops typing
 
     return () => clearTimeout(timer);
-  }, [phoneInput]);
+  }, [phoneInput, manualPhoneNumbers, onManualPhoneNumbersChange]);
 
   const totalSelectedCount = selectedClientIds.length + manualPhoneNumbers.length;
 

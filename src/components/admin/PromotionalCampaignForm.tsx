@@ -211,13 +211,13 @@ export function PromotionalCampaignForm({ open, onOpenChange, campaignId }: Prop
       
       // Only update if values actually changed
       if (JSON.stringify(currentRecipientIds) !== JSON.stringify(selectedClientIds)) {
-        form.setValue('custom_recipient_ids', selectedClientIds);
+        form.setValue('custom_recipient_ids', selectedClientIds, { shouldDirty: false });
       }
       if (JSON.stringify(currentPhoneNumbers) !== JSON.stringify(manualPhoneNumbers)) {
-        form.setValue('custom_phone_numbers', manualPhoneNumbers);
+        form.setValue('custom_phone_numbers', manualPhoneNumbers, { shouldDirty: false });
       }
     }
-  }, [selectedClientIds, manualPhoneNumbers, watchTargetAudience]);
+  }, [selectedClientIds, manualPhoneNumbers, watchTargetAudience, form]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
