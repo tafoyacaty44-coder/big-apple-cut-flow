@@ -8,28 +8,34 @@ import { getGalleryImages } from '@/lib/api/gallery';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SeoHead } from '@/components/SeoHead';
 
-// Import service images as fallbacks
-import haircutImg from '@/assets/services/haircut.jpg';
-import beardTrimImg from '@/assets/services/beard-trim.jpg';
-import royalShaveImg from '@/assets/services/royal-shave.jpg';
-import haircutWashImg from '@/assets/services/haircut-wash.jpg';
-import haircutBeardComboImg from '@/assets/services/haircut-beard-combo.jpg';
-import seniorHaircutImg from '@/assets/services/senior-haircut.jpg';
-import blackMaskImg from '@/assets/services/black-mask.jpg';
-import wisemanSpecialImg from '@/assets/services/wiseman-special.jpg';
+// Import gallery images
+import fadeOne from '@/assets/gallery/fade-one.jpg';
+import fadeTwo from '@/assets/gallery/fade-two.jpg';
+import taperOne from '@/assets/gallery/taper-one.jpg';
+import taperTwo from '@/assets/gallery/taper-two.jpg';
+import taperThree from '@/assets/gallery/taper-three.jpg';
+import cleanFadeOne from '@/assets/gallery/clean-fade-one.jpg';
+import designOne from '@/assets/gallery/design-one.jpg';
+import beardFadeOne from '@/assets/gallery/beard-fade-one.jpg';
+import skinFadeOne from '@/assets/gallery/skin-fade-one.jpg';
+import classicOne from '@/assets/gallery/classic-one.jpg';
+import pompadourOne from '@/assets/gallery/pompadour-one.jpg';
 
-const categories = ['All', 'Haircuts', 'Shaves', 'Beard Work', 'Transformations'];
+const categories = ['All', 'Fades', 'Tapers', 'Classic Cuts', 'Designs', 'Beard Work', 'Pompadours'];
 
 // Fallback images when database is empty
 const fallbackImages = [
-  { id: '1', image_url: haircutImg, category: 'Haircuts', title: 'Classic Haircut', description: null, display_order: 0, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: '2', image_url: beardTrimImg, category: 'Beard Work', title: 'Beard Trim', description: null, display_order: 1, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: '3', image_url: royalShaveImg, category: 'Shaves', title: 'Royal Shave', description: null, display_order: 2, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: '4', image_url: haircutWashImg, category: 'Haircuts', title: 'Haircut with Wash', description: null, display_order: 3, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: '5', image_url: haircutBeardComboImg, category: 'Transformations', title: 'Complete Transformation', description: null, display_order: 4, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: '6', image_url: seniorHaircutImg, category: 'Haircuts', title: 'Senior Haircut', description: null, display_order: 5, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: '7', image_url: blackMaskImg, category: 'Transformations', title: 'Black Mask Treatment', description: null, display_order: 6, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: '8', image_url: wisemanSpecialImg, category: 'Transformations', title: 'Wiseman Special', description: null, display_order: 7, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '1', image_url: fadeOne, category: 'Fades', title: 'High Fade with Hard Part', description: null, display_order: 0, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '2', image_url: fadeTwo, category: 'Fades', title: 'Skin Fade with Design', description: null, display_order: 1, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '3', image_url: taperOne, category: 'Tapers', title: 'Classic Taper', description: null, display_order: 2, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '4', image_url: taperTwo, category: 'Tapers', title: 'Mid Taper Fade', description: null, display_order: 3, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '5', image_url: taperThree, category: 'Tapers', title: 'Low Taper with Beard', description: null, display_order: 4, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '6', image_url: cleanFadeOne, category: 'Fades', title: 'Clean Fade', description: null, display_order: 5, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '7', image_url: designOne, category: 'Designs', title: 'Hair Design Art', description: null, display_order: 6, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '8', image_url: beardFadeOne, category: 'Beard Work', title: 'Beard Fade Blend', description: null, display_order: 7, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '9', image_url: skinFadeOne, category: 'Fades', title: 'Bald Fade', description: null, display_order: 8, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '10', image_url: classicOne, category: 'Classic Cuts', title: 'Traditional Side Part', description: null, display_order: 9, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  { id: '11', image_url: pompadourOne, category: 'Pompadours', title: 'Modern Pompadour', description: null, display_order: 10, is_active: true, uploaded_by: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
 ];
 
 const Gallery = () => {

@@ -21,10 +21,7 @@ const customerInfoSchema = z.object({
     .max(255, 'Email must be less than 255 characters'),
   phone: z.string()
     .trim()
-    .refine(
-      (val) => val.replace(/\D/g, '').length === 10,
-      'Please enter a valid 10-digit phone number'
-    ),
+    .min(1, 'Phone number is required'),
   notes: z.string()
     .max(500, 'Notes must be less than 500 characters')
     .optional(),
