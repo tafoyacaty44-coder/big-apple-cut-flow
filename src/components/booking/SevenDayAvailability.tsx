@@ -3,7 +3,7 @@ import { getBarberAvailability } from '@/lib/api/availability';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { format, addDays } from 'date-fns';
 import { cn, formatTime12h } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +25,7 @@ export const SevenDayAvailability = ({
   const fromDate = format(today, 'yyyy-MM-dd');
   const [selectedDate, setSelectedDate] = useState<string | null>(fromDate);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  const timeSlotsRef = useRef<HTMLDivElement>(null);
   
   const toDate = format(addDays(today, 6), 'yyyy-MM-dd');
 
@@ -42,6 +43,19 @@ export const SevenDayAvailability = ({
     queryFn: () => getBarberAvailability(barberId, fromDate, toDate, serviceDuration),
     refetchInterval: 60000,
   });
+
+  // Auto-scroll to time slots when date is selected
+  useEffect(() => {
+    if (selectedDate && timeSlotsRef.current) {
+      setTimeout(() => {
+        timeSlotsRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 100);
+    }
+  }, [selectedDate]);
 
   // Get next 5 available slots across all days
   const nextSlots = availability
@@ -139,7 +153,7 @@ export const SevenDayAvailability = ({
       </div>
 
       {/* Right: Time Slots */}
-      <div className="space-y-2">
+      <div ref={timeSlotsRef} className="space-y-2">
         <h4 className="text-sm font-medium flex items-center gap-2">
           <Clock className="h-4 w-4" />
           {selectedDate 

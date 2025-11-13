@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,7 @@ const DateTimePicker = ({
   onTimeSelect,
 }: DateTimePickerProps) => {
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+  const timeSelectionRef = useRef<HTMLDivElement>(null);
 
   // Get barber's availability for selected date
   const getBarberScheduleForDate = (date: Date): BarberAvailability | undefined => {
@@ -79,6 +80,19 @@ const DateTimePicker = ({
     setAvailableTimeSlots(slots);
   }, [selectedDate, barberAvailability, serviceDuration]);
 
+  // Auto-scroll to time selection when date is selected
+  useEffect(() => {
+    if (selectedDate && timeSelectionRef.current) {
+      setTimeout(() => {
+        timeSelectionRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 100);
+    }
+  }, [selectedDate]);
+
   // Check if date should be disabled (past dates or barber not available)
   const isDateDisabled = (date: Date): boolean => {
     const today = new Date();
@@ -114,7 +128,7 @@ const DateTimePicker = ({
       </Card>
 
       {/* Time Selection */}
-      <Card className="p-6">
+      <Card ref={timeSelectionRef} className="p-6">
         <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
           <Clock className="h-5 w-5 text-[hsl(var(--accent))]" />
           Select Time
