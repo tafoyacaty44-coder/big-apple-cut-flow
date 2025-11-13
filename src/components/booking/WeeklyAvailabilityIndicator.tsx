@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getBarberAvailability } from '@/lib/api/availability';
 import { format, addDays } from 'date-fns';
-import { cn } from '@/lib/utils';
 
 interface WeeklyAvailabilityIndicatorProps {
   barberId: string;
@@ -16,7 +15,7 @@ export const WeeklyAvailabilityIndicator = ({
   const fromDate = format(today, 'yyyy-MM-dd');
   const toDate = format(addDays(today, 6), 'yyyy-MM-dd');
 
-  const { data: availability, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['availability', 'barber', barberId, fromDate, toDate, 30],
     queryFn: () => getBarberAvailability(barberId, fromDate, toDate, 30),
     refetchInterval: 60000,
@@ -24,56 +23,69 @@ export const WeeklyAvailabilityIndicator = ({
 
   if (isLoading) {
     return (
-      <div className="flex gap-1 justify-center items-center">
-        {[...Array(7)].map((_, i) => (
-          <div 
-            key={i} 
-            className="w-8 h-8 rounded-full bg-muted animate-pulse"
-          />
-        ))}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-1.5">
+          {[...Array(7)].map((_, i) => (
+            <div 
+              key={i} 
+              className="flex-1 aspect-square rounded-full bg-muted animate-pulse"
+            />
+          ))}
+        </div>
       </div>
     );
   }
 
-  const dates = [];
+  const weekDays = [];
   for (let i = 0; i < 7; i++) {
-    dates.push(addDays(today, i));
+    const date = addDays(today, i);
+    weekDays.push({
+      date: format(date, 'yyyy-MM-dd'),
+      dayLabel: format(date, 'EEE').charAt(0), // S, M, T, W, etc
+      isToday: i === 0,
+    });
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex gap-1 justify-center items-center">
-        {dates.map((date) => {
-          const dateStr = format(date, 'yyyy-MM-dd');
-          const isToday = dateStr === fromDate;
-          const dayAvailability = availability?.find(a => a.date === dateStr);
-          const slotCount = dayAvailability?.time_slots.length || 0;
-          
+    <div className="space-y-1.5">
+      {/* Day Labels */}
+      <div className="flex items-center justify-between gap-1.5 text-[10px] text-muted-foreground font-medium">
+        {weekDays.map((dayData, index) => (
+          <div key={index} className="flex-1 text-center min-w-0">
+            {dayData.dayLabel}
+          </div>
+        ))}
+      </div>
+      
+      {/* Colored Availability Dots */}
+      <div className="flex items-center justify-between gap-1.5">
+        {weekDays.map((dayData, index) => {
+          const dayAvailability = data?.find((d: any) => d.date === dayData.date);
+          const slotCount = dayAvailability?.time_slots?.length || 0;
+          const hasSlots = slotCount > 0;
+          const isClickable = hasSlots && onDateClick;
+
           return (
             <button
-              key={dateStr}
-              onClick={() => onDateClick?.(dateStr)}
-              className={cn(
-                "w-8 h-8 rounded-full text-xs font-medium transition-all",
-                isToday && "border-2 border-primary",
-                slotCount > 0 
-                  ? "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-100" 
-                  : "bg-muted text-muted-foreground cursor-not-allowed"
-              )}
-              disabled={slotCount === 0}
-              title={`${format(date, 'EEE')}: ${slotCount} slots available`}
+              key={index}
+              onClick={() => isClickable && onDateClick(dayData.date)}
+              disabled={!hasSlots}
+              className={`
+                flex-1 aspect-square rounded-full flex items-center justify-center text-[10px] font-bold transition-all
+                ${
+                  dayData.isToday
+                    ? 'bg-foreground text-background border-2 border-[hsl(var(--accent))]'
+                    : hasSlots
+                    ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
+                    : 'bg-destructive/80 text-white cursor-not-allowed'
+                }
+              `}
+              aria-label={`${dayData.dayLabel}: ${hasSlots ? `${slotCount} slots available` : 'No availability'}`}
             >
-              {slotCount > 0 ? slotCount : '—'}
+              {hasSlots ? slotCount : '×'}
             </button>
           );
         })}
-      </div>
-      <div className="flex justify-between text-xs text-muted-foreground px-1">
-        {dates.map((date) => (
-          <span key={format(date, 'yyyy-MM-dd')} className="w-8 text-center">
-            {format(date, 'EEE').charAt(0)}
-          </span>
-        ))}
       </div>
     </div>
   );
