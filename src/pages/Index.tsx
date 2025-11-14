@@ -31,7 +31,7 @@ const navItems = [
   { 
     label: "Leave a review ⭐", 
     onClick: () => {
-      window.open('https://www.google.com/search?q=Big+Apple+Barbers+East+Village+NYC+review', '_blank');
+      window.open('https://www.google.com/search?client=ms-android-tmus-us-rvc3&sca_esv=f517df8b24517ced&sxsrf=AE3TifMeMUvdrAVRaWcIaKOny_DDKqy3Kg:1763163592413&q=big+apple+barbers+reviews&uds=AOm0WdECvYO7xkHV2F4c7OUn42BkEx8EST3tx-APo32jnw0d4luOWShgqK6Du6AvAed7b_fPeSYBCwwaeDH71s6kdQqH1a9y47WBamHdIEZbLLqbofovuy9XnprjO5ZxdRZpen8KeDxeB48FwctM0yrRSMjPRewW1zGra0bG8IsK3-P0ydUZZUi4rRsX2i1Udm8rBH0sWePtHLlnzIYubP2cQuvG4_eFU4XuOwXoqStAmtN1M98l73a3gqxsD9draiCSmy9vlg39_dIfAFZ5t-TxloqgliQi2pGTaTOzk_4dinG0Iz3Vegqh9w8vzrKOanOyY557ARpJmt6PlRhi4NyP6m4udbQVW08XeF6U3NZMrOVmajU9zQEnat7cTB6aWntACeAdbOXZpR5ebRDbeaaAhohpyzYQvEN3tYfSJQALiYHy-5C2Lx9NvLNKDd_MSz_xIYxZzUo4mbIs_UaXntZZZr91oV5hUJpJK5YdQRcUlvxs4ZyiwZ3s_1_D1u4Zsu7K8KvgDkc1oIEQVp0uK7e6U2yT4iTzADnXfpXQJSdcDt7kPO_lob0&si=AMgyJEvkVjFQtirYNBhM3ZJIRTaSJ6PxY6y1_6WZHGInbzDnMdZ4grdI74XvsyE7W0vToJk4PsGszTWIGUlOX9apgtFlHQ3R_QrlKBBvRmnnFAXrqilUH9YbARDHTYdCbx3CAB5zNOt_JdswmYbrLcePl6y1aunPwQ%3D%3D&sa=X&ved=2ahUKEwjLge2c6PKQAxWKQzABHRDJJssQk8gLegQIPBAB&ictx=1&biw=360&bih=676&dpr=3#ebo=1', '_blank');
     },
     external: true
   },
