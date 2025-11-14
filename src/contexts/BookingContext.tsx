@@ -11,7 +11,7 @@ interface BarberAvailability {
 }
 
 interface BookingState {
-  selectedServiceId: string | null;
+  selectedServiceId: string | undefined;
   selectedBarberId: string | undefined;
   selectedBarberName: string | null;
   barberAvailability: BarberAvailability[] | null;
@@ -51,7 +51,7 @@ const BookingContext = createContext<BookingContextType | undefined>(undefined);
 
 export const BookingProvider = ({ children }: { children: ReactNode }) => {
   const [booking, setBooking] = useState<BookingState>({
-    selectedServiceId: null,
+    selectedServiceId: undefined,
     selectedBarberId: undefined,
     selectedBarberName: null,
     barberAvailability: null,
@@ -111,7 +111,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
 
   const resetBooking = () => {
     setBooking({
-      selectedServiceId: null,
+      selectedServiceId: undefined,
       selectedBarberId: undefined,
       selectedBarberName: null,
       barberAvailability: null,

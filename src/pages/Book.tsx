@@ -215,16 +215,16 @@ const Book = () => {
   };
 
   const canContinueStep = (step: number) => {
-    if (step === 1) return !!booking.customerInfo;
-    if (step === 2) {
-      // Save add-ons to context when continuing from step 2
+    if (step === 1) {
+      // Save add-ons to context when continuing from step 1 (service selection)
       if (selectedAddonIds.length > 0) {
         setSelectedAddons(selectedAddonIds);
       }
       return !!booking.selectedServiceId;
     }
-    if (step === 3) return !!booking.selectedBarberId;
-    if (step === 4) return !!(booking.selectedDate && booking.selectedTime);
+    if (step === 2) return !!booking.selectedBarberId;
+    if (step === 3) return !!(booking.selectedDate && booking.selectedTime);
+    if (step === 4) return !!booking.customerInfo;
     return false;
   };
 
@@ -475,60 +475,7 @@ const Book = () => {
               )}
             </AnimatePresence>
 
-            {/* Step 2: Select Barber */}
-            <AnimatePresence mode="wait">
-              {currentStep === 2 && !booking.isBlacklisted && (
-                <motion.div
-                  key="step2"
-                  initial={{ opacity: 0, x: isMobile ? 100 : 0 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={cn("space-y-4", isMobile && "pb-20")}
-                >
-                  <div>
-                    <h2 className="text-xl font-bold mb-1">Select a Service</h2>
-                    <p className="text-sm text-muted-foreground">Choose the service you'd like to book</p>
-                  </div>
-                {isLoadingServices ? (
-                  <div className="space-y-2">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <div key={i} className="h-24 bg-muted rounded-lg animate-pulse" />
-                    ))}
-                  </div>
-                ) : (
-                  <CompactServiceList
-                    services={services.filter(s => s.category !== 'addon')}
-                    addons={addonServices}
-                    selectedServiceId={booking.selectedServiceId}
-                  selectedAddonIds={selectedAddonIds}
-                  onServiceSelect={handleServiceSelect}
-                  onAddonToggle={handleAddonToggle}
-                  isVip={vipCodeValid}
-                />
-                )}
-
-
-                {isMobile && (
-                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
-                    <GoldButton
-                      className="w-full min-h-[48px]"
-                      onClick={() => {
-                        if (!booking.selectedServiceId) return;
-                        setSelectedAddons(selectedAddonIds);
-                        setCurrentStep(2);
-                      }}
-                      disabled={!booking.selectedServiceId}
-                    >
-                      Continue to Barber Selection
-                    </GoldButton>
-                  </div>
-                )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Step 2: Select Barber ONLY */}
+        {/* Step 2: Select Barber */}
             <AnimatePresence mode="wait">
               {currentStep === 2 && !booking.isBlacklisted && (
                 <motion.div

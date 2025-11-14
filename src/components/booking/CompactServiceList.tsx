@@ -36,7 +36,7 @@ export const CompactServiceList = ({
   return (
     <div className="space-y-3">
       {/* Main Services - Text-Only Compact Layout */}
-      <RadioGroup value={selectedServiceId || undefined} onValueChange={onServiceSelect}>
+      <RadioGroup value={selectedServiceId ?? undefined} onValueChange={onServiceSelect}>
         <div className="space-y-3">
           {services.map((service) => {
             const price = isVip && service.vip_price ? service.vip_price : service.regular_price;
