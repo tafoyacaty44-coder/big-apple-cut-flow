@@ -53,9 +53,9 @@ const Book = () => {
 
   // Reset booking context when component mounts (fresh start)
   useEffect(() => {
-    // Only reset if we're on step 1 and there's no customer info
+    // Only reset if we're on step 1 and there's no service selected
     // This allows returning to booking page to continue, but fresh starts are clean
-    if (currentStep === 1 && !booking.customerInfo) {
+    if (currentStep === 1 && !booking.selectedServiceId) {
       resetBooking();
       setSelectedAddonIds([]);
       setPolicyAgreed(false);
@@ -111,7 +111,7 @@ const Book = () => {
   const { data: barbers = [], isLoading: isLoadingBarbers } = useQuery({
     queryKey: ['barbers', 'active'],
     queryFn: getActiveBarbers,
-    enabled: currentStep === 3 && !!selectedService,
+    enabled: currentStep === 2 && !!selectedService,
   });
 
   // Fetch barber availability when barber and service are selected
@@ -126,7 +126,7 @@ const Book = () => {
         selectedService.duration_minutes
       );
     },
-    enabled: currentStep === 4 && !!booking.selectedBarberId && !!selectedService?.duration_minutes,
+    enabled: currentStep === 3 && !!booking.selectedBarberId && !!selectedService?.duration_minutes,
   });
 
   const handleServiceSelect = (serviceId: string) => {
@@ -195,12 +195,9 @@ const Book = () => {
         phone: data.phone,
       });
       
-      // If on step 1, move to step 2
-      if (currentStep === 1) {
-        setCurrentStep(2);
-      } else if (currentStep === 4) {
-        // If on final step, submit booking
-        handleConfirmBooking();
+      // If on step 4 (customer info), move to step 5 (confirmation)
+      if (currentStep === 4) {
+        setCurrentStep(5);
       }
     } catch (error) {
       console.error('Error checking blacklist:', error);
@@ -342,9 +339,9 @@ const Book = () => {
               selectedAddons={selectedAddons}
               onEditStep={handleEditStep}
               onContinue={() => {
+                if (currentStep === 1 && canContinueStep(1)) setCurrentStep(2);
                 if (currentStep === 2 && canContinueStep(2)) setCurrentStep(3);
                 if (currentStep === 3 && canContinueStep(3)) setCurrentStep(4);
-                if (currentStep === 4 && canContinueStep(4)) setCurrentStep(5);
                 if (currentStep === 5) handleConfirmBooking();
               }}
               canContinue={canContinueStep(currentStep)}
@@ -435,7 +432,7 @@ const Book = () => {
               </Alert>
             )}
 
-            {/* Step 1: Customer Information */}
+            {/* Step 1: Select Service */}
             <AnimatePresence mode="wait">
               {currentStep === 1 && !booking.isBlacklisted && (
                 <motion.div
@@ -447,20 +444,30 @@ const Book = () => {
                   className={cn("space-y-4", isMobile && "pb-20")}
                 >
                   <div>
-                    <h2 className="text-xl font-bold mb-1">Your Information</h2>
-                    <p className="text-sm text-muted-foreground">Let's start with your contact details</p>
+                    <h2 className="text-xl font-bold mb-1">Select a Service</h2>
+                    <p className="text-sm text-muted-foreground">Choose the service you'd like</p>
                   </div>
-            <CustomerInfoForm 
-              onSubmit={handleCustomerInfoSubmit}
-            />
+                  <CompactServiceList
+                    services={services}
+                    addons={addonServices}
+                    selectedServiceId={booking.selectedServiceId}
+                    selectedAddonIds={selectedAddonIds}
+                    onServiceSelect={handleServiceSelect}
+                    onAddonToggle={handleAddonToggle}
+                    isVip={vipCodeValid}
+                  />
                   {isMobile && (
                     <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                       <GoldButton
-                        type="submit"
-                        form="customer-info-form"
                         className="w-full min-h-[48px]"
+                        onClick={() => {
+                          if (!booking.selectedServiceId) return;
+                          setSelectedAddons(selectedAddonIds);
+                          setCurrentStep(2);
+                        }}
+                        disabled={!booking.selectedServiceId}
                       >
-                        Continue to Service Selection
+                        Continue to Barber Selection
                       </GoldButton>
                     </div>
                   )}
@@ -468,7 +475,7 @@ const Book = () => {
               )}
             </AnimatePresence>
 
-            {/* Step 2: Select Service */}
+            {/* Step 2: Select Barber */}
             <AnimatePresence mode="wait">
               {currentStep === 2 && !booking.isBlacklisted && (
                 <motion.div
@@ -509,7 +516,7 @@ const Book = () => {
                       onClick={() => {
                         if (!booking.selectedServiceId) return;
                         setSelectedAddons(selectedAddonIds);
-                        setCurrentStep(3);
+                        setCurrentStep(2);
                       }}
                       disabled={!booking.selectedServiceId}
                     >
@@ -521,9 +528,9 @@ const Book = () => {
               )}
             </AnimatePresence>
 
-            {/* Step 3: Select Barber ONLY */}
+            {/* Step 2: Select Barber ONLY */}
             <AnimatePresence mode="wait">
-              {currentStep === 3 && !booking.isBlacklisted && (
+              {currentStep === 2 && !booking.isBlacklisted && (
                 <motion.div
                   key="step3"
                   initial={{ opacity: 0, x: isMobile ? 100 : 0 }}
@@ -562,8 +569,8 @@ const Book = () => {
                     <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                       <GoldButton
                         className="w-full min-h-[48px]"
-                        onClick={() => canContinueStep(3) && setCurrentStep(4)}
-                        disabled={!canContinueStep(3)}
+                        onClick={() => canContinueStep(2) && setCurrentStep(3)}
+                        disabled={!canContinueStep(2)}
                       >
                         Continue to Date & Time
                       </GoldButton>
@@ -573,9 +580,9 @@ const Book = () => {
               )}
             </AnimatePresence>
 
-            {/* Step 4: Select Date & Time ONLY */}
+            {/* Step 3: Select Date & Time ONLY */}
             <AnimatePresence mode="wait">
-              {currentStep === 4 && !booking.isBlacklisted && selectedService && (
+              {currentStep === 3 && !booking.isBlacklisted && selectedService && (
                 <motion.div
                   key="step4"
                   initial={{ opacity: 0, x: isMobile ? 100 : 0 }}
@@ -613,10 +620,43 @@ const Book = () => {
                     <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
                       <GoldButton
                         className="w-full min-h-[48px]"
-                        onClick={() => canContinueStep(4) && setCurrentStep(5)}
-                        disabled={!canContinueStep(4)}
+                        onClick={() => canContinueStep(3) && setCurrentStep(4)}
+                        disabled={!canContinueStep(3)}
                       >
-                        Continue to Confirmation
+                        Continue to Your Info
+                      </GoldButton>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Step 4: Customer Information */}
+            <AnimatePresence mode="wait">
+              {currentStep === 4 && !booking.isBlacklisted && (
+                <motion.div
+                  key="step4"
+                  initial={{ opacity: 0, x: isMobile ? 100 : 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: isMobile ? -100 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={cn("space-y-4", isMobile && "pb-20")}
+                >
+                  <div>
+                    <h2 className="text-xl font-bold mb-1">Your Information</h2>
+                    <p className="text-sm text-muted-foreground">We need your contact information</p>
+                  </div>
+                  <CustomerInfoForm 
+                    onSubmit={handleCustomerInfoSubmit}
+                  />
+                  {isMobile && (
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-40 shadow-lg">
+                      <GoldButton
+                        type="submit"
+                        form="customer-info-form"
+                        className="w-full min-h-[48px]"
+                      >
+                        Continue to Review
                       </GoldButton>
                     </div>
                   )}

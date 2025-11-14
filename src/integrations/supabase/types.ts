@@ -306,6 +306,7 @@ export type Database = {
           is_active: boolean
           profile_image_url: string | null
           specialties: string[] | null
+          status_message: string | null
           user_id: string | null
           years_experience: number | null
         }
@@ -317,6 +318,7 @@ export type Database = {
           is_active?: boolean
           profile_image_url?: string | null
           specialties?: string[] | null
+          status_message?: string | null
           user_id?: string | null
           years_experience?: number | null
         }
@@ -328,6 +330,7 @@ export type Database = {
           is_active?: boolean
           profile_image_url?: string | null
           specialties?: string[] | null
+          status_message?: string | null
           user_id?: string | null
           years_experience?: number | null
         }

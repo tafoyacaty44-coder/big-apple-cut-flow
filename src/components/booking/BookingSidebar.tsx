@@ -36,15 +36,6 @@ export const BookingSidebar = ({
   const steps = [
     {
       number: 1,
-      label: "Your Info",
-      icon: User,
-      completed: !!customerInfo,
-      content: customerInfo
-        ? `${customerInfo.name}`
-        : "Enter your details",
-    },
-    {
-      number: 2,
       label: "Service",
       icon: Scissors,
       completed: !!selectedService,
@@ -53,7 +44,7 @@ export const BookingSidebar = ({
         : "Select a service",
     },
     {
-      number: 3,
+      number: 2,
       label: "Barber",
       icon: User,
       completed: !!selectedBarber,
@@ -62,13 +53,22 @@ export const BookingSidebar = ({
         : "Choose your barber",
     },
     {
-      number: 4,
+      number: 3,
       label: "Date & Time",
       icon: Clock,
       completed: !!selectedDate && !!selectedTime,
       content: selectedDate && selectedTime
         ? `${new Date(selectedDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })} • ${formatTime12h(selectedTime)}`
         : "Pick date & time",
+    },
+    {
+      number: 4,
+      label: "Your Info",
+      icon: User,
+      completed: !!customerInfo,
+      content: customerInfo
+        ? `${customerInfo.name}`
+        : "Enter your details",
     },
     {
       number: 5,
@@ -172,7 +172,7 @@ export const BookingSidebar = ({
         </div>
 
         <GoldButton
-          {...(currentStep === 1 && customerInfoFormId
+          {...(currentStep === 4 && customerInfoFormId
             ? { type: "submit", form: customerInfoFormId }
             : { onClick: onContinue }
           )}
