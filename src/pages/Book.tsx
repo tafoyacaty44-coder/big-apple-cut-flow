@@ -642,10 +642,14 @@ const Book = () => {
                   <CancellationPolicy 
                     agreed={policyAgreed}
                     onAgreeChange={setPolicyAgreed}
+                    className={cn(!policyAgreed && "border-amber-500/50 animate-pulse")}
                   />
 
                   {/* Payment Method - Compact */}
-                  <div className="border rounded-lg p-3">
+                  <div className={cn(
+                    "border rounded-lg p-3",
+                    !selectedPaymentMethod && "border-amber-500/50 animate-pulse"
+                  )}>
                     <h3 className="text-sm font-bold mb-2">Payment Method</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
@@ -697,6 +701,20 @@ const Book = () => {
                     selectedServiceId={booking.selectedServiceId}
                     promoDiscount={promoDiscount}
                   />
+
+                  {/* Show what's missing to enable booking */}
+                  {(!policyAgreed || !selectedPaymentMethod) && (
+                    <Alert className="mb-4">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Please complete the following to book:
+                        <ul className="list-disc list-inside mt-2 space-y-1">
+                          {!selectedPaymentMethod && <li>Select a payment method</li>}
+                          {!policyAgreed && <li>Agree to cancellation policy</li>}
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                  )}
 
                   {/* Mobile Complete Booking Button */}
                   {isMobile && (

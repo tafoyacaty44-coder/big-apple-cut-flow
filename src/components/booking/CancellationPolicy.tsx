@@ -5,11 +5,12 @@ import { Label } from '@/components/ui/label';
 interface CancellationPolicyProps {
   agreed: boolean;
   onAgreeChange: (agreed: boolean) => void;
+  className?: string;
 }
 
-export const CancellationPolicy = ({ agreed, onAgreeChange }: CancellationPolicyProps) => {
+export const CancellationPolicy = ({ agreed, onAgreeChange, className }: CancellationPolicyProps) => {
   return (
-    <Card className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+    <Card className={`border-amber-500/50 bg-amber-50 dark:bg-amber-950/20 ${className || ''}`}>
       <CardContent className="p-4 space-y-3">
         <h3 className="font-bold text-base uppercase tracking-wide">
           CANCELLATION / RESCHEDULE POLICY
