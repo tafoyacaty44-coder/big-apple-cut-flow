@@ -29,6 +29,13 @@ const navItems = [
     primary: true 
   },
   { 
+    label: "Leave a review ⭐", 
+    onClick: () => {
+      window.open('https://www.google.com/search?q=Big+Apple+Barbers+East+Village+NYC+review', '_blank');
+    },
+    external: true
+  },
+  { 
     label: "Login & Reschedule", 
     onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/login')
   },
@@ -46,9 +53,10 @@ interface CTAButtonProps {
   label: string;
   onClick: () => void;
   primary?: boolean;
+  external?: boolean;
 }
 
-function CTAButton({ label, onClick, primary }: CTAButtonProps) {
+function CTAButton({ label, onClick, primary, external }: CTAButtonProps) {
   const reduce = useReducedMotion();
   const [mx, setMx] = React.useState(0);
   const [my, setMy] = React.useState(0);
@@ -68,7 +76,7 @@ function CTAButton({ label, onClick, primary }: CTAButtonProps) {
       onClick={onClick}
       onMouseMove={magnetic}
       onMouseLeave={resetMagnetic}
-      className="group relative w-full rounded-xl px-6 py-4 text-center font-semibold tracking-wide shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/60 focus:ring-offset-2 focus:ring-offset-primary select-none bg-accent text-accent-foreground hover:bg-accent/90"
+      className={`group relative w-full rounded-xl px-6 py-4 text-center font-semibold tracking-wide shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/60 focus:ring-offset-2 focus:ring-offset-primary select-none bg-accent text-accent-foreground hover:bg-accent/90 ${external ? 'border-2 border-accent/30' : ''}`}
       whileHover={{ scale: 1.035, boxShadow: "0 0 18px hsl(var(--accent) / 0.45)" }}
       whileTap={{ scale: 0.985 }}
       animate={primary && !reduce ? { x: mx, y: my } : undefined}
@@ -77,6 +85,7 @@ function CTAButton({ label, onClick, primary }: CTAButtonProps) {
       {/* Sheen sweep */}
       <span className="pointer-events-none absolute inset-y-0 -left-1 w-1/3 -translate-x-[130%] bg-gradient-to-r from-transparent via-white/30 to-transparent rotate-12 transition-transform duration-500 group-hover:translate-x-[310%]" />
       {label}
+      {external && <span className="ml-1 text-xs opacity-70">↗</span>}
     </motion.button>
   );
 }
@@ -315,6 +324,7 @@ const Index = () => {
               label={navItem.label} 
               onClick={() => navItem.onClick(navigate)}
               primary={navItem.primary}
+              external={navItem.external}
             />
           ))}
         </motion.div>
