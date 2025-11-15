@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
-import { Calendar, AlertCircle, CheckCircle, User as UserIcon, Scissors, Calendar as CalendarIcon, Clock, ChevronLeft, Check } from 'lucide-react';
+import { Calendar, AlertCircle, CheckCircle, User as UserIcon, Scissors, Calendar as CalendarIcon, Clock, ChevronLeft, Check, Crown, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimations } from '@/hooks/useAnimations';
 import { AnimatedCard } from '@/components/ui/animated-card';
@@ -29,6 +29,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SeoHead } from '@/components/SeoHead';
 import { getBarberAvailability } from '@/lib/api/availability';
 import { addDays } from 'date-fns';
+import { validatePromoCode } from '@/lib/api/promo-codes';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 const Book = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -48,6 +52,18 @@ const Book = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  
+  // Inline discount codes state
+  const [vipCode, setVipCode] = useState('');
+  const [vipCodeAttempted, setVipCodeAttempted] = useState(false);
+  const [vipCodeChecking, setVipCodeChecking] = useState(false);
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [promoCodeValid, setPromoCodeValid] = useState(false);
+  const [promoCodeChecking, setPromoCodeChecking] = useState(false);
+  const [promoError, setPromoError] = useState('');
+  
+  // Ref for auto-scroll
+  const cancellationPolicyRef = useRef<HTMLDivElement>(null);
   
   const TOTAL_STEPS = 5;
 
@@ -81,6 +97,18 @@ const Book = () => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+  
+  // Auto-scroll to cancellation policy when payment method is selected
+  useEffect(() => {
+    if (selectedPaymentMethod && cancellationPolicyRef.current && currentStep === 5) {
+      setTimeout(() => {
+        cancellationPolicyRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }, 300);
+    }
+  }, [selectedPaymentMethod, currentStep]);
 
   const handleVipCodeChange = (code: string, isValid: boolean) => {
     setVipCodeFromForm(code);
@@ -91,6 +119,67 @@ const Book = () => {
     setPromoCode(code);
     setPromoDiscount(discount);
     setPromoCampaignId(campaignId);
+  };
+  
+  const handleValidateVipCode = async () => {
+    if (!vipCode.trim()) return;
+    
+    setVipCodeChecking(true);
+    setVipCodeAttempted(true);
+    try {
+      const { data: settings, error } = await supabase
+        .from('vip_settings')
+        .select('enabled, vip_code')
+        .eq('id', 1)
+        .single();
+
+      if (error) throw error;
+
+      const isValid = settings?.enabled && settings.vip_code === vipCode.trim();
+      setVipCodeValid(isValid);
+      handleVipCodeChange(vipCode.trim(), isValid);
+      
+      if (isValid) {
+        toast({
+          title: 'VIP Code Applied!',
+          description: 'You\'ll receive VIP pricing on your services.',
+        });
+      }
+    } catch (error) {
+      setVipCodeValid(false);
+      handleVipCodeChange('', false);
+    } finally {
+      setVipCodeChecking(false);
+    }
+  };
+  
+  const handleValidatePromoCode = async () => {
+    if (!promoCodeInput.trim()) return;
+    
+    setPromoCodeChecking(true);
+    setPromoError('');
+    try {
+      const result = await validatePromoCode(promoCodeInput.trim());
+      
+      if (result.valid) {
+        setPromoCodeValid(true);
+        handlePromoCodeChange(promoCodeInput.trim(), result.discount, result.campaign_id);
+        toast({
+          title: 'Promo Code Applied!',
+          description: `You saved $${result.discount}!`,
+        });
+      } else {
+        setPromoCodeValid(false);
+        setPromoError(result.error || 'Invalid promo code');
+        handlePromoCodeChange('', 0);
+      }
+    } catch (error) {
+      setPromoCodeValid(false);
+      setPromoError('Failed to validate code');
+      handlePromoCodeChange('', 0);
+    } finally {
+      setPromoCodeChecking(false);
+    }
   };
 
   const { data: services = [], isLoading: isLoadingServices } = useQuery({
@@ -627,7 +716,7 @@ const Book = () => {
                     <p className="text-xs text-muted-foreground">Confirm details and complete booking</p>
                   </div>
 
-                  {/* Compact Summary - No Card */}
+                  {/* 1. Appointment Summary */}
                   <div className="border rounded-lg p-3 space-y-2 text-sm bg-muted/30">
                     <h3 className="font-bold text-base mb-2">Appointment Summary</h3>
                     <div className="text-xs space-y-1">
@@ -638,19 +727,72 @@ const Book = () => {
                       <div><span className="text-muted-foreground">Duration:</span> <span className="font-semibold">{selectedService.duration_minutes + selectedAddons.reduce((sum, a) => sum + a.duration_minutes, 0)} min</span> • <span className="font-bold text-[hsl(var(--accent))]">Total: ${calculateBookingTotal(selectedService, selectedAddons, vipCodeValid).subtotal.toFixed(2)}</span></div>
                     </div>
                   </div>
-                  {/* Cancellation Policy - Compact */}
-                  <CancellationPolicy 
-                    agreed={policyAgreed}
-                    onAgreeChange={setPolicyAgreed}
-                    className={cn(!policyAgreed && "border-amber-500/50 animate-pulse")}
-                  />
 
-                  {/* Payment Method - Compact */}
+                  {/* 2. Compact VIP Code - Inline */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <Label htmlFor="vip-code" className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Crown className="h-3 w-3" /> VIP Code
+                      </Label>
+                      <Input
+                        id="vip-code"
+                        value={vipCode}
+                        onChange={(e) => setVipCode(e.target.value.toUpperCase())}
+                        placeholder="Enter VIP code"
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleValidateVipCode}
+                      disabled={!vipCode.trim() || vipCodeChecking}
+                      size="sm"
+                      className="mt-4"
+                    >
+                      {vipCodeChecking ? 'Checking...' : 'Apply'}
+                    </Button>
+                  </div>
+                  {vipCodeAttempted && (
+                    <p className={cn("text-xs", vipCodeValid ? "text-green-600" : "text-red-600")}>
+                      {vipCodeValid ? '✓ VIP code applied!' : '✗ Invalid VIP code'}
+                    </p>
+                  )}
+
+                  {/* 3. Compact Promo Code - Inline */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <Label htmlFor="promo-code" className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Tag className="h-3 w-3" /> Promo Code
+                      </Label>
+                      <Input
+                        id="promo-code"
+                        value={promoCodeInput}
+                        onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                        placeholder="Enter promo code"
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleValidatePromoCode}
+                      disabled={!promoCodeInput.trim() || promoCodeChecking}
+                      size="sm"
+                      className="mt-4"
+                    >
+                      {promoCodeChecking ? 'Checking...' : 'Apply'}
+                    </Button>
+                  </div>
+                  {promoCodeValid && (
+                    <p className="text-xs text-green-600">✓ Promo code applied! ${promoDiscount} off</p>
+                  )}
+                  {promoError && (
+                    <p className="text-xs text-red-600">✗ {promoError}</p>
+                  )}
+
+                  {/* 4. Payment Method - Simplified (Only show instructions after selection) */}
                   <div className={cn(
                     "border rounded-lg p-3",
                     !selectedPaymentMethod && "border-amber-500/50 animate-pulse"
                   )}>
-                    <h3 className="text-sm font-bold mb-2">Payment Method</h3>
+                    <h3 className="text-sm font-bold mb-2">Select Payment Method</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {[
                         { id: 'zelle' as const, name: 'Zelle', info: '(555) 123-4567' },
@@ -662,45 +804,53 @@ const Book = () => {
                           key={method.id}
                           type="button"
                           onClick={() => setSelectedPaymentMethod(method.id)}
-                          className={`p-2 sm:p-4 border-2 rounded-lg text-left transition-all ${
+                          className={`p-2 border-2 rounded-lg text-center transition-all ${
                             selectedPaymentMethod === method.id
                               ? 'border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/10'
                               : 'border-border hover:border-[hsl(var(--accent))]/50'
                           }`}
                         >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="text-xs sm:text-sm font-semibold mb-0.5 leading-tight">{method.name}</p>
-                              <p className="text-[10px] sm:text-xs text-muted-foreground break-words leading-tight">{method.info}</p>
-                            </div>
-                            {selectedPaymentMethod === method.id && (
-                              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-[hsl(var(--accent))] flex-shrink-0" />
-                            )}
-                          </div>
+                          <p className="text-xs font-semibold">{method.name}</p>
+                          {selectedPaymentMethod === method.id && (
+                            <CheckCircle className="h-4 w-4 text-[hsl(var(--accent))] mx-auto mt-1" />
+                          )}
                         </button>
                       ))}
                     </div>
 
+                    {/* Payment Instructions - Only show after selection */}
                     {selectedPaymentMethod && (
-                      <Alert className="bg-[hsl(var(--accent))]/5 border-[hsl(var(--accent))]/20">
-                        <AlertDescription className="text-sm">
-                          After completing your booking, send ${calculateBookingTotal(selectedService, selectedAddons, vipCodeValid).subtotal.toFixed(2)} via {
-                            selectedPaymentMethod === 'zelle' ? 'Zelle' :
-                            selectedPaymentMethod === 'apple_pay' ? 'Apple Pay' :
-                            selectedPaymentMethod === 'venmo' ? 'Venmo' : 'Cash App'
-                          } and include your confirmation number in the payment note.
-                        </AlertDescription>
-                      </Alert>
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        transition={{ duration: 0.3 }}
+                        className="mt-3"
+                      >
+                        <Alert className="bg-[hsl(var(--accent))]/5 border-[hsl(var(--accent))]/20">
+                          <AlertDescription className="text-xs">
+                            <p className="font-semibold mb-1">
+                              Send to: {
+                                selectedPaymentMethod === 'zelle' ? '(555) 123-4567' :
+                                selectedPaymentMethod === 'apple_pay' ? '(555) 123-4567' :
+                                selectedPaymentMethod === 'venmo' ? '@BigAppleBarberShop' : '$BigAppleBarbers'
+                              }
+                            </p>
+                            <p>Amount: ${calculateBookingTotal(selectedService, selectedAddons, vipCodeValid).subtotal.toFixed(2)}</p>
+                            <p className="mt-1 text-muted-foreground">Include your confirmation number in the payment note.</p>
+                          </AlertDescription>
+                        </Alert>
+                      </motion.div>
                     )}
                   </div>
 
-                  {/* VIP/Promo Codes */}
-                  <DiscountCodesForm 
-                    onVipCodeChange={handleVipCodeChange}
-                    onPromoCodeChange={handlePromoCodeChange}
-                    selectedServiceId={booking.selectedServiceId}
-                    promoDiscount={promoDiscount}
-                  />
+                  {/* 5. Cancellation Policy - With ref for auto-scroll */}
+                  <div ref={cancellationPolicyRef}>
+                    <CancellationPolicy 
+                      agreed={policyAgreed}
+                      onAgreeChange={setPolicyAgreed}
+                      className={cn(!policyAgreed && "border-amber-500/50 animate-pulse")}
+                    />
+                  </div>
 
                   {/* Show what's missing to enable booking */}
                   {(!policyAgreed || !selectedPaymentMethod) && (
