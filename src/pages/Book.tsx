@@ -586,7 +586,7 @@ const Book = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{/* Removed "Any Available Barber" option */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">{/* Removed "Any Available Barber" option */}
 
                       {barbers.map((barber) => (
                         <SimplifiedBarberCard

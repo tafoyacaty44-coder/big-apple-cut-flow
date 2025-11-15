@@ -38,11 +38,11 @@ export const SimplifiedBarberCard = ({
           : 'border-border hover:border-[hsl(var(--accent))]/30'
       }`}
     >
-      <div className="p-4">
+      <div className="p-3">
         <div className="flex items-start gap-4">
           {/* Circular Profile Photo */}
           <div 
-            className="w-20 h-20 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center text-2xl font-bold text-[hsl(var(--accent))] flex-shrink-0 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[hsl(var(--accent))] transition-all"
+            className="w-16 h-16 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center text-xl font-bold text-[hsl(var(--accent))] flex-shrink-0 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[hsl(var(--accent))] transition-all"
             onClick={() => setShowDetails(true)}
             role="button"
             aria-label="View barber details"
@@ -59,18 +59,18 @@ export const SimplifiedBarberCard = ({
           </div>
 
           {/* Info Section */}
-          <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex-1 min-w-0 space-y-1.5">
             {/* Name and Price Row */}
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="font-bold text-lg mb-0.5">{barber.full_name}</h3>
-                <p className="text-xs text-muted-foreground">
+                <h3 className="font-bold text-base leading-tight mb-0.5">{barber.full_name}</h3>
+                <p className="text-[10px] text-muted-foreground leading-tight">
                   {barber.years_experience} yrs exp
                 </p>
               </div>
               <div className="text-right flex-shrink-0">
-                <p className="text-sm font-semibold">{selectedServiceName}</p>
-                <p className="text-lg font-bold text-[hsl(var(--accent))]">
+                <p className="text-xs font-semibold leading-tight">{selectedServiceName}</p>
+                <p className="text-base font-bold text-[hsl(var(--accent))] leading-tight">
                   ${selectedServicePrice}
                 </p>
               </div>
@@ -83,7 +83,7 @@ export const SimplifiedBarberCard = ({
 
             {/* Notes (if any) */}
             {barber.notes && (
-              <p className="text-xs text-muted-foreground italic leading-relaxed">
+              <p className="text-[10px] text-muted-foreground italic leading-snug">
                 "{barber.notes}"
               </p>
             )}
@@ -91,8 +91,8 @@ export const SimplifiedBarberCard = ({
             {/* Status Message + Continue Button */}
             <div className="flex items-center gap-2 pt-1">
               {barber.status_message && (
-                <div className="flex-1 px-3 py-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md">
-                  <p className="text-xs text-amber-700 dark:text-amber-400 italic leading-tight">
+                <div className="flex-1 px-2 py-1.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded">
+                  <p className="text-[10px] text-amber-700 dark:text-amber-400 italic leading-snug">
                     {barber.status_message}
                   </p>
                 </div>
@@ -101,7 +101,7 @@ export const SimplifiedBarberCard = ({
                 onClick={onSelect}
                 size="sm"
                 variant={isSelected ? 'default' : 'outline'}
-                className="flex-shrink-0 px-6"
+                className="flex-shrink-0 px-4 py-1.5 text-xs"
               >
                 {isSelected ? 'Selected' : 'Select'}
               </GoldButton>
