@@ -64,6 +64,7 @@ const Book = () => {
   
   // Ref for auto-scroll
   const cancellationPolicyRef = useRef<HTMLDivElement>(null);
+  const barberSectionRef = useRef<HTMLDivElement>(null);
   
   const TOTAL_STEPS = 5;
 
@@ -109,6 +110,19 @@ const Book = () => {
       }, 300);
     }
   }, [selectedPaymentMethod, currentStep]);
+
+  // Auto-scroll to show all barbers when Step 2 is reached
+  useEffect(() => {
+    if (currentStep === 2 && barberSectionRef.current) {
+      setTimeout(() => {
+        // Scroll to bottom of barber section to show all 3 barbers
+        barberSectionRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'end'
+        });
+      }, 300);
+    }
+  }, [currentStep]);
 
   const handleVipCodeChange = (code: string, isValid: boolean) => {
     setVipCodeFromForm(code);
@@ -586,7 +600,7 @@ const Book = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">{/* Removed "Any Available Barber" option */}
+                    <div ref={barberSectionRef} className="grid grid-cols-1 md:grid-cols-2 gap-2.5">{/* Removed "Any Available Barber" option */}
 
                       {barbers.map((barber) => (
                         <SimplifiedBarberCard
