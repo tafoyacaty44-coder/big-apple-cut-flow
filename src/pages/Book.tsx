@@ -442,9 +442,13 @@ const Book = () => {
               selectedAddons={selectedAddons}
               onEditStep={handleEditStep}
               onContinue={() => {
-                if (currentStep === 1 && canContinueStep(1)) setCurrentStep(2);
+                if (currentStep === 1 && canContinueStep(1)) {
+                  setSelectedAddons(selectedAddonIds);
+                  setCurrentStep(2);
+                }
                 if (currentStep === 2 && canContinueStep(2)) setCurrentStep(3);
                 if (currentStep === 3 && canContinueStep(3)) setCurrentStep(4);
+                if (currentStep === 4 && canContinueStep(4)) setCurrentStep(5);
                 if (currentStep === 5) handleConfirmBooking();
               }}
               canContinue={canContinueStep(currentStep)}
