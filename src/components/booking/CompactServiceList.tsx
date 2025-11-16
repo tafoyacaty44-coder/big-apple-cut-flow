@@ -34,7 +34,7 @@ export const CompactServiceList = ({
   isVip = false,
 }: CompactServiceListProps) => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Main Services - Text-Only Compact Layout */}
       <RadioGroup value={selectedServiceId ?? undefined} onValueChange={onServiceSelect}>
         <div className="space-y-3">
@@ -43,7 +43,7 @@ export const CompactServiceList = ({
             const isSelected = selectedServiceId === service.id;
             
             return (
-              <div key={service.id} className="space-y-2">
+              <div key={service.id}>
                 <RadioGroupItem
                   value={service.id}
                   id={service.id}
@@ -77,56 +77,61 @@ export const CompactServiceList = ({
                     </div>
                   </div>
                 </Label>
-
-                {/* Add-ons appear directly below selected service */}
-                {isSelected && addons.length > 0 && (
-                  <div className="ml-2 pl-3 border-l-2 border-[hsl(var(--accent))]/30 space-y-2">
-                    <h4 className="font-semibold text-xs text-muted-foreground uppercase">Add-ons (Optional)</h4>
-                    <div className="space-y-2">
-                      {addons.map((addon) => {
-                        const addonPrice = isVip && addon.vip_price ? addon.vip_price : addon.regular_price;
-                        const isAddonSelected = selectedAddonIds.includes(addon.id);
-                        
-                        return (
-                          <div key={addon.id} className={cn(
-                            "flex items-center gap-2 p-2 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer",
-                            isAddonSelected && "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5"
-                          )}>
-                            <Checkbox
-                              id={addon.id}
-                              checked={isAddonSelected}
-                              onCheckedChange={(checked) => {
-                                const newAddonIds = checked
-                                  ? [...selectedAddonIds, addon.id]
-                                  : selectedAddonIds.filter((id) => id !== addon.id);
-                                onAddonToggle(newAddonIds);
-                              }}
-                            />
-                            <Label
-                              htmlFor={addon.id}
-                              className="flex-1 cursor-pointer flex items-center justify-between"
-                            >
-                              <span className="text-sm font-medium">{addon.name}</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-bold text-[hsl(var(--accent))]">
-                                  +${addonPrice.toFixed(2)}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {addon.duration_minutes}min
-                                </span>
-                              </div>
-                            </Label>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
       </RadioGroup>
+
+      {/* Add-ons Section - Rendered OUTSIDE RadioGroup */}
+      {selectedServiceId && addons.length > 0 && (
+        <div className="space-y-2 pointer-events-auto">
+          <h4 className="font-semibold text-xs text-muted-foreground uppercase">Add-ons (Optional)</h4>
+          <div className="space-y-2">
+            {addons.map((addon) => {
+              const addonPrice = isVip && addon.vip_price ? addon.vip_price : addon.regular_price;
+              const isAddonSelected = selectedAddonIds.includes(addon.id);
+              
+              return (
+                <div 
+                  key={addon.id} 
+                  className={cn(
+                    "flex items-center gap-2 p-2 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer",
+                    isAddonSelected && "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5"
+                  )}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Checkbox
+                    id={addon.id}
+                    checked={isAddonSelected}
+                    onCheckedChange={(checked) => {
+                      const isChecked = checked === true;
+                      const newAddonIds = isChecked
+                        ? [...selectedAddonIds, addon.id]
+                        : selectedAddonIds.filter((id) => id !== addon.id);
+                      onAddonToggle(newAddonIds);
+                    }}
+                  />
+                  <Label
+                    htmlFor={addon.id}
+                    className="flex-1 cursor-pointer flex items-center justify-between"
+                  >
+                    <span className="text-sm font-medium">{addon.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-[hsl(var(--accent))]">
+                        +${addonPrice.toFixed(2)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {addon.duration_minutes}min
+                      </span>
+                    </div>
+                  </Label>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
