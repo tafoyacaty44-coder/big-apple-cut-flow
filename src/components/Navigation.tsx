@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import heroBg from "@/assets/hero-barbershop.jpg";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,9 +35,20 @@ const Navigation = () => {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? "bg-primary/95 shadow-lg" : "bg-primary"
+      scrolled ? "shadow-lg" : ""
     } backdrop-blur-sm`}>
-      <div className="container mx-auto px-4">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+        style={{ backgroundImage: `url(${heroBg})` }}
+      />
+      
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/80" />
+      
+      {/* Content wrapper with relative positioning */}
+      <div className="relative z-10">
+        <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
@@ -173,7 +185,8 @@ const Navigation = () => {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </div> {/* Close relative z-10 wrapper */}
     </nav>
   );
 };
