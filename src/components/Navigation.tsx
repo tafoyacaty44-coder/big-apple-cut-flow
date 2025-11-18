@@ -39,12 +39,12 @@ const Navigation = () => {
     } backdrop-blur-sm`}>
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-70"
         style={{ backgroundImage: `url(${heroBg})` }}
       />
       
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/80" />
+      <div className="absolute inset-0 bg-black/50" />
       
       {/* Content wrapper with relative positioning */}
       <div className="relative z-10">
