@@ -46,7 +46,12 @@ const navItems = [
   },
   { 
     label: "Cuts & styles gallery", 
-    onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/gallery')
+    onClick: () => {
+      const gallerySection = document.getElementById('gallery');
+      if (gallerySection) {
+        gallerySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   },
 ];
 
