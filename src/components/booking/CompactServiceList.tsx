@@ -125,7 +125,6 @@ export const CompactServiceList = ({
                   <Checkbox
                     id={addon.id}
                     checked={isAddonSelected}
-                    onCheckedChange={handleToggle}
                   />
                   <Label
                     className="flex-1 cursor-pointer flex items-center justify-between"
