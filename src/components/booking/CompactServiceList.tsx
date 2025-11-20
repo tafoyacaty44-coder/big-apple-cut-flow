@@ -106,10 +106,10 @@ export const CompactServiceList = ({
               const addonPrice = isVip && addon.vip_price ? addon.vip_price : addon.regular_price;
               const isAddonSelected = selectedAddonIds.includes(addon.id);
               
-              const handleToggle = () => {
-                const newAddonIds = isAddonSelected
-                  ? selectedAddonIds.filter((id) => id !== addon.id)
-                  : [...selectedAddonIds, addon.id];
+              const handleToggle = (checked: boolean) => {
+                const newAddonIds = checked
+                  ? [...selectedAddonIds, addon.id]
+                  : selectedAddonIds.filter((id) => id !== addon.id);
                 onAddonToggle(newAddonIds);
               };
               
@@ -117,17 +117,18 @@ export const CompactServiceList = ({
                 <div 
                   key={addon.id} 
                   className={cn(
-                    "flex items-center gap-2 p-2 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer",
+                    "flex items-center gap-2 p-2 border rounded-lg hover:bg-muted/50 transition-colors",
                     isAddonSelected && "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5"
                   )}
-                  onClick={handleToggle}
                 >
                   <Checkbox
                     id={addon.id}
                     checked={isAddonSelected}
+                    onCheckedChange={handleToggle}
                   />
                   <Label
-                    className="flex-1 cursor-pointer flex items-center justify-between"
+                    htmlFor={addon.id}
+                    className="flex-1 flex items-center justify-between"
                   >
                     <span className="text-sm font-medium">{addon.name}</span>
                     <div className="flex items-center gap-2">
