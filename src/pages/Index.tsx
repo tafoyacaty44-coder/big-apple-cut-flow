@@ -269,16 +269,13 @@ const Index = () => {
       
       {/* Barbershop pattern background */}
       <div 
-        className="absolute inset-0 opacity-[0.15]"
+        className="absolute inset-0 opacity-[0.35]"
         style={{
           backgroundImage: `url(${barberPatternBg})`,
           backgroundRepeat: "repeat",
           backgroundSize: "400px 400px"
         }}
       />
-      
-      {/* Dark overlay to ensure readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/90 to-primary" />
       
       {/* Vignette overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_20%,rgba(217,168,45,0.07),transparent_60%),radial-gradient(60%_40%_at_50%_100%,rgba(0,0,0,0.75),rgba(0,0,0,0.95))]" />
