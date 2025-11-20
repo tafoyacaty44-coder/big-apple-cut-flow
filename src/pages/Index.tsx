@@ -9,6 +9,7 @@ import { TodayAvailability } from "@/components/TodayAvailability";
 import { SeoHead } from "@/components/SeoHead";
 import { VideoIntro } from "@/components/VideoIntro";
 import React from "react";
+import barberPatternBg from '@/assets/barber-pattern-bg.jpg';
 import fadeOne from '@/assets/gallery/fade-one.jpg';
 import fadeTwo from '@/assets/gallery/fade-two.jpg';
 import taperOne from '@/assets/gallery/taper-one.jpg';
@@ -265,23 +266,22 @@ const Index = () => {
       <VideoIntro />
       <main className="min-h-[100dvh] bg-primary text-primary-foreground relative overflow-hidden">
         <SeoHead pageSlug="home" />
-      {/* Animated gradient background */}
-      <motion.div
-        aria-hidden="true"
-        className="absolute inset-0"
+      
+      {/* Barbershop pattern background */}
+      <div 
+        className="absolute inset-0 opacity-[0.15]"
         style={{
-          backgroundImage: "linear-gradient(270deg, hsl(var(--primary)), hsl(var(--primary)/0.95), hsl(var(--primary)))",
-          backgroundSize: "400% 400%",
+          backgroundImage: `url(${barberPatternBg})`,
+          backgroundRepeat: "repeat",
+          backgroundSize: "400px 400px"
         }}
-        animate={reduce ? undefined : { backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
       />
-
+      
+      {/* Dark overlay to ensure readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/90 to-primary" />
+      
       {/* Vignette overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_20%,rgba(217,168,45,0.07),transparent_60%),radial-gradient(60%_40%_at_50%_100%,rgba(0,0,0,0.75),rgba(0,0,0,0.95))]" />
-      
-      {/* Subtle noise texture */}
-      <div className="pointer-events-none absolute inset-0 mix-blend-soft-light opacity-[0.06]" style={{ backgroundImage: "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"120\" height=\"120\"><filter id=\"n\"><feTurbulence type=\"fractalNoise\" baseFrequency=\"0.65\" numOctaves=\"2\" stitchTiles=\"stitch\"/></filter><rect width=\"100%\" height=\"100%\" filter=\"url(%23n)\" opacity=\"0.25\"/></svg>')" }} />
 
       {/* Content */}
       <section className="relative z-10 flex flex-col items-center justify-center gap-8 px-4 py-12 pt-24">
