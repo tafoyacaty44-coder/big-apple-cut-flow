@@ -1,8 +1,10 @@
+import { useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Service {
   id: string;
@@ -33,6 +35,18 @@ export const CompactServiceList = ({
   onAddonToggle,
   isVip = false,
 }: CompactServiceListProps) => {
+  const addonsRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+
+  // Auto-scroll to add-ons section on mobile when a service is selected
+  useEffect(() => {
+    if (selectedServiceId && addons.length > 0 && isMobile && addonsRef.current) {
+      setTimeout(() => {
+        addonsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+  }, [selectedServiceId, addons.length, isMobile]);
+
   return (
     <div className="space-y-4">
       {/* Main Services - Text-Only Compact Layout */}
@@ -85,12 +99,19 @@ export const CompactServiceList = ({
 
       {/* Add-ons Section - Rendered OUTSIDE RadioGroup */}
       {selectedServiceId && addons.length > 0 && (
-        <div className="space-y-2 pointer-events-auto">
+        <div ref={addonsRef} className="space-y-2 pointer-events-auto">
           <h4 className="font-semibold text-xs text-muted-foreground uppercase">Add-ons (Optional)</h4>
           <div className="space-y-2">
             {addons.map((addon) => {
               const addonPrice = isVip && addon.vip_price ? addon.vip_price : addon.regular_price;
               const isAddonSelected = selectedAddonIds.includes(addon.id);
+              
+              const handleToggle = () => {
+                const newAddonIds = isAddonSelected
+                  ? selectedAddonIds.filter((id) => id !== addon.id)
+                  : [...selectedAddonIds, addon.id];
+                onAddonToggle(newAddonIds);
+              };
               
               return (
                 <div 
@@ -99,21 +120,14 @@ export const CompactServiceList = ({
                     "flex items-center gap-2 p-2 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer",
                     isAddonSelected && "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5"
                   )}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={handleToggle}
                 >
                   <Checkbox
                     id={addon.id}
                     checked={isAddonSelected}
-                    onCheckedChange={(checked) => {
-                      const isChecked = checked === true;
-                      const newAddonIds = isChecked
-                        ? [...selectedAddonIds, addon.id]
-                        : selectedAddonIds.filter((id) => id !== addon.id);
-                      onAddonToggle(newAddonIds);
-                    }}
+                    onCheckedChange={handleToggle}
                   />
                   <Label
-                    htmlFor={addon.id}
                     className="flex-1 cursor-pointer flex items-center justify-between"
                   >
                     <span className="text-sm font-medium">{addon.name}</span>
