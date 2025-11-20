@@ -277,8 +277,8 @@ const Index = () => {
         }}
       />
       
-      {/* Vignette overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_20%,rgba(217,168,45,0.07),transparent_60%),radial-gradient(60%_40%_at_50%_100%,rgba(0,0,0,0.75),rgba(0,0,0,0.95))]" />
+      {/* Subtle gold accent overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_20%,rgba(217,168,45,0.07),transparent_60%)]" />
 
       {/* Content */}
       <section className="relative z-10 flex flex-col items-center justify-center gap-8 px-4 py-12 pt-24">
