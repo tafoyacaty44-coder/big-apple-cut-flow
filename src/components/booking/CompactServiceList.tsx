@@ -1,10 +1,9 @@
 import { useRef, useEffect } from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Check } from 'lucide-react';
 
 interface Service {
   id: string;
@@ -97,39 +96,41 @@ export const CompactServiceList = ({
         </div>
       </RadioGroup>
 
-      {/* Add-ons Section - Rendered OUTSIDE RadioGroup */}
+      {/* Add-ons Section - Simple Click Handler */}
       {selectedServiceId && addons.length > 0 && (
-        <div ref={addonsRef} className="space-y-2 pointer-events-auto">
+        <div ref={addonsRef} className="space-y-2">
           <h4 className="font-semibold text-xs text-muted-foreground uppercase">Add-ons (Optional)</h4>
           <div className="space-y-2">
             {addons.map((addon) => {
               const addonPrice = isVip && addon.vip_price ? addon.vip_price : addon.regular_price;
-              const isAddonSelected = selectedAddonIds.includes(addon.id);
-              
-              const handleToggle = (checked: boolean) => {
-                const newAddonIds = checked
-                  ? [...selectedAddonIds, addon.id]
-                  : selectedAddonIds.filter((id) => id !== addon.id);
-                onAddonToggle(newAddonIds);
-              };
+              const isSelected = selectedAddonIds.includes(addon.id);
               
               return (
                 <div 
-                  key={addon.id} 
+                  key={addon.id}
+                  onClick={() => {
+                    const newIds = isSelected
+                      ? selectedAddonIds.filter(id => id !== addon.id)
+                      : [...selectedAddonIds, addon.id];
+                    onAddonToggle(newIds);
+                  }}
                   className={cn(
-                    "flex items-center gap-2 p-2 border rounded-lg hover:bg-muted/50 transition-colors",
-                    isAddonSelected && "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5"
+                    "flex items-center gap-3 p-3 border rounded-lg transition-all cursor-pointer select-none",
+                    "hover:border-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/10",
+                    isSelected && "border-[hsl(var(--accent))] bg-[hsl(var(--accent))]/5 shadow-sm"
                   )}
                 >
-                  <Checkbox
-                    id={addon.id}
-                    checked={isAddonSelected}
-                    onCheckedChange={handleToggle}
-                  />
-                  <Label
-                    htmlFor={addon.id}
-                    className="flex-1 flex items-center justify-between"
-                  >
+                  {/* Custom checkbox visual */}
+                  <div className={cn(
+                    "w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all",
+                    isSelected 
+                      ? "bg-[hsl(var(--accent))] border-[hsl(var(--accent))]" 
+                      : "border-muted-foreground/30"
+                  )}>
+                    {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+                  </div>
+                  
+                  <div className="flex-1 flex items-center justify-between">
                     <span className="text-sm font-medium">{addon.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-[hsl(var(--accent))]">
@@ -139,7 +140,7 @@ export const CompactServiceList = ({
                         {addon.duration_minutes}min
                       </span>
                     </div>
-                  </Label>
+                  </div>
                 </div>
               );
             })}

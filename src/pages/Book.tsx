@@ -45,7 +45,6 @@ const Book = () => {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoCampaignId, setPromoCampaignId] = useState<string | undefined>();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'zelle' | 'apple_pay' | 'venmo' | 'cash_app' | null>(null);
-  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
   const [policyAgreed, setPolicyAgreed] = useState(false);
   const { booking, setSelectedService, setSelectedBarber, setSelectedDate, setSelectedTime, setCustomerInfo, setBlacklisted, setSelectedAddons, resetBooking } = useBooking();
   const navigate = useNavigate();
@@ -74,7 +73,6 @@ const Book = () => {
     // This allows returning to booking page to continue, but fresh starts are clean
     if (currentStep === 1 && !booking.selectedServiceId) {
       resetBooking();
-      setSelectedAddonIds([]);
       setPolicyAgreed(false);
       setSelectedPaymentMethod(null);
       setVipCodeFromForm('');
@@ -83,13 +81,6 @@ const Book = () => {
       setPromoDiscount(0);
     }
   }, []); // Only run on mount
-
-  // Sync selected add-ons with booking context
-  useEffect(() => {
-    if (booking.selectedAddonIds.length > 0 && selectedAddonIds.length === 0) {
-      setSelectedAddonIds(booking.selectedAddonIds);
-    }
-  }, [booking.selectedAddonIds]);
 
   // Check if mobile
   useEffect(() => {
@@ -209,7 +200,7 @@ const Book = () => {
     enabled: !!booking.selectedServiceId,
   });
 
-  const selectedAddons = addonServices.filter(addon => selectedAddonIds.includes(addon.id));
+  const selectedAddons = addonServices.filter(addon => booking.selectedAddonIds.includes(addon.id));
 
   const { data: barbers = [], isLoading: isLoadingBarbers } = useQuery({
     queryKey: ['barbers', 'active'],
@@ -234,11 +225,11 @@ const Book = () => {
 
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
-    setSelectedAddonIds([]); // Reset add-ons when service changes
+    setSelectedAddons([]); // Reset add-ons when service changes
   };
 
   const handleAddonToggle = (addonIds: string[]) => {
-    setSelectedAddonIds(addonIds);
+    setSelectedAddons(addonIds); // Update context directly
   };
 
   const handleBarberSelect = (barberId: string, barberName: string) => {
@@ -318,13 +309,7 @@ const Book = () => {
   };
 
   const canContinueStep = (step: number) => {
-    if (step === 1) {
-      // Save add-ons to context when continuing from step 1 (service selection)
-      if (selectedAddonIds.length > 0) {
-        setSelectedAddons(selectedAddonIds);
-      }
-      return !!booking.selectedServiceId;
-    }
+    if (step === 1) return !!booking.selectedServiceId;
     if (step === 2) return !!booking.selectedBarberId;
     if (step === 3) return !!(booking.selectedDate && booking.selectedTime);
     if (step === 4) return !!booking.customerInfo;
@@ -356,7 +341,7 @@ const Book = () => {
           promo_code: promoCode || null,
           campaign_id: promoCampaignId || null,
           payment_method: selectedPaymentMethod,
-          addon_service_ids: selectedAddonIds.length > 0 ? selectedAddonIds : null,
+          addon_service_ids: booking.selectedAddonIds.length > 0 ? booking.selectedAddonIds : null,
         },
       });
 
@@ -442,10 +427,7 @@ const Book = () => {
               selectedAddons={selectedAddons}
               onEditStep={handleEditStep}
               onContinue={() => {
-                if (currentStep === 1 && canContinueStep(1)) {
-                  setSelectedAddons(selectedAddonIds);
-                  setCurrentStep(2);
-                }
+                if (currentStep === 1 && canContinueStep(1)) setCurrentStep(2);
                 if (currentStep === 2 && canContinueStep(2)) setCurrentStep(3);
                 if (currentStep === 3 && canContinueStep(3)) setCurrentStep(4);
                 if (currentStep === 4 && canContinueStep(4)) setCurrentStep(5);
@@ -488,7 +470,6 @@ const Book = () => {
                       if (confirm('Start over? This will clear all your booking information.')) {
                         resetBooking();
                         setCurrentStep(1);
-                        setSelectedAddonIds([]);
                         setPolicyAgreed(false);
                         setSelectedPaymentMethod(null);
                       }
@@ -558,7 +539,7 @@ const Book = () => {
                     services={services}
                     addons={addonServices}
                     selectedServiceId={booking.selectedServiceId}
-                    selectedAddonIds={selectedAddonIds}
+                    selectedAddonIds={booking.selectedAddonIds}
                     onServiceSelect={handleServiceSelect}
                     onAddonToggle={handleAddonToggle}
                     isVip={vipCodeValid}
@@ -569,7 +550,6 @@ const Book = () => {
                         className="w-full min-h-[48px]"
                         onClick={() => {
                           if (!booking.selectedServiceId) return;
-                          setSelectedAddons(selectedAddonIds);
                           setCurrentStep(2);
                         }}
                         disabled={!booking.selectedServiceId}
