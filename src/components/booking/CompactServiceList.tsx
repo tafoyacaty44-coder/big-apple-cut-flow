@@ -42,7 +42,7 @@ export const CompactServiceList = ({
   useEffect(() => {
     if (selectedServiceId && addons.length > 0 && isMobile && addonsRef.current) {
       setTimeout(() => {
-        addonsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        addonsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }, 100);
     }
   }, [selectedServiceId, addons.length, isMobile]);
