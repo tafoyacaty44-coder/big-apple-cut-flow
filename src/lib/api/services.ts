@@ -18,6 +18,7 @@ export const getServices = async (): Promise<Service[]> => {
     .from('services')
     .select('*')
     .eq('is_active', true)
+    .neq('category', 'addon')
     .order('display_order');
 
   if (error) throw error;
