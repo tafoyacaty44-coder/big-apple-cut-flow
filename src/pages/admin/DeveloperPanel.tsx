@@ -12,6 +12,7 @@ import Logo from '@/components/Logo';
 import { ArrowLeft, Upload, Shield, AlertTriangle } from 'lucide-react';
 import { getDatabaseStats, updateBrandingAsset, updateColors, updateBackgroundOpacity, getSystemInfo, getAllUsers, promoteToMasterAdmin } from '@/lib/api/developer';
 import { getBusinessConfig } from '@/lib/api/setup';
+import { importGalleryAssets } from '@/lib/api/gallery';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -99,6 +100,24 @@ const DeveloperPanel = () => {
         description: "Background opacity has been updated",
       });
       queryClient.invalidateQueries({ queryKey: ['business-config'] });
+    },
+  });
+
+  const importGalleryMutation = useMutation({
+    mutationFn: importGalleryAssets,
+    onSuccess: (data) => {
+      toast({
+        title: "Gallery imported",
+        description: data.message || "Gallery assets imported successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['db-stats'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Import failed",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -443,6 +462,33 @@ const DeveloperPanel = () => {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Gallery Management</CardTitle>
+                <CardDescription>Import initial gallery images from assets</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {dbStats?.gallery_images === 0 ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Your gallery database is empty. Import the initial 11 curated images from your assets folder to populate the home page gallery.
+                    </p>
+                    <Button 
+                      onClick={() => importGalleryMutation.mutate()}
+                      disabled={importGalleryMutation.isPending}
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      {importGalleryMutation.isPending ? 'Importing...' : 'Import Initial Gallery'}
+                    </Button>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Gallery has {dbStats?.gallery_images} images. Use Admin Gallery Management to add or remove images.
+                  </p>
+                )}
               </CardContent>
             </Card>
 

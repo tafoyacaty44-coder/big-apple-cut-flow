@@ -179,9 +179,13 @@ export function GalleryUploadDialog({ open, onOpenChange, onSuccess }: GalleryUp
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Haircuts">Haircuts</SelectItem>
-                            <SelectItem value="Shaves">Shaves</SelectItem>
+                            <SelectItem value="Fades">Fades</SelectItem>
+                            <SelectItem value="Tapers">Tapers</SelectItem>
+                            <SelectItem value="Designs">Designs</SelectItem>
                             <SelectItem value="Beard Work">Beard Work</SelectItem>
+                            <SelectItem value="Shaves">Shaves</SelectItem>
+                            <SelectItem value="Classic Cuts">Classic Cuts</SelectItem>
+                            <SelectItem value="Pompadours">Pompadours</SelectItem>
                             <SelectItem value="Transformations">Transformations</SelectItem>
                           </SelectContent>
                         </Select>

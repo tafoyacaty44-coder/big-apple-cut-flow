@@ -124,19 +124,31 @@ export const updateBackgroundOpacity = async (opacity: number) => {
 
 // User & Role Management
 export const getAllUsers = async () => {
-  const { data, error } = await supabase
+  // First fetch all profiles
+  const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
-    .select(`
-      id,
-      full_name,
-      phone,
-      created_at,
-      user_roles (role)
-    `)
+    .select('id, full_name, phone, created_at')
     .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data;
+
+  if (profilesError) throw profilesError;
+
+  // Then fetch roles for each user separately
+  const usersWithRoles = await Promise.all(
+    (profiles || []).map(async (profile) => {
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', profile.id)
+        .maybeSingle();
+
+      return {
+        ...profile,
+        user_roles: roleData,
+      };
+    })
+  );
+
+  return usersWithRoles;
 };
 
 export const promoteToMasterAdmin = async (targetEmail: string) => {
