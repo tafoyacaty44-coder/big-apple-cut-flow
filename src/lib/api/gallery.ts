@@ -1,4 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
+import fadeOne from '@/assets/gallery/fade-one.jpg';
+import fadeTwo from '@/assets/gallery/fade-two.jpg';
+import taperOne from '@/assets/gallery/taper-one.jpg';
+import taperTwo from '@/assets/gallery/taper-two.jpg';
+import taperThree from '@/assets/gallery/taper-three.jpg';
+import cleanFadeOne from '@/assets/gallery/clean-fade-one.jpg';
+import designOne from '@/assets/gallery/design-one.jpg';
+import beardFadeOne from '@/assets/gallery/beard-fade-one.jpg';
+import skinFadeOne from '@/assets/gallery/skin-fade-one.jpg';
+import classicOne from '@/assets/gallery/classic-one.jpg';
+import pompadourOne from '@/assets/gallery/pompadour-one.jpg';
 
 export interface GalleryImage {
   id: string;
@@ -148,4 +159,28 @@ export const deleteGalleryImageFile = async (url: string): Promise<void> => {
     .remove([filePath]);
 
   if (error) throw error;
+};
+
+// Fallback gallery images for initial import
+export const fallbackGalleryImages = [
+  { image_url: fadeOne, category: 'Fades', title: 'High Fade with Hard Part', display_order: 0 },
+  { image_url: fadeTwo, category: 'Fades', title: 'Skin Fade with Design', display_order: 1 },
+  { image_url: taperOne, category: 'Tapers', title: 'Classic Taper', display_order: 2 },
+  { image_url: taperTwo, category: 'Tapers', title: 'Mid Taper Fade', display_order: 3 },
+  { image_url: taperThree, category: 'Tapers', title: 'Low Taper with Beard', display_order: 4 },
+  { image_url: cleanFadeOne, category: 'Fades', title: 'Clean Fade', display_order: 5 },
+  { image_url: designOne, category: 'Designs', title: 'Hair Design Art', display_order: 6 },
+  { image_url: beardFadeOne, category: 'Beard Work', title: 'Beard Fade Blend', display_order: 7 },
+  { image_url: skinFadeOne, category: 'Fades', title: 'Bald Fade', display_order: 8 },
+  { image_url: classicOne, category: 'Classic Cuts', title: 'Traditional Side Part', display_order: 9 },
+  { image_url: pompadourOne, category: 'Pompadours', title: 'Modern Pompadour', display_order: 10 },
+];
+
+export const importGalleryAssets = async () => {
+  const { data, error } = await supabase.functions.invoke('import-gallery-assets', {
+    body: { images: fallbackGalleryImages }
+  });
+  
+  if (error) throw error;
+  return data;
 };
