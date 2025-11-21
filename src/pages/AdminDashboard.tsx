@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { getAllScheduleRequests } from '@/lib/api/availability';
+import { checkMasterAdminExists, bootstrapMasterAdmin } from '@/lib/api/developer';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, Users, Scissors, Gift, CalendarClock, Database, Image, Settings, FileText, Send, Clock, Search } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { LogOut, Calendar, Users, Scissors, Gift, CalendarClock, Database, Image, Settings, FileText, Send, Clock, Search, Shield, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -42,6 +44,30 @@ const AdminDashboard = () => {
       return requests.length;
     },
     refetchInterval: 30000,
+  });
+
+  const { data: masterAdminExists, isLoading: checkingMasterAdmin } = useQuery({
+    queryKey: ['master-admin-exists'],
+    queryFn: checkMasterAdminExists,
+    staleTime: 30000,
+  });
+
+  const bootstrapMutation = useMutation({
+    mutationFn: bootstrapMasterAdmin,
+    onSuccess: () => {
+      toast({
+        title: "Master Admin Role Claimed!",
+        description: "You now have full system access. The page will reload.",
+      });
+      setTimeout(() => window.location.reload(), 2000);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Bootstrap Failed",
+        description: error.message || "Failed to claim master admin role",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleSeedDemoData = async () => {
@@ -96,6 +122,40 @@ const AdminDashboard = () => {
             <h2 className="text-xl md:text-2xl font-bold mb-2">Welcome back!</h2>
             <p className="text-sm md:text-base text-muted-foreground">Manage your barbershop operations</p>
           </div>
+
+          {!masterAdminExists && !isMasterAdmin && !checkingMasterAdmin && (
+            <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+              <Shield className="h-5 w-5 text-yellow-600" />
+              <AlertTitle className="text-yellow-800 dark:text-yellow-400 font-semibold">
+                No Master Admin Found
+              </AlertTitle>
+              <AlertDescription className="space-y-3">
+                <p className="text-yellow-700 dark:text-yellow-300">
+                  This project doesn't have a master admin yet. As an admin, you can claim this role to access:
+                </p>
+                <ul className="list-disc list-inside text-yellow-700 dark:text-yellow-300 text-sm space-y-1">
+                  <li>Developer Panel & Branding Management</li>
+                  <li>User Role Management</li>
+                  <li>Database & System Tools</li>
+                  <li>Ability to promote other admins to master admin</li>
+                </ul>
+                <div className="flex items-center gap-2 pt-2">
+                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                    This action can only be performed once per project
+                  </p>
+                </div>
+                <Button
+                  onClick={() => bootstrapMutation.mutate()}
+                  disabled={bootstrapMutation.isPending}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  {bootstrapMutation.isPending ? "Claiming..." : "Claim Master Admin Role"}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
 
           <DashboardStats />
 
