@@ -29,3 +29,6 @@ verify_jwt = true
 
 [functions.seed-demo-data]
 verify_jwt = true
+
+[functions.setup-wizard-complete]
+verify_jwt = false
