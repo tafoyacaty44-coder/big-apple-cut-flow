@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_actions: {
+        Row: {
+          action_type: string
+          admin_user_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_user_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_user_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
+      applied_templates: {
+        Row: {
+          applied_at: string | null
+          applied_by: string | null
+          config_snapshot: Json | null
+          id: string
+          template_id: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_by?: string | null
+          config_snapshot?: Json | null
+          id?: string
+          template_id?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          applied_by?: string | null
+          config_snapshot?: Json | null
+          id?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applied_templates_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "business_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_action_tokens: {
         Row: {
           action: string
@@ -525,6 +587,99 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      business_config: {
+        Row: {
+          accent_color: string | null
+          address: string | null
+          business_name: string
+          business_type: string
+          created_at: string | null
+          currency: string | null
+          email: string | null
+          hero_image_url: string | null
+          id: string
+          is_setup_complete: boolean | null
+          logo_url: string | null
+          phone: string | null
+          primary_color: string | null
+          service_title: string | null
+          staff_title: string | null
+          timezone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          address?: string | null
+          business_name: string
+          business_type?: string
+          created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          hero_image_url?: string | null
+          id?: string
+          is_setup_complete?: boolean | null
+          logo_url?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          service_title?: string | null
+          staff_title?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          address?: string | null
+          business_name?: string
+          business_type?: string
+          created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          hero_image_url?: string | null
+          id?: string
+          is_setup_complete?: boolean | null
+          logo_url?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          service_title?: string | null
+          staff_title?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      business_templates: {
+        Row: {
+          business_type: string
+          config_json: Json
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          preview_image_url: string | null
+        }
+        Insert: {
+          business_type: string
+          config_json: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          preview_image_url?: string | null
+        }
+        Update: {
+          business_type?: string
+          config_json?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          preview_image_url?: string | null
+        }
+        Relationships: []
       }
       campaign_recipients: {
         Row: {
@@ -1431,6 +1586,74 @@ export type Database = {
         }
         Relationships: []
       }
+      template_services: {
+        Row: {
+          category: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          name: string
+          regular_price: number | null
+          sort_order: number | null
+          template_id: string | null
+          vip_price: number | null
+        }
+        Insert: {
+          category?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name: string
+          regular_price?: number | null
+          sort_order?: number | null
+          template_id?: string | null
+          vip_price?: number | null
+        }
+        Update: {
+          category?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name?: string
+          regular_price?: number | null
+          sort_order?: number | null
+          template_id?: string | null
+          vip_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_services_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "business_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      terminology: {
+        Row: {
+          display_value: string
+          id: string
+          plural_value: string | null
+          term_key: string
+          updated_at: string | null
+        }
+        Insert: {
+          display_value: string
+          id?: string
+          plural_value?: string | null
+          term_key: string
+          updated_at?: string | null
+        }
+        Update: {
+          display_value?: string
+          id?: string
+          plural_value?: string | null
+          term_key?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1526,6 +1749,13 @@ export type Database = {
       }
     }
     Functions: {
+      check_role_access: {
+        Args: {
+          _required_role: Database["public"]["Enums"]["user_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       generate_appointment_token: { Args: never; Returns: string }
       generate_confirmation_number: { Args: never; Returns: string }
       has_role: {
@@ -1535,6 +1765,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_master_admin: { Args: { _user_id: string }; Returns: boolean }
       norm_email: { Args: { e: string }; Returns: string }
       norm_phone: { Args: { p: string }; Returns: string }
       promote_user_to_admin: {
