@@ -3,6 +3,8 @@ import { Phone, Menu, X, User, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { getBusinessConfig } from "@/lib/api/setup";
 import Logo from "./Logo";
 import {
   DropdownMenu,
@@ -19,8 +21,16 @@ const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const { user, userRole, signOut } = useAuth();
 
+  const { data: config } = useQuery({
+    queryKey: ['business-config'],
+    queryFn: getBusinessConfig,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const heroBgImage = (config as any)?.hero_image_url || heroBg;
+
   const getDashboardPath = () => {
-    if (userRole === 'admin') return '/admin';
+    if (userRole === 'master_admin' || userRole === 'admin') return '/admin';
     if (userRole === 'barber') return '/barber';
     return '/dashboard';
   };
@@ -36,7 +46,7 @@ const Navigation = () => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled ? "shadow-lg" : ""
-    }`} style={{ backgroundImage: `url(${heroBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    }`} style={{ backgroundImage: `url(${heroBgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/60" />
       

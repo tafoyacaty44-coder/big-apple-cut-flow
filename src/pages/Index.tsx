@@ -5,6 +5,7 @@ import { motion, type Variants, useReducedMotion } from "framer-motion";
 import { useNextAvailableSlots } from "@/hooks/useNextAvailableSlots";
 import { useQuery } from "@tanstack/react-query";
 import { getGalleryImages } from "@/lib/api/gallery";
+import { getBusinessConfig } from "@/lib/api/setup";
 import { TodayAvailability } from "@/components/TodayAvailability";
 import { SeoHead } from "@/components/SeoHead";
 import { VideoIntro } from "@/components/VideoIntro";
@@ -266,6 +267,15 @@ const Index = () => {
   const reduce = useReducedMotion();
   const { data: slots } = useNextAvailableSlots(3);
 
+  const { data: config } = useQuery({
+    queryKey: ['business-config'],
+    queryFn: getBusinessConfig,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const backgroundPattern = (config as any)?.background_pattern_url || barberPatternBg;
+  const backgroundOpacity = (config as any)?.background_opacity || 0.35;
+
   return (
     <>
       <VideoIntro />
@@ -274,11 +284,12 @@ const Index = () => {
       
       {/* Barbershop pattern background */}
       <div 
-        className="absolute inset-0 opacity-[0.35]"
+        className="absolute inset-0"
         style={{
-          backgroundImage: `url(${barberPatternBg})`,
+          backgroundImage: `url(${backgroundPattern})`,
           backgroundRepeat: "repeat",
-          backgroundSize: "400px 400px"
+          backgroundSize: "400px 400px",
+          opacity: backgroundOpacity
         }}
       />
       

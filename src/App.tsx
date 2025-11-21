@@ -4,8 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BookingProvider } from "@/contexts/BookingContext";
-import { AdminRoute, BarberRoute, CustomerRoute } from "@/components/auth/ProtectedRoute";
-import { SetupWizardDetector } from "@/components/SetupWizardDetector";
+import { AdminRoute, BarberRoute, CustomerRoute, MasterAdminRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import SetupWizard from "./pages/SetupWizard";
 import NotFound from "./pages/NotFound";
@@ -43,6 +42,7 @@ import MyClients from "./pages/barber/MyClients";
 import BarberDetail from "./pages/BarberDetail";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import DeveloperPanel from "./pages/admin/DeveloperPanel";
 
 const queryClient = new QueryClient();
 
@@ -53,7 +53,6 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <SetupWizardDetector>
             <Routes>
               <Route path="/setup-wizard" element={<SetupWizard />} />
               <Route path="/" element={<Index />} />
@@ -217,6 +216,14 @@ const App = () => (
                 </AdminRoute>
               } 
             />
+            <Route
+              path="/admin/developer"
+              element={
+                <MasterAdminRoute>
+                  <DeveloperPanel />
+                </MasterAdminRoute>
+              }
+            />
             <Route 
               path="/dashboard"
               element={
@@ -237,7 +244,6 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </SetupWizardDetector>
         </BrowserRouter>
       </BookingProvider>
     </TooltipProvider>

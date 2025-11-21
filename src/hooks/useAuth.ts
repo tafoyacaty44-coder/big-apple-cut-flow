@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 
-type UserRole = 'admin' | 'barber' | 'customer' | null;
+type UserRole = 'admin' | 'barber' | 'customer' | 'master_admin' | null;
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -90,7 +90,7 @@ export const useAuth = () => {
       setUserRole(role);
       
       // Role-based redirect
-      if (role === 'admin') {
+      if (role === 'master_admin' || role === 'admin') {
         navigate('/admin');
       } else if (role === 'barber') {
         navigate('/barber');

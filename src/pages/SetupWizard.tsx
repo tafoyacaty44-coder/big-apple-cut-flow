@@ -10,16 +10,35 @@ import { WizardStep4BusinessInfo } from "@/components/setup/WizardStep4BusinessI
 import { WizardStep5Customization } from "@/components/setup/WizardStep5Customization";
 import { WizardStep6DataSetup } from "@/components/setup/WizardStep6DataSetup";
 import { WizardStep7Complete } from "@/components/setup/WizardStep7Complete";
-import { getBusinessTemplates, completeSetupWizard, skipSetup, SetupWizardData } from "@/lib/api/setup";
+import { getBusinessTemplates, completeSetupWizard, skipSetup, SetupWizardData, checkSetupNeeded } from "@/lib/api/setup";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
 export default function SetupWizard() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userRole } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+
+  // Check if setup is allowed
+  useEffect(() => {
+    const checkAccess = async () => {
+      const setupNeeded = await checkSetupNeeded(userRole || undefined);
+      
+      if (!setupNeeded) {
+        // Setup already complete or user doesn't have access
+        navigate('/', { replace: true });
+      } else {
+        setIsCheckingAccess(false);
+      }
+    };
+    
+    checkAccess();
+  }, [userRole, navigate]);
 
   // Form data
   const [adminData, setAdminData] = useState<{ fullName: string; email: string; password: string } | null>(null);
@@ -108,13 +127,17 @@ export default function SetupWizard() {
     }
   };
 
-  if (isProcessing) {
+  if (isCheckingAccess || isProcessing) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
-          <h2 className="text-xl font-semibold">Setting up your booking system...</h2>
-          <p className="text-muted-foreground">This may take a moment</p>
+          <h2 className="text-xl font-semibold">
+            {isCheckingAccess ? 'Checking access...' : 'Setting up your booking system...'}
+          </h2>
+          <p className="text-muted-foreground">
+            {isCheckingAccess ? 'Please wait' : 'This may take a moment'}
+          </p>
         </div>
       </div>
     );
