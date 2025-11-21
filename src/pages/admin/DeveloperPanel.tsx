@@ -205,8 +205,16 @@ const DeveloperPanel = () => {
                   <div className="mb-4">
                     <Label>Current Logo</Label>
                     <div className="mt-2 p-4 border rounded-lg bg-muted flex items-center justify-center">
-                      <img src={config.logo_url} alt="Current logo" className="h-16" />
+                      <img src={config.logo_url} alt="Current logo" className="h-16 object-contain" />
                     </div>
+                  </div>
+                )}
+                {logoFile && (
+                  <div className="mb-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                    <Label className="text-sm font-medium">Selected: {logoFile.name}</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {(logoFile.size / 1024).toFixed(1)} KB
+                    </p>
                   </div>
                 )}
                 <div>
@@ -241,6 +249,14 @@ const DeveloperPanel = () => {
                     <div className="mt-2 border rounded-lg overflow-hidden">
                       <img src={config.hero_image_url} alt="Current hero" className="w-full h-32 object-cover" />
                     </div>
+                  </div>
+                )}
+                {heroFile && (
+                  <div className="mb-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                    <Label className="text-sm font-medium">Selected: {heroFile.name}</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {(heroFile.size / 1024).toFixed(1)} KB
+                    </p>
                   </div>
                 )}
                 <div>
@@ -278,6 +294,14 @@ const DeveloperPanel = () => {
                       backgroundSize: '200px 200px',
                       height: '200px'
                     }} />
+                  </div>
+                )}
+                {bgFile && (
+                  <div className="mb-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                    <Label className="text-sm font-medium">Selected: {bgFile.name}</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {(bgFile.size / 1024).toFixed(1)} KB
+                    </p>
                   </div>
                 )}
                 <div>
