@@ -148,6 +148,26 @@ export const promoteToMasterAdmin = async (targetEmail: string) => {
   return data;
 };
 
+// Master Admin Bootstrap
+export const checkMasterAdminExists = async (): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from('user_roles')
+    .select('id')
+    .eq('role', 'master_admin')
+    .limit(1)
+    .maybeSingle();
+  
+  if (error) throw error;
+  return !!data;
+};
+
+export const bootstrapMasterAdmin = async () => {
+  const { data, error } = await supabase.functions.invoke('bootstrap-master-admin');
+  
+  if (error) throw error;
+  return data;
+};
+
 // System Information
 export const getSystemInfo = async () => {
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
