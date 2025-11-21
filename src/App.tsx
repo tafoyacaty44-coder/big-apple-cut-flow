@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BookingProvider } from "@/contexts/BookingContext";
 import { AdminRoute, BarberRoute, CustomerRoute } from "@/components/auth/ProtectedRoute";
+import { SetupWizardDetector } from "@/components/SetupWizardDetector";
 import Index from "./pages/Index";
+import SetupWizard from "./pages/SetupWizard";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import StaffLogin from "./pages/StaffLogin";
@@ -51,8 +53,10 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
+          <SetupWizardDetector>
+            <Routes>
+              <Route path="/setup-wizard" element={<SetupWizard />} />
+              <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/staff-login" element={<StaffLogin />} />
             <Route path="/signup" element={<Signup />} />
@@ -233,6 +237,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </SetupWizardDetector>
         </BrowserRouter>
       </BookingProvider>
     </TooltipProvider>
