@@ -59,7 +59,7 @@ const AdminDashboard = () => {
         title: "Master Admin Role Claimed!",
         description: "You now have full system access. The page will reload.",
       });
-      setTimeout(() => window.location.reload(), 2000);
+      setTimeout(() => window.location.href = '/admin', 2000);
     },
     onError: (error: any) => {
       toast({
