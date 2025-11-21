@@ -30,7 +30,7 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
 
   if (userRole && !allowedRoles.includes(userRole)) {
     // Redirect to appropriate dashboard based on role
-    if (userRole === 'admin') return <Navigate to="/admin" replace />;
+    if (userRole === 'admin' || userRole === 'master_admin') return <Navigate to="/admin" replace />;
     if (userRole === 'barber') return <Navigate to="/barber" replace />;
     return <Navigate to="/dashboard" replace />;
   }
@@ -39,7 +39,7 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
 };
 
 export const AdminRoute = ({ children }: { children: React.ReactNode }) => (
-  <ProtectedRoute allowedRoles={['admin']}>{children}</ProtectedRoute>
+  <ProtectedRoute allowedRoles={['admin', 'master_admin']}>{children}</ProtectedRoute>
 );
 
 export const BarberRoute = ({ children }: { children: React.ReactNode }) => (
