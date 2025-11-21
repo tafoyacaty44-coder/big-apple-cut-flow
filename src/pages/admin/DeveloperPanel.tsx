@@ -10,8 +10,11 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Logo from '@/components/Logo';
 import { ArrowLeft, Upload, Shield, AlertTriangle } from 'lucide-react';
-import { getDatabaseStats, updateBrandingAsset, updateColors, updateBackgroundOpacity, getSystemInfo } from '@/lib/api/developer';
+import { getDatabaseStats, updateBrandingAsset, updateColors, updateBackgroundOpacity, getSystemInfo, getAllUsers, promoteToMasterAdmin } from '@/lib/api/developer';
 import { getBusinessConfig } from '@/lib/api/setup';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const DeveloperPanel = () => {
   const { signOut } = useAuth();
@@ -25,6 +28,8 @@ const DeveloperPanel = () => {
   const [primaryColor, setPrimaryColor] = useState('#D4AF37');
   const [accentColor, setAccentColor] = useState('#1A1A1A');
   const [bgOpacity, setBgOpacity] = useState(0.35);
+  const [promoteEmail, setPromoteEmail] = useState('');
+  const [showPromoteDialog, setShowPromoteDialog] = useState(false);
 
   const { data: config } = useQuery({
     queryKey: ['business-config'],
@@ -39,6 +44,11 @@ const DeveloperPanel = () => {
   const { data: sysInfo } = useQuery({
     queryKey: ['system-info'],
     queryFn: getSystemInfo,
+  });
+
+  const { data: users } = useQuery({
+    queryKey: ['all-users'],
+    queryFn: getAllUsers,
   });
 
   const uploadAssetMutation = useMutation({
@@ -92,6 +102,26 @@ const DeveloperPanel = () => {
     },
   });
 
+  const promoteMutation = useMutation({
+    mutationFn: (email: string) => promoteToMasterAdmin(email),
+    onSuccess: () => {
+      toast({
+        title: "User promoted",
+        description: "User has been promoted to master admin",
+      });
+      queryClient.invalidateQueries({ queryKey: ['all-users'] });
+      setPromoteEmail('');
+      setShowPromoteDialog(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Promotion failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleUploadLogo = () => {
     if (logoFile) {
       uploadAssetMutation.mutate({ type: 'logo', file: logoFile });
@@ -139,6 +169,7 @@ const DeveloperPanel = () => {
         <Tabs defaultValue="branding" className="space-y-4">
           <TabsList>
             <TabsTrigger value="branding">Branding & Assets</TabsTrigger>
+            <TabsTrigger value="users">User & Role Management</TabsTrigger>
             <TabsTrigger value="database">Database</TabsTrigger>
             <TabsTrigger value="system">System Info</TabsTrigger>
           </TabsList>
@@ -310,6 +341,90 @@ const DeveloperPanel = () => {
             </Card>
           </TabsContent>
 
+          {/* User & Role Management Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>All Users</CardTitle>
+                <CardDescription>View and manage user roles</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Created</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users?.map((user: any) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.full_name}</TableCell>
+                        <TableCell>{user.phone || 'N/A'}</TableCell>
+                        <TableCell>
+                          <Badge variant={user.user_roles?.role === 'master_admin' ? 'default' : 'secondary'}>
+                            {user.user_roles?.role || 'customer'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            <Card className="border-yellow-600">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Shield className="h-5 w-5 text-yellow-600" />
+                  <CardTitle>Promote to Master Admin</CardTitle>
+                </div>
+                <CardDescription>
+                  Grant full system access including developer tools access
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-950/20 dark:border-yellow-900">
+                  <div className="flex items-start space-x-2">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                        Warning: Master Admin Access
+                      </p>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                        Master admins have unrestricted access to all data, can bypass security policies, 
+                        and manage branding and system configuration. Only promote trusted users.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="promote-email">User Email</Label>
+                  <Input
+                    id="promote-email"
+                    type="email"
+                    placeholder="user@example.com"
+                    value={promoteEmail}
+                    onChange={(e) => setPromoteEmail(e.target.value)}
+                  />
+                </div>
+
+                <Button 
+                  onClick={() => setShowPromoteDialog(true)}
+                  disabled={!promoteEmail || promoteMutation.isPending}
+                  variant="default"
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Promote to Master Admin
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Database Tab */}
           <TabsContent value="database" className="space-y-6">
             <Card>
@@ -386,6 +501,35 @@ const DeveloperPanel = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Promotion Confirmation Dialog */}
+      <AlertDialog open={showPromoteDialog} onOpenChange={setShowPromoteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Master Admin Promotion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to promote <strong>{promoteEmail}</strong> to master admin? 
+              This will grant them full system access including:
+              <ul className="mt-2 space-y-1 list-disc list-inside">
+                <li>Access to Developer Panel</li>
+                <li>Ability to manage branding and assets</li>
+                <li>Full database access with RLS bypass</li>
+                <li>Ability to promote other users</li>
+              </ul>
+              <p className="mt-3 font-semibold">This action should only be done for fully trusted users.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => promoteMutation.mutate(promoteEmail)}
+              disabled={promoteMutation.isPending}
+            >
+              {promoteMutation.isPending ? 'Promoting...' : 'Confirm Promotion'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
