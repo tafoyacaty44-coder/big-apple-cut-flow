@@ -20,6 +20,21 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const [isSeedingData, setIsSeedingData] = useState(false);
 
+  const { data: isMasterAdmin } = useQuery({
+    queryKey: ['is-master-admin', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'master_admin')
+        .single();
+      return !!data;
+    },
+    enabled: !!user?.id
+  });
+
   const { data: pendingCount } = useQuery({
     queryKey: ['schedule-requests', 'pending-count'],
     queryFn: async () => {
@@ -181,6 +196,14 @@ const AdminDashboard = () => {
                 <Database className="mr-2 h-4 w-4" />
                 {isSeedingData ? 'Seeding...' : 'Seed Demo Data'}
               </Button>
+              {isMasterAdmin && (
+                <Link to="/admin/developer" className="w-full">
+                  <Button variant="outline" className="w-full justify-start border-yellow-500 text-yellow-600 hover:bg-yellow-50">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Developer Tools
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
 

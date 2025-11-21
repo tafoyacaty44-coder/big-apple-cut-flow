@@ -58,39 +58,36 @@ export interface SetupWizardData {
 }
 
 // Check if setup is needed
-export const checkSetupNeeded = async (): Promise<boolean> => {
+export const checkSetupNeeded = async (userRole?: string): Promise<boolean> => {
   try {
-    // Check if business_config exists and is complete
-    const { data: config, error: configError } = await supabase
+    // First check if there's any master_admin
+    const { data: masterAdmin, error: adminError } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('role', 'master_admin')
+      .limit(1)
+      .single();
+
+    // If no master admin exists, it's a fresh install - setup needed
+    if (adminError || !masterAdmin) {
+      return true;
+    }
+
+    // If master admin exists, only allow setup for master_admin users
+    if (userRole !== 'master_admin') {
+      return false;
+    }
+
+    // Check if setup is complete
+    const { data: config } = await supabase
       .from('business_config')
       .select('is_setup_complete')
       .single();
 
-    if (configError && configError.code !== 'PGRST116') {
-      // Error other than "not found"
-      console.error('Error checking business config:', configError);
-      return false;
-    }
-
-    // Check if there are any users with master_admin role
-    const { data: masterAdmins, error: roleError } = await supabase
-      .from('user_roles')
-      .select('id')
-      .eq('role', 'master_admin')
-      .limit(1);
-
-    if (roleError) {
-      console.error('Error checking master admin:', roleError);
-      return false;
-    }
-
-    // Setup is needed if:
-    // 1. No config exists OR config is not complete
-    // 2. AND no master admin exists
-    const needsSetup = (!config || !config.is_setup_complete) && (!masterAdmins || masterAdmins.length === 0);
-    return needsSetup;
+    // If no config or incomplete, setup needed for master_admin
+    return !config || !config.is_setup_complete;
   } catch (error) {
-    console.error('Error in checkSetupNeeded:', error);
+    console.error('Error checking setup status:', error);
     return false;
   }
 };

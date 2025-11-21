@@ -592,6 +592,8 @@ export type Database = {
         Row: {
           accent_color: string | null
           address: string | null
+          background_opacity: number | null
+          background_pattern_url: string | null
           business_name: string
           business_type: string
           created_at: string | null
@@ -611,6 +613,8 @@ export type Database = {
         Insert: {
           accent_color?: string | null
           address?: string | null
+          background_opacity?: number | null
+          background_pattern_url?: string | null
           business_name: string
           business_type?: string
           created_at?: string | null
@@ -630,6 +634,8 @@ export type Database = {
         Update: {
           accent_color?: string | null
           address?: string | null
+          background_opacity?: number | null
+          background_pattern_url?: string | null
           business_name?: string
           business_type?: string
           created_at?: string | null

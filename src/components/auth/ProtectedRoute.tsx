@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
-type UserRole = 'admin' | 'barber' | 'customer';
+type UserRole = 'admin' | 'barber' | 'customer' | 'master_admin';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -48,4 +48,8 @@ export const BarberRoute = ({ children }: { children: React.ReactNode }) => (
 
 export const CustomerRoute = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allowedRoles={['customer']}>{children}</ProtectedRoute>
+);
+
+export const MasterAdminRoute = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute allowedRoles={['master_admin']}>{children}</ProtectedRoute>
 );
