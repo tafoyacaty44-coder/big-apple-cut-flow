@@ -442,7 +442,7 @@ const Book = () => {
 
         {/* Mobile Summary Header */}
         {isMobile && (
-          <div className="sticky top-0 z-50 bg-background border-b shadow-sm">
+          <div className="sticky top-0 z-40 bg-background border-b shadow-sm">
             <button
               onClick={() => setShowMobileSummary(!showMobileSummary)}
               className="w-full flex items-center justify-between p-4 active:bg-muted/50 transition-colors"
