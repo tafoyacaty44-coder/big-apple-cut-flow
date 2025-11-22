@@ -8,7 +8,6 @@ import { getGalleryImages } from "@/lib/api/gallery";
 import { getBusinessConfig } from "@/lib/api/setup";
 import { TodayAvailability } from "@/components/TodayAvailability";
 import { SeoHead } from "@/components/SeoHead";
-import { VideoIntro } from "@/components/VideoIntro";
 import React from "react";
 import barberPatternBg from '@/assets/barber-pattern-bg.jpg';
 import fadeOne from '@/assets/gallery/fade-one.jpg';
@@ -278,7 +277,6 @@ const Index = () => {
 
   return (
     <>
-      <VideoIntro />
       <main className="min-h-[100dvh] bg-primary text-primary-foreground relative overflow-hidden">
         <SeoHead pageSlug="home" />
       
