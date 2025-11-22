@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getBusinessConfig } from '@/lib/api/setup';
-import defaultLogo from "@/assets/big-apple-logo-white.png";
+import logoWhite from "@/assets/demo-logo-white.png";
+import logoBlack from "@/assets/demo-logo-black.png";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg" | "xl";
@@ -22,15 +23,15 @@ const Logo = ({ size = "md", className = "", variant = "light" }: LogoProps) => 
     staleTime: 5 * 60 * 1000,
   });
 
+  const defaultLogo = variant === "dark" ? logoBlack : logoWhite;
   const logoSrc = (config as any)?.logo_url || defaultLogo;
-  const altText = (config as any)?.business_name || "Big Apple Barbers - East Village";
+  const altText = (config as any)?.business_name || "Demo Barbershop";
 
   return (
     <img
       src={logoSrc}
       alt={altText}
       className={`${sizeClasses[size]} ${className}`}
-      style={variant === 'dark' ? { filter: 'invert(1) brightness(0)' } : undefined}
     />
   );
 };
