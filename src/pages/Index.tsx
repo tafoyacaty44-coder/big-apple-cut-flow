@@ -8,6 +8,7 @@ import { getGalleryImages } from "@/lib/api/gallery";
 import { getBusinessConfig } from "@/lib/api/setup";
 import { TodayAvailability } from "@/components/TodayAvailability";
 import { SeoHead } from "@/components/SeoHead";
+import { LiveAvailabilityBanner } from "@/components/home/LiveAvailabilityBanner";
 import React from "react";
 import barberPatternBg from '@/assets/barber-pattern-bg.jpg';
 import fadeOne from '@/assets/gallery/fade-one.jpg';
@@ -321,6 +322,11 @@ const Index = () => {
         >
           <span className="mr-1">⭐</span> 4.8 (<span className="tabular-nums">356</span> Google reviews) • East Village
         </motion.p>
+
+        {/* Live Availability Banner */}
+        <div className="w-full max-w-[720px]">
+          <LiveAvailabilityBanner />
+        </div>
 
         {/* Navigation Buttons */}
         <motion.div
