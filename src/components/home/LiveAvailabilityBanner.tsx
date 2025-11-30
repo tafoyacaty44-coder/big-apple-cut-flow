@@ -4,7 +4,7 @@ import { getBarbersWithRealAvailability } from "@/lib/api/barbers";
 import { useBooking } from "@/contexts/BookingContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, ChevronDown, ChevronRight } from "lucide-react";
+import { Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { formatTime12h } from "@/lib/utils";
@@ -79,9 +79,15 @@ export const LiveAvailabilityBanner = () => {
           <Skeleton className="w-8 h-8 rounded-full" />
           <Skeleton className="h-4 w-32" />
         </div>
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-16 w-full rounded-lg mb-2" />
-        ))}
+        <div className="grid grid-cols-3 gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse flex flex-col items-center p-4">
+              <div className="h-12 w-12 bg-white/10 rounded-full mb-2" />
+              <div className="h-4 w-16 bg-white/10 rounded mb-1" />
+              <div className="h-3 w-20 bg-white/10 rounded" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -92,21 +98,14 @@ export const LiveAvailabilityBanner = () => {
     return null;
   }
 
-  // Find global earliest slot
-  const globalEarliest = barbersWithSlots.reduce((earliest, barber) => {
-    if (!earliest) return { barber, slot: barber.nextAvailableSlot! };
-    const currentTime = barber.nextAvailableSlot!.time;
-    const earliestTime = earliest.slot.time;
-    if (currentTime < earliestTime) {
-      return { barber, slot: barber.nextAvailableSlot! };
-    }
-    return earliest;
-  }, null as { barber: (typeof barbersWithSlots)[0]; slot: SlotInfo } | null);
+  const selectedBarber = expandedBarberId
+    ? barbersWithSlots.find((b) => b.id === expandedBarberId)
+    : null;
 
   return (
     <div className="w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl py-4 px-4 shadow-lg">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-3">
+      <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center justify-center w-7 h-7 rounded-full bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/30">
           <Clock className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
         </div>
@@ -115,154 +114,114 @@ export const LiveAvailabilityBanner = () => {
         </h3>
       </div>
 
-      {/* Top Summary - Global Next Available */}
-      {globalEarliest && (
-        <button
-          onClick={() =>
-            handleSlotClick(
-              globalEarliest.barber.id,
-              globalEarliest.barber.full_name,
-              globalEarliest.slot
-            )
-          }
-          className="w-full mb-4 p-3 rounded-lg bg-[hsl(var(--accent))]/10 border border-[hsl(var(--accent))]/30 hover:bg-[hsl(var(--accent))]/20 transition-colors group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-foreground/70">Book now:</span>
-              <span className="text-sm font-semibold text-[hsl(var(--accent))]">
-                {globalEarliest.barber.full_name}
-              </span>
-              <span className="text-sm text-foreground/70">@</span>
-              <span className="text-sm font-semibold text-[hsl(var(--accent))]">
-                {formatTime12h(globalEarliest.slot.time)}
-              </span>
-            </div>
-            <ChevronRight className="h-4 w-4 text-[hsl(var(--accent))] group-hover:translate-x-0.5 transition-transform" />
-          </div>
-        </button>
-      )}
-
-      {/* Barber Rows */}
-      <div className="space-y-2">
+      {/* Barber Columns */}
+      <div className="grid grid-cols-3 gap-3">
         {barbersWithSlots.map((barber) => {
-          const todaySlots =
-            barber.realAvailability?.[0]?.time_slots || [];
-          const groupedSlots = groupSlotsByTimeOfDay(todaySlots);
-          const previewSlots = todaySlots.slice(0, 3);
           const isExpanded = expandedBarberId === barber.id;
+          const todaySlots = barber.realAvailability?.[0]?.time_slots || [];
 
           return (
-            <div key={barber.id} className="rounded-lg overflow-hidden">
-              {/* Collapsed Row */}
-              <button
-                onClick={() => toggleExpand(barber.id)}
-                className={`w-full p-3 flex items-center gap-3 bg-white/5 border transition-colors ${
-                  isExpanded
-                    ? "border-[hsl(var(--accent))]/40 rounded-t-lg border-b-0"
-                    : "border-white/10 rounded-lg hover:border-white/20"
-                }`}
-              >
-                <Avatar className="h-9 w-9 ring-2 ring-[hsl(var(--accent))]/20 flex-shrink-0">
-                  <AvatarImage
-                    src={barber.profile_image_url || undefined}
-                    alt={barber.full_name}
-                  />
-                  <AvatarFallback className="bg-[hsl(var(--accent))]/10 text-[hsl(var(--accent))] font-semibold text-xs">
-                    {getInitials(barber.full_name)}
-                  </AvatarFallback>
-                </Avatar>
+            <button
+              key={barber.id}
+              onClick={() => toggleExpand(barber.id)}
+              className={`flex flex-col items-center p-4 rounded-xl transition-all duration-200 ${
+                isExpanded
+                  ? "bg-white/15 ring-1 ring-[hsl(var(--accent))]/50"
+                  : "bg-white/5 hover:bg-white/10"
+              }`}
+            >
+              <Avatar className="h-12 w-12 mb-2 ring-2 ring-white/20">
+                <AvatarImage
+                  src={barber.profile_image_url || undefined}
+                  alt={barber.full_name}
+                />
+                <AvatarFallback className="bg-[hsl(var(--accent))]/20 text-[hsl(var(--accent))]">
+                  {getInitials(barber.full_name)}
+                </AvatarFallback>
+              </Avatar>
 
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="text-sm font-medium text-foreground truncate">
-                    {barber.full_name}
-                  </div>
-                  <div className="text-xs text-[hsl(var(--accent))]">
-                    Next: {formatTime12h(barber.nextAvailableSlot!.time)}
-                  </div>
-                </div>
+              <span className="text-sm font-semibold text-[hsl(var(--accent))] mb-1">
+                {barber.full_name}
+              </span>
 
-                {/* Preview Chips */}
-                <div className="hidden sm:flex items-center gap-1.5">
-                  {previewSlots.slice(1, 4).map((time) => (
-                    <span
-                      key={time}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSlotClick(barber.id, barber.full_name, {
-                          date: barber.nextAvailableSlot!.date,
-                          time,
-                        });
-                      }}
-                      className="px-2 py-0.5 text-[10px] rounded bg-white/10 text-foreground/70 hover:bg-[hsl(var(--accent))]/20 hover:text-[hsl(var(--accent))] cursor-pointer transition-colors"
-                    >
-                      {formatTime12h(time)}
-                    </span>
-                  ))}
-                </div>
+              {barber.nextAvailableSlot && (
+                <span className="text-xs text-white/70 mb-2">
+                  Next: {formatTime12h(barber.nextAvailableSlot.time)}
+                </span>
+              )}
 
-                <motion.div
-                  animate={{ rotate: isExpanded ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <ChevronDown className="h-4 w-4 text-foreground/50" />
-                </motion.div>
-              </button>
-
-              {/* Expanded Panel */}
-              <AnimatePresence>
-                {isExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="p-3 bg-white/5 border border-[hsl(var(--accent))]/40 border-t-0 rounded-b-lg space-y-3">
-                      {/* Morning */}
-                      {groupedSlots.morning.length > 0 && (
-                        <TimeSection
-                          label="Morning"
-                          slots={groupedSlots.morning}
-                          barber={barber}
-                          onSlotClick={handleSlotClick}
-                        />
-                      )}
-
-                      {/* Afternoon */}
-                      {groupedSlots.afternoon.length > 0 && (
-                        <TimeSection
-                          label="Afternoon"
-                          slots={groupedSlots.afternoon}
-                          barber={barber}
-                          onSlotClick={handleSlotClick}
-                        />
-                      )}
-
-                      {/* Evening */}
-                      {groupedSlots.evening.length > 0 && (
-                        <TimeSection
-                          label="Evening"
-                          slots={groupedSlots.evening}
-                          barber={barber}
-                          onSlotClick={handleSlotClick}
-                        />
-                      )}
-
-                      {todaySlots.length === 0 && (
-                        <p className="text-xs text-foreground/50 text-center py-2">
-                          No slots available today
-                        </p>
-                      )}
-                    </div>
-                  </motion.div>
+              <div className="flex items-center gap-1 text-white/50">
+                <span className="text-xs">{todaySlots.length} slots</span>
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
                 )}
-              </AnimatePresence>
-            </div>
+              </div>
+            </button>
           );
         })}
       </div>
+
+      {/* Expanded Panel (Below Grid) */}
+      <AnimatePresence>
+        {selectedBarber && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium text-[hsl(var(--accent))]">
+                  {selectedBarber.full_name}'s Availability
+                </span>
+              </div>
+
+              {(() => {
+                const todaySlots = selectedBarber.realAvailability?.[0]?.time_slots || [];
+                const grouped = groupSlotsByTimeOfDay(todaySlots);
+                const todayDate =
+                  selectedBarber.realAvailability?.[0]?.date ||
+                  new Date().toISOString().split("T")[0];
+
+                return (
+                  <div className="space-y-3">
+                    <TimeSection
+                      label="Morning"
+                      slots={grouped.morning}
+                      barber={selectedBarber}
+                      date={todayDate}
+                      onSlotClick={handleSlotClick}
+                    />
+                    <TimeSection
+                      label="Afternoon"
+                      slots={grouped.afternoon}
+                      barber={selectedBarber}
+                      date={todayDate}
+                      onSlotClick={handleSlotClick}
+                    />
+                    <TimeSection
+                      label="Evening"
+                      slots={grouped.evening}
+                      barber={selectedBarber}
+                      date={todayDate}
+                      onSlotClick={handleSlotClick}
+                    />
+                    {todaySlots.length === 0 && (
+                      <p className="text-xs text-white/50 text-center py-2">
+                        No slots available today
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -271,26 +230,27 @@ interface TimeSectionProps {
   label: string;
   slots: string[];
   barber: { id: string; full_name: string; nextAvailableSlot: SlotInfo | null };
+  date: string;
   onSlotClick: (barberId: string, barberName: string, slot: SlotInfo) => void;
 }
 
-const TimeSection = ({ label, slots, barber, onSlotClick }: TimeSectionProps) => {
+const TimeSection = ({ label, slots, barber, date, onSlotClick }: TimeSectionProps) => {
+  if (slots.length === 0) return null;
+
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wider text-foreground/40 mb-1.5">
+      <div className="text-[10px] uppercase tracking-wider text-white/50 mb-1.5">
         {label}
       </div>
       <div className="flex flex-wrap gap-1.5">
         {slots.map((time) => (
           <button
             key={time}
-            onClick={() =>
-              onSlotClick(barber.id, barber.full_name, {
-                date: barber.nextAvailableSlot!.date,
-                time,
-              })
-            }
-            className="px-2.5 py-1 text-xs rounded bg-white/10 text-foreground/80 hover:bg-[hsl(var(--accent))]/20 hover:text-[hsl(var(--accent))] transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSlotClick(barber.id, barber.full_name, { date, time });
+            }}
+            className="px-2.5 py-1 text-xs rounded bg-white/10 text-white hover:bg-[hsl(var(--accent))]/20 hover:text-[hsl(var(--accent))] transition-colors"
           >
             {formatTime12h(time)}
           </button>
